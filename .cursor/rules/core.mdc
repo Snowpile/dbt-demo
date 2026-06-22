@@ -1,0 +1,13 @@
+---
+description: Core agent behavior — autonomy and token discipline
+alwaysApply: true
+---
+
+# Core
+
+- Follow `AGENTS.md` as source of truth.
+- Minimize scope: smallest correct diff; no unrelated edits.
+- Run terminal commands yourself; retry on failure before escalating.
+- Do not commit/push/force-push unless the user asks.
+- Prefer retrieval from repo files over guessing stack or business rules.
+- Keep responses concise; skip preamble and engagement bait.

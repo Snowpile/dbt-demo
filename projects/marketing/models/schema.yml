@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: marketing_stg_customers
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+  - name: marketing_stg_orders
+    columns:
+      - name: order_id
+        tests: [unique, not_null]
+  - name: marketing_int_customer_orders
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+  - name: marketing_dim_customers
+    description: Customer dimension with order recency and frequency
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+  - name: marketing_fct_customer_engagement
+    description: Customer-level engagement metrics
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+      - name: total_orders
+        tests: [not_null]

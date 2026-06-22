@@ -1,0 +1,77 @@
+# --- secrets & local config (never commit) ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials.json
+secrets/
+profiles.yml
+dbt_profiles.yml
+**/profiles.yml
+
+# --- dbt ---
+target/
+dbt_packages/
+logs/
+manifest.json
+catalog.json
+run_results.json
+semantic_manifest.json
+.partial_parse.msgpack
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+.envrc
+*.egg-info/
+.eggs/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+
+# --- data artifacts (local only) ---
+data/*
+!data/.gitkeep
+!data/seeds/
+!data/seeds/**
+*.parquet
+*.avro
+*.orc
+*.duckdb
+*.sqlite
+*.db
+!**/seeds/**/*.csv
+!**/seeds/**/*.parquet
+
+# --- Spark / notebooks ---
+.spark/
+metastore_db/
+derby.log
+
+# --- OS & editors ---
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# --- AI local overrides (machine-specific; keep AGENTS.md in git) ---
+AGENTS.override.md
+CLAUDE.local.md
+.cursor/mcp.json

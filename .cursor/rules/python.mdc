@@ -1,0 +1,12 @@
+---
+description: Python — uv, Prefect, utilities
+globs: "**/*.py"
+alwaysApply: false
+---
+
+# Python
+
+- Deps: **uv** — `uv sync`; add packages via `uv add <pkg>`.
+- Config via env vars; never hardcode secrets.
+- Type hints on public functions; no bare `except`.
+- Prefect flows live under `prefect/` — follow existing `@flow` / `@task` patterns.

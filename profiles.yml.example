@@ -1,0 +1,18 @@
+benderik:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('DUCKDB_DEV_PATH', 'data/dev.duckdb') }}"
+      threads: 4
+    staging:
+      type: duckdb
+      path: "{{ env_var('DUCKDB_STAGING_PATH', 'data/staging.duckdb') }}"
+      threads: 4
+    prod:
+      type: duckdb
+      path: "{{ env_var('DUCKDB_PROD_PATH', 'data/prod.duckdb') }}"
+      threads: 4
+
+# Copy to profiles.yml (gitignored). Per-project profile name must match
+# profile: in each projects/<domain>/dbt_project.yml

@@ -1,0 +1,27 @@
+version: 2
+
+models:
+  - name: finance_stg_payments
+    columns:
+      - name: payment_id
+        tests: [unique, not_null]
+  - name: finance_stg_orders
+    columns:
+      - name: order_id
+        tests: [unique, not_null]
+  - name: finance_int_order_payments
+    columns:
+      - name: order_id
+        tests: [unique, not_null]
+  - name: finance_fct_revenue
+    description: Order-level revenue with payment method breakdown
+    columns:
+      - name: order_id
+        tests: [unique, not_null]
+      - name: total_amount
+        tests: [not_null]
+  - name: finance_dim_payment_method
+    description: Payment method dimension with collected totals
+    columns:
+      - name: payment_method_code
+        tests: [unique, not_null]
