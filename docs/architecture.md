@@ -30,3 +30,14 @@ data/seeds/*.csv  →  scripts/load_raw.py  →  raw.* (DuckDB)
 | dev | `data/dev.duckdb` | read/write OK |
 | staging | `data/staging.duckdb` | ask first |
 | prod | `data/prod.duckdb` | ask first |
+
+## DuckDB note — demo scope only
+
+DuckDB is a **single-writer** embedded database: only one process may write to a
+`.duckdb` file at a time. Concurrent writers against the same file (e.g. serving
+docs for two domains while a build runs against that file) fail with a lock
+error. Run domains/targets **sequentially**, or point each at its own DuckDB file.
+
+This is acceptable because **benderik is a demo**. Real implementations target an
+**enterprise SQL warehouse** (e.g. Snowflake, BigQuery, Postgres) where
+concurrency is handled server-side; DuckDB here keeps the demo free and local.

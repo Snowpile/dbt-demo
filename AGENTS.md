@@ -27,7 +27,7 @@ Data engineering repo. **Read this file first.** Prefer repo files over pretrain
 | Transform | **dbt Core** — `projects/{finance,marketing,operations}/` |
 | Orchestration | **GitHub Actions** + `scripts/dbt_build_all.sh` (cron optional) |
 | Sample data | **dbt-labs/jaffle_shop_duckdb** seeds → `data/seeds/` → `raw.*` |
-| Python | **pip** (`requirements.json`, `./setup.sh`) |
+| Python | **uv** (`requirements.json`, `./setup.sh`) |
 | Environments | **dev**, **staging**, **prod** dbt targets |
 | Remote | **GitHub** `benderik` — see `docs/github.md` |
 

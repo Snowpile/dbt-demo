@@ -1,30 +1,33 @@
 #!/usr/bin/env bash
-# Create .venv and install dependencies for benderik.
+# Create .venv (uv) and install benderik deps from requirements.json (setup.py).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"
 
-PYTHON_VERSION="${PYTHON_VERSION:-3.10}"
-PYTHON="${PYTHON:-python${PYTHON_VERSION}}"
-
-if ! command -v "$PYTHON" >/dev/null 2>&1; then
-	PYTHON=python3
-fi
-
-if ! command -v "$PYTHON" >/dev/null 2>&1; then
-	echo "error: Python ${PYTHON_VERSION}+ is required." >&2
+if ! command -v uv >/dev/null 2>&1; then
+	echo "error: uv is required." >&2
+	echo "Install: https://docs.astral.sh/uv/getting-started/installation/" >&2
 	exit 1
 fi
 
-echo "==> Creating virtualenv (.venv) with ${PYTHON}"
-if [[ ! -d .venv ]]; then
-	"$PYTHON" -m venv .venv
-fi
+echo "==> Creating virtualenv (.venv) with uv (Python 3.11)"
+uv venv --python=python3.11
 
-echo "==> Installing dependencies from requirements.json"
-.venv/bin/pip install --upgrade pip
-.venv/bin/pip install -e ".[dev]"
+case "$(uname -s)" in
+	Darwin*|Linux*)
+		source ./.venv/bin/activate
+		;;
+	CYGWIN*|MINGW32*|MSYS*|MINGW*)
+		source ./.venv/Scripts/activate
+		;;
+	*)
+		echo "Other OS detected — activate .venv manually."
+		;;
+esac
+
+echo "==> Installing dependencies (uv pip install -e .[dev])"
+uv pip install -e ".[dev]"
 
 if [[ ! -f .env ]]; then
 	echo "==> Creating .env from .env.example"
@@ -41,14 +44,7 @@ mkdir -p data
 echo ""
 echo "Setup complete."
 echo ""
-echo "Activate (optional):"
-if [[ -f .venv/bin/activate ]]; then
-	echo "  source .venv/bin/activate"
-elif [[ -f .venv/Scripts/activate ]]; then
-	echo "  source .venv/Scripts/activate"
-fi
-echo ""
 echo "Verify:"
-echo "  .venv/bin/dbt --version"
+echo "  uv run dbt --version"
 echo "  ./scripts/dbt_build_all.sh"
 echo "  ./dbt_docs.sh"

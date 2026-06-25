@@ -288,7 +288,7 @@
 
 | Tool | Status |
 |------|--------|
-| `uv` lockfile | ✅ |
+| `uv` + `requirements.json` | ✅ |
 | `.sqlfluff` + dbt templater | ⬜ |
 | `pre-commit-config.yaml` | ⬜ |
 | VS Code / Cursor dbt extension notes | ⬜ |

@@ -13,7 +13,7 @@ AI-friendly data engineering sandbox: **3 dbt projects** on **DuckDB**, sharing 
 | AI config | `AGENTS.md`, `CLAUDE.md`, `.cursor/rules/` |
 | Sample data | Jaffle Shop CSVs in `data/seeds/`, SHA-256 pinned + scanned |
 | dbt models | stg → int → fct/dim per domain; **49 tests passing** on dev |
-| Tooling | `uv` + `uv.lock`, `scripts/dbt_build_all.sh` |
+| Tooling | `uv` + `requirements.json` (`./setup.sh`), `scripts/dbt_build_all.sh` |
 | CI | `.github/workflows/ci.yml` |
 | **Local git** | **First commit on `main`** (`be75f79`) |
 
@@ -48,8 +48,7 @@ Optional: add `~/.ssh/config` with `github-snowpile` / `github-hoodie` hosts (se
 
 ```bash
 cd ~/Desktop/Contracting/benderik
-uv sync
-export DBT_PROFILES_DIR=$(git rev-parse --show-toplevel)
+./setup.sh
 ./scripts/dbt_build_all.sh
 ```
 

@@ -1,12 +1,11 @@
 ---
-description: Python — uv, Prefect, utilities
+description: Python — uv, requirements.json, utilities
 globs: "**/*.py"
 alwaysApply: false
 ---
 
 # Python
 
-- Deps: **pip** — `./setup.sh`; add packages in `requirements.json`.
+- Deps: **uv** — `./setup.sh` (`uv venv` + `uv pip install -e ".[dev]"`); add packages in `requirements.json`.
 - Config via env vars; never hardcode secrets.
 - Type hints on public functions; no bare `except`.
-- Prefect flows live under `prefect/` — follow existing `@flow` / `@task` patterns.
