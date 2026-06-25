@@ -3,8 +3,8 @@
 Shared **raw** layer (Jaffle Shop CSVs) → domain-specific **stg → int → fct/dim**.
 
 ```bash
-export DBT_PROFILES_DIR=$(git rev-parse --show-toplevel)
 ./scripts/dbt_build_all.sh
+./dbt_docs.sh finance
 ```
 
 | Domain | Staging | Intermediate | Marts |

@@ -1,6 +1,6 @@
 # benderik — session summary
 
-*Last updated: 2026-06-22. Read this tomorrow to pick up where we left off.*
+*Last updated: 2026-06-22 (evening). Read this tomorrow to pick up where we left off.*
 
 ## What this repo is
 
@@ -10,30 +10,41 @@ AI-friendly data engineering sandbox: **3 dbt projects** on **DuckDB**, sharing 
 
 | Area | Status |
 |------|--------|
-| AI config | `AGENTS.md`, `CLAUDE.md`, `.cursor/rules/` (token-efficient) |
-| Sample data | 3 CSVs from [dbt-labs/jaffle_shop_duckdb](https://github.com/dbt-labs/jaffle_shop_duckdb), SHA-256 pinned |
-| Security | `scripts/scan_downloads.sh` (checksums, MIME, CSV parse) before every load |
-| Raw layer | `scripts/load_raw.py` → DuckDB schema `raw` |
+| AI config | `AGENTS.md`, `CLAUDE.md`, `.cursor/rules/` |
+| Sample data | Jaffle Shop CSVs in `data/seeds/`, SHA-256 pinned + scanned |
 | dbt models | stg → int → fct/dim per domain; **49 tests passing** on dev |
 | Tooling | `uv` + `uv.lock`, `scripts/dbt_build_all.sh` |
-| CI | `.github/workflows/ci.yml` — scan → load → `dbt build` |
-| Docs | `docs/architecture.md`, `docs/conventions.md`, `docs/github.md` |
-
-### Model map
-
-| Domain | Marts |
-|--------|-------|
-| finance | `finance_fct_revenue`, `finance_dim_payment_method` |
-| marketing | `marketing_dim_customers`, `marketing_fct_customer_engagement` |
-| operations | `operations_fct_orders`, `operations_dim_fulfillment_status` |
+| CI | `.github/workflows/ci.yml` |
+| **Local git** | **First commit on `main`** (`be75f79`) |
 
 ## Where we're at
 
-- **Git:** repo initialized on `main`, **no commits yet**, **no GitHub remote**
-- **Local:** `profiles.yml` exists (gitignored); `data/dev.duckdb` built and working
-- **Verified:** `./scripts/dbt_build_all.sh` completes green locally
+- **Local dbt:** `./scripts/dbt_build_all.sh` works
+- **GitHub push:** **not done yet** — account/SSH mismatch (see below)
 
-## Tomorrow — quick start
+## GitHub — pick up here tomorrow
+
+You have **two GitHub accounts** on this machine:
+
+| SSH key | Account |
+|---------|---------|
+| `~/.ssh/id_rsa_Snowpile` | **Snowpile** ← benderik belongs here |
+| `~/.ssh/id_rsa_Hoodie` | ErikRForsman-Hoodie |
+
+`origin` may still point at Hoodie. Fix:
+
+```bash
+# 1. Create empty repo "benderik" while logged in as Snowpile on github.com
+
+# 2. Fix remote + push with Snowpile key
+cd ~/Desktop/Contracting/benderik
+git remote set-url origin git@github.com:Snowpile/benderik.git
+GIT_SSH_COMMAND='ssh -i ~/.ssh/id_rsa_Snowpile -o IdentitiesOnly=yes' git push -u origin main
+```
+
+Optional: add `~/.ssh/config` with `github-snowpile` / `github-hoodie` hosts (see chat from 2026-06-22).
+
+## Tomorrow — dbt quick start
 
 ```bash
 cd ~/Desktop/Contracting/benderik
@@ -42,39 +53,23 @@ export DBT_PROFILES_DIR=$(git rev-parse --show-toplevel)
 ./scripts/dbt_build_all.sh
 ```
 
-If fresh machine: `cp profiles.yml.example profiles.yml` and set absolute paths in `.env` (see `.env.example`).
+## Still to do (after push)
 
-## Still to do
-
-### Must-do (to be “real”)
-
-1. **First commit** — everything is untracked
-2. **GitHub** — create `benderik` repo, add remote, push (`docs/github.md`)
-3. **Auth** — SSH key or `gh auth login` for AI/human PR workflow
-
-### Nice-to-have
-
-4. **Cron** — schedule `./scripts/dbt_build_all.sh` if you want local runs beyond CI
-5. **Staging/prod** — load raw into `data/staging.duckdb` / `data/prod.duckdb`; not tested yet
-6. **Cleanup** — remove leftover `.gitkeep` in model folders; add `projects/**/logs/` to `.gitignore`
-7. **Richer docs** — model/column descriptions in `schema.yml`; `dbt docs generate`
-8. **Real data** — swap Jaffle Shop seeds when you have production sources
-
-### Not planned (for now)
-
-- Prefect (dropped; use GitHub Actions + bash/cron)
-- MCP integrations
-- Ingestion layer (sources assumed pre-loaded into `raw`)
+1. Confirm CI passes on GitHub Actions after first push
+2. Cron for `dbt_build_all.sh` (optional)
+3. Staging/prod DuckDB targets (untested)
+4. Richer `schema.yml` docs / `dbt docs generate`
+5. Real data when ready
 
 ## Key files
 
-| Read first | Purpose |
-|------------|---------|
-| `AGENTS.md` | AI behavior + commands |
-| `docs/github.md` | Push branches, open PRs |
-| `data/seeds/PROVENANCE.md` | Data source + checksums |
-| `projects/README.md` | Per-domain model layout |
+| File | Purpose |
+|------|---------|
+| `AGENTS.md` | AI rules + commands |
+| `docs/github.md` | PR workflow (update for Snowpile remote) |
+| `projects/README.md` | Domain model map |
+| `docs/dbt-master-checklist.md` | **Full dbt feature matrix** — implement later |
 
-## For AI (next session)
+## For AI
 
-Say: *“Read `summary.md` and continue.”* — stack, conventions, and autonomy rules are in `AGENTS.md`. Do not commit unless asked.
+Say: *“Read `summary.md` and continue.”* Do not commit unless asked.

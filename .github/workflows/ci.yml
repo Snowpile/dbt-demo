@@ -9,29 +9,19 @@ on:
 jobs:
   dbt-build:
     runs-on: ubuntu-latest
-    env:
-      DBT_PROFILES_DIR: ${{ github.workspace }}
     steps:
       - uses: actions/checkout@v4
-
-      - uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.json
 
-      - run: uv sync
+      - run: ./setup.sh
 
       - name: Scan seed data integrity
         run: ./scripts/scan_downloads.sh
 
       - name: Load raw + dbt build (all projects)
-        env:
-          DUCKDB_DEV_PATH: ${{ github.workspace }}/data/dev.duckdb
-          DUCKDB_STAGING_PATH: ${{ github.workspace }}/data/staging.duckdb
-          DUCKDB_PROD_PATH: ${{ github.workspace }}/data/prod.duckdb
-        run: |
-          cp profiles.yml.example profiles.yml
-          ./scripts/dbt_build_all.sh
+        run: ./scripts/dbt_build_all.sh

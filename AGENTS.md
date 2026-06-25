@@ -13,7 +13,7 @@ Data engineering repo. **Read this file first.** Prefer repo files over pretrain
 
 | Allowed without asking | Ask first |
 |------------------------|-----------|
-| `uv sync`, `dbt deps`, local `dbt parse/compile/test/build` | Commits, force-push, branch delete |
+| `./setup.sh`, `dbt deps`, local `dbt parse/compile/test/build` | Commits, force-push, branch delete |
 | Read-only SQL on **dev** DuckDB only | SQL on **staging** or **prod** |
 | Create feature branches, push, open PRs via `gh` | Destructive warehouse DDL/DML |
 | Edit CI / bash scripts | Changing secrets or prod credentials |
@@ -27,18 +27,18 @@ Data engineering repo. **Read this file first.** Prefer repo files over pretrain
 | Transform | **dbt Core** — `projects/{finance,marketing,operations}/` |
 | Orchestration | **GitHub Actions** + `scripts/dbt_build_all.sh` (cron optional) |
 | Sample data | **dbt-labs/jaffle_shop_duckdb** seeds → `data/seeds/` → `raw.*` |
-| Python | **uv** (`pyproject.toml`, commit `uv.lock`) |
+| Python | **pip** (`requirements.json`, `./setup.sh`) |
 | Environments | **dev**, **staging**, **prod** dbt targets |
 | Remote | **GitHub** `benderik` — see `docs/github.md` |
 
 ## Quick commands
 
 ```bash
-export DBT_PROFILES_DIR=$(git rev-parse --show-toplevel)
+./setup.sh                           # creates .env + .venv
 ./scripts/scan_downloads.sh          # integrity check before load
-./scripts/load_raw.sh dev            # CSV → DuckDB schema raw
+./scripts/load_raw.sh                # CSV → DuckDB schema raw
 ./scripts/dbt_build_all.sh           # load + dbt build all domains
-cd projects/finance && uv run dbt build
+./dbt_docs.sh marketing              # docs for one domain
 ```
 
 ## dbt conventions

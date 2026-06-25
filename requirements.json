@@ -1,0 +1,11 @@
+{
+    "install_requires": [
+        "dbt-duckdb==1.10.1",
+        "duckdb==1.5.4"
+    ],
+    "extras_require": {
+        "dev": [
+            "ruff==0.15.18"
+        ]
+    }
+}
