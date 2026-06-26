@@ -1,27 +1,101 @@
 version: 2
 
 models:
+  # --- staging (views) ---
   - name: marketing_stg_customers
+    description: Cleaned customer records.
     columns:
       - name: customer_id
         tests: [unique, not_null]
   - name: marketing_stg_orders
+    description: Cleaned orders with USD total.
     columns:
       - name: order_id
         tests: [unique, not_null]
+      - name: order_total_usd
+        tests: [not_negative]
+  - name: marketing_stg_order_items
+    description: One row per order line item.
+    columns:
+      - name: order_item_id
+        tests: [unique, not_null]
+  - name: marketing_stg_products
+    description: Product catalog (name + type).
+    columns:
+      - name: sku
+        tests: [unique, not_null]
+  - name: marketing_stg_channels
+    description: Acquisition channel reference (from seed).
+    columns:
+      - name: channel
+        tests: [unique, not_null]
+
+  # --- intermediate ---
   - name: marketing_int_customer_orders
+    description: Per-customer order counts and spend.
     columns:
       - name: customer_id
         tests: [unique, not_null]
+  - name: marketing_int_customer_lifetime
+    description: CLV metrics including recency and lifespan.
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+      - name: total_spend_usd
+        tests: [not_negative]
+  - name: marketing_int_order_products
+    description: Line items enriched with product type (table).
+    columns:
+      - name: order_item_id
+        tests: [unique, not_null]
+  - name: marketing_int_customer_product_affinity
+    description: Units per customer per product type.
+    columns:
+      - name: affinity_id
+        tests: [unique, not_null]
+  - name: marketing_int_customer_segments
+    description: RFM-style customer segment label.
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+      - name: segment
+        tests:
+          - accepted_values:
+              values: ['champion', 'active', 'at_risk', 'dormant']
+  - name: marketing_int_channel_attribution
+    description: Deterministic channel attribution per customer.
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]
+
+  # --- marts ---
+  - name: marketing_fct_customer_orders
+    description: Incremental order fact for marketing (delete+insert on ordered_at).
+    columns:
+      - name: order_id
+        tests: [unique, not_null]
+      - name: order_total_usd
+        tests: [not_null, not_negative]
   - name: marketing_dim_customers
-    description: Customer dimension with order recency and frequency
+    description: Customer dimension with CLV, segment, cohort, channel, favorite product.
     columns:
       - name: customer_id
         tests: [unique, not_null]
-  - name: marketing_fct_customer_engagement
-    description: Customer-level engagement metrics
+      - name: segment
+        tests:
+          - accepted_values:
+              values: ['champion', 'active', 'at_risk', 'dormant', 'no_orders']
+  - name: marketing_fct_product_affinity
+    description: Product-type popularity across orders and customers.
     columns:
-      - name: customer_id
+      - name: product_type
         tests: [unique, not_null]
-      - name: total_orders
-        tests: [not_null]
+      - name: units_sold
+        tests: [not_negative]
+
+seeds:
+  - name: marketing_channels
+    description: Reference seed - acquisition channels and groups.
+    columns:
+      - name: channel
+        tests: [unique, not_null]

@@ -23,3 +23,11 @@ jobs:
 
       - name: Load raw + dbt build (all projects)
         run: ./scripts/dbt_build_all.sh
+
+      # Manifest-based dbt-checkpoint structural checks (need compiled manifests from the build above).
+      - name: dbt structural checks (dbt-checkpoint)
+        run: |
+          for hook in check-script-semicolon check-script-has-no-table-name \
+            check-model-has-description check-model-has-tests; do
+            uv run pre-commit run "$hook" --hook-stage manual --all-files
+          done

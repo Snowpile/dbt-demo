@@ -9,11 +9,11 @@ BENDERIK_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # the command line) take precedence over .env.
 if [[ -f "$BENDERIK_ROOT/.env" ]]; then
 	while IFS='=' read -r _key _val; do
-		_key="${_key#"${_key%%[![:space:]]*}"}"   # ltrim
-		_key="${_key%"${_key##*[![:space:]]}"}"     # rtrim
+		_key="${_key#"${_key%%[![:space:]]*}"}" # ltrim
+		_key="${_key%"${_key##*[![:space:]]}"}" # rtrim
 		[[ -z "$_key" || "$_key" == \#* ]] && continue
 		[[ -z "${!_key:-}" ]] && export "$_key=$_val"
-	done < "$BENDERIK_ROOT/.env"
+	done <"$BENDERIK_ROOT/.env"
 	unset _key _val
 fi
 

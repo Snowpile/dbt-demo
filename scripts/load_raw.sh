@@ -9,10 +9,13 @@ TARGET="${1:-$DBT_TARGET}"
 "$BENDERIK_ROOT/scripts/scan_downloads.sh"
 
 case "$TARGET" in
-  dev) DB="$DUCKDB_DEV_PATH" ;;
-  staging) DB="$DUCKDB_STAGING_PATH" ;;
-  prod) DB="$DUCKDB_PROD_PATH" ;;
-  *) echo "usage: load_raw.sh [dev|staging|prod]" >&2; exit 1 ;;
+dev) DB="$DUCKDB_DEV_PATH" ;;
+staging) DB="$DUCKDB_STAGING_PATH" ;;
+prod) DB="$DUCKDB_PROD_PATH" ;;
+*)
+	echo "usage: load_raw.sh [dev|staging|prod]" >&2
+	exit 1
+	;;
 esac
 
 mkdir -p "$(dirname "$DB")"

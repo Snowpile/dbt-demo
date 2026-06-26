@@ -1,27 +1,104 @@
 version: 2
 
 models:
-  - name: finance_stg_payments
-    columns:
-      - name: payment_id
-        tests: [unique, not_null]
+  # --- staging (views) ---
   - name: finance_stg_orders
+    description: Cleaned order financials (money converted cents -> USD).
     columns:
       - name: order_id
         tests: [unique, not_null]
-  - name: finance_int_order_payments
+      - name: order_total_usd
+        tests: [not_negative]
+  - name: finance_stg_order_items
+    description: One row per order line item.
+    columns:
+      - name: order_item_id
+        tests: [unique, not_null]
+  - name: finance_stg_products
+    description: Product catalog with USD price.
+    columns:
+      - name: sku
+        tests: [unique, not_null]
+      - name: product_type
+        tests:
+          - accepted_values:
+              values: ['jaffle', 'beverage']
+  - name: finance_stg_supplies
+    description: Bill-of-materials rows (supply per product).
+    columns:
+      - name: cost_usd
+        tests: [not_negative]
+  - name: finance_stg_stores
+    description: Store dimension with tax rate.
+    columns:
+      - name: store_id
+        tests: [unique, not_null]
+  - name: finance_stg_margin_targets
+    description: Target gross margin by product type (from seed).
+    columns:
+      - name: product_type
+        tests: [unique, not_null]
+
+  # --- intermediate ---
+  - name: finance_int_product_margin
+    description: Per-product price, BOM cost, and margin vs target.
+    columns:
+      - name: sku
+        tests: [unique, not_null]
+      - name: unit_cost_usd
+        tests: [not_negative]
+  - name: finance_int_order_items_costed
+    description: Line items enriched with product price/cost (table).
+    columns:
+      - name: order_item_id
+        tests: [unique, not_null]
+  - name: finance_int_order_costs
+    description: Per-order item cost roll-up.
     columns:
       - name: order_id
         tests: [unique, not_null]
-  - name: finance_fct_revenue
-    description: Order-level revenue with payment method breakdown
+  - name: finance_int_order_financials
+    description: Order-grain revenue, COGS, and gross profit.
     columns:
       - name: order_id
         tests: [unique, not_null]
-      - name: total_amount
-        tests: [not_null]
-  - name: finance_dim_payment_method
-    description: Payment method dimension with collected totals
+  - name: finance_int_store_tax
+    description: Expected vs actual tax per order, by store rate.
     columns:
-      - name: payment_method_code
+      - name: order_id
+        tests: [unique, not_null]
+  - name: finance_int_daily_revenue
+    description: Per-store per-day revenue, COGS, and gross profit roll-up.
+    columns:
+      - name: revenue_usd
+        tests: [not_negative]
+      - name: order_count
+        tests: [not_negative]
+
+  # --- marts ---
+  - name: finance_fct_order_revenue
+    description: Incremental order-grain revenue fact (delete+insert on ordered_at).
+    columns:
+      - name: order_id
+        tests: [unique, not_null]
+      - name: order_total_usd
+        tests: [not_null, not_negative]
+  - name: finance_fct_daily_revenue
+    description: Daily revenue / profit per store.
+    columns:
+      - name: daily_revenue_id
+        tests: [unique, not_null]
+      - name: revenue_usd
+        tests: [not_negative]
+  - name: finance_dim_product
+    description: Product dimension with cost, margin, and target flag.
+    columns:
+      - name: product_key
+        tests: [unique, not_null]
+
+seeds:
+  - name: finance_margin_targets
+    description: Reference seed - target gross margin by product type.
+    columns:
+      - name: product_type
         tests: [unique, not_null]

@@ -1,25 +1,28 @@
 # benderik — session summary
 
-*Last updated: 2026-06-22 (evening). Read this tomorrow to pick up where we left off.*
+*Last updated: 2026-06-26. Read this to pick up where we left off.*
 
 ## What this repo is
 
-AI-friendly data engineering sandbox: **3 dbt projects** on **DuckDB**, sharing official **Jaffle Shop** sample data. Domains: `finance`, `marketing`, `operations`.
+AI-friendly data engineering sandbox: **3 dbt projects** on **DuckDB**, sharing the richer **dbt-labs/jaffle-shop** star schema. Domains: `finance`, `marketing`, `operations`.
 
 ## Done ✓
 
 | Area | Status |
 |------|--------|
 | AI config | `AGENTS.md`, `CLAUDE.md`, `.cursor/rules/` |
-| Sample data | Jaffle Shop CSVs in `data/seeds/`, SHA-256 pinned + scanned |
-| dbt models | stg → int → fct/dim per domain; **49 tests passing** on dev |
-| Tooling | `uv` + `requirements.json` (`./setup.sh`), `scripts/dbt_build_all.sh` |
-| CI | `.github/workflows/ci.yml` |
-| **Local git** | **First commit on `main`** (`be75f79`) |
+| Sample data | jaffle-shop star schema (customers/orders/items/products/supplies/stores), ~62k orders, SHA-256 pinned + scanned |
+| dbt models | per domain: ≥3 stg (view) / 7 int (ephemeral+view+table) / 3 marts (table + **incremental**); **green on dev/staging/prod** (finance 50 / marketing 52 / operations 46 nodes) |
+| dbt features | per-domain seed, `cents_to_dollars` macro, `not_negative` custom generic test, `accepted_values` tests |
+| Tooling | `uv` + `requirements.json` (`./setup.sh`), `scripts/dbt_build_all.sh`, pre-commit + sqlfluff |
+| CI | `.github/workflows/ci.yml` (theoretical) |
+| **Local git** | commits on `main` |
 
 ## Where we're at
 
-- **Local dbt:** `./scripts/dbt_build_all.sh` works
+- **Local dbt:** `./scripts/dbt_build_all.sh` builds + seeds all 3 domains on dev/staging/prod
+- **Model build-out (Phase 1):** ✅ complete — see `docs/remaining-work.md`
+- **Uncommitted:** new seeds/models/macros/tests + pre-commit config (not committed)
 - **GitHub push:** **not done yet** — account/SSH mismatch (see below)
 
 ## GitHub — pick up here tomorrow
@@ -52,13 +55,13 @@ cd ~/Desktop/Contracting/benderik
 ./scripts/dbt_build_all.sh
 ```
 
-## Still to do (after push)
+## Still to do
 
-1. Confirm CI passes on GitHub Actions after first push
-2. Cron for `dbt_build_all.sh` (optional)
-3. Staging/prod DuckDB targets (untested)
-4. Richer `schema.yml` docs / `dbt docs generate`
-5. Real data when ready
+See `docs/remaining-work.md` for the full prioritized tracker. Headlines:
+1. Commit current work; push to GitHub (resolve Snowpile/Hoodie SSH)
+2. Advanced dbt features (Phase 2+): snapshots, more incremental strategies (merge/append/microbatch), unit/singular tests, `dbt_utils` package, `_showcase` configs, hooks, exposures
+3. Docs pipeline: `dbt docs generate` + `{% docs %}` + GitHub Pages
+4. Slim CI + defer with manifest artifacts
 
 ## Key files
 

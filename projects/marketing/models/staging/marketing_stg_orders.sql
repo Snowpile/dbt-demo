@@ -5,9 +5,10 @@ with source as (
 renamed as (
     select
         id as order_id,
-        user_id as customer_id,
-        cast(order_date as date) as order_date,
-        status as order_status
+        customer as customer_id,
+        cast(ordered_at as timestamp) as ordered_at,
+        cast(ordered_at as date) as order_date,
+        {{ cents_to_dollars('order_total') }} as order_total_usd
     from source
 )
 

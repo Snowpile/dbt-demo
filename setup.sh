@@ -15,23 +15,28 @@ echo "==> Creating virtualenv (.venv) with uv (Python 3.11)"
 uv venv --python=python3.11
 
 case "$(uname -s)" in
-	Darwin*|Linux*)
-		source ./.venv/bin/activate
-		;;
-	CYGWIN*|MINGW32*|MSYS*|MINGW*)
-		source ./.venv/Scripts/activate
-		;;
-	*)
-		echo "Other OS detected — activate .venv manually."
-		;;
+Darwin* | Linux*)
+	source ./.venv/bin/activate
+	;;
+CYGWIN* | MINGW32* | MSYS* | MINGW*)
+	source ./.venv/Scripts/activate
+	;;
+*)
+	echo "Other OS detected — activate .venv manually."
+	;;
 esac
 
 echo "==> Installing dependencies (uv pip install -e .[dev])"
 uv pip install -e ".[dev]"
 
+if [[ -d .git ]]; then
+	echo "==> Installing git pre-commit hooks"
+	pre-commit install
+fi
+
 if [[ ! -f .env ]]; then
 	echo "==> Creating .env from .env.example"
-	sed "s|/absolute/path/to/benderik|${ROOT}|g" .env.example > .env
+	sed "s|/absolute/path/to/benderik|${ROOT}|g" .env.example >.env
 fi
 
 if [[ ! -f profiles.yml ]]; then

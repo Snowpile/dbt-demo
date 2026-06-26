@@ -5,7 +5,8 @@
     ],
     "extras_require": {
         "dev": [
-            "ruff==0.15.18"
+            "ruff==0.15.18",
+            "pre-commit==3.6.2"
         ]
     }
 }

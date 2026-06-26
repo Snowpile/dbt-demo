@@ -16,9 +16,9 @@
 | 2 | **dbt docs — serve locally** | `scripts/docs_serve.sh`; documented port/host | ⬜ |
 | 3 | **dbt docs — deploy** | GitHub Pages from `target/` artifacts **or** object-store static hosting **or** CI artifact + README | ⬜ |
 | 4 | **Macros** | Project macros + package macros; documented call sites | ⬜ |
-| 5 | **Tests — generic (built-in)** | `unique`, `not_null`, `accepted_values`, `relationships` across domains | 🔶 |
+| 5 | **Tests — generic (built-in)** | `unique`, `not_null`, `accepted_values` across domains (`relationships` pending) | 🔶 |
 | 6 | **Tests — singular** | `.sql` tests in `tests/` | ⬜ |
-| 7 | **Tests — custom generic** | reusable `test` macro in `macros/` | ⬜ |
+| 7 | **Tests — custom generic** | `not_negative` reusable test in `tests/generic/` (all 3 domains) | ✅ |
 | 8 | **Tests — unit tests** | YAML `unit_tests:` with `given`/`expect`, macro overrides | ⬜ |
 | 9 | **Tests — freshness** | `loaded_at_field` + `freshness` on sources | ⬜ |
 | 10 | **dbt defer** | `state/` artifact dir; `dbt build --select state:modified+ --defer --state state/` | ⬜ |
@@ -48,7 +48,7 @@
 | `dbt build` | `scripts/dbt_build_all.sh` | ✅ |
 | `dbt run` | documented per-domain | 🔶 |
 | `dbt test` | in build | ✅ |
-| `dbt seed` | optional vs `load_raw.py` (document both patterns) | 🔶 |
+| `dbt seed` | reference seed per domain (vs `load_raw.py` for bulk raw) | ✅ |
 | `dbt snapshot` | SCD2 example model | ⬜ |
 | `dbt compile` | in dev workflow | 🔶 |
 | `dbt parse` | CI | ✅ |
@@ -69,11 +69,11 @@
 
 | Materialization | Example model | Status |
 |-----------------|---------------|--------|
-| `view` | all `*_stg_*`, `*_int_*` | ✅ |
-| `table` | all `*_fct_*`, `*_dim_*` | ✅ |
-| `incremental` | append + merge examples | ⬜ |
+| `view` | all `*_stg_*`, most `*_int_*` | ✅ |
+| `table` | all `*_dim_*`, table marts, some `*_int_*` | ✅ |
+| `incremental` | one fct per domain (delete+insert on `ordered_at`) | ✅ |
 | `incremental` + `microbatch` | time-partitioned fact | ⬜ |
-| `ephemeral` | int layer CTE replacement | ⬜ |
+| `ephemeral` | int helper per domain (`*_int_*_cost` / `*_first_order` / `*_item_counts`) | ✅ |
 | `materialized view` | if DuckDB version supports | ⬜ |
 
 ### Incremental strategies (document DuckDB support)
@@ -81,7 +81,7 @@
 | Strategy | Example | Status |
 |----------|---------|--------|
 | `append` | event log | ⬜ |
-| `delete+insert` | daily partition replace | ⬜ |
+| `delete+insert` | order facts in all 3 domains (`unique_key=order_id`) | ✅ |
 | `merge` | upsert with `unique_key` | ⬜ |
 | `insert_overwrite` | 🚫 BQ-centric — document N/A | 🚫 |
 | Custom strategy macro | wrapper pattern | ⬜ |
@@ -109,10 +109,10 @@
 
 | Config | Example | Status |
 |--------|---------|--------|
-| `materialized` | view/table/incremental/ephemeral | 🔶 |
-| `incremental_strategy` | merge vs append | ⬜ |
-| `unique_key` | incremental merge key | ⬜ |
-| `on_schema_change` | append_new_columns / fail / sync | ⬜ |
+| `materialized` | view/table/incremental/ephemeral all used | ✅ |
+| `incremental_strategy` | `delete+insert` (merge/append pending) | 🔶 |
+| `unique_key` | `order_id` on all incremental facts | ✅ |
+| `on_schema_change` | `append_new_columns` on all incremental facts | ✅ |
 | `full_refresh` | force full-refresh on model | ⬜ |
 | `incremental_predicates` | filter incremental window | ⬜ |
 | `event_time` | microbatch | ⬜ |
@@ -158,9 +158,9 @@
 
 | Type | Example | Status |
 |------|---------|--------|
-| Project macro | `cents_to_dollars` | ⬜ |
-| Jinja macro with args | `generate_surrogate_key` style | ⬜ |
-| `is_incremental()` usage | incremental model | ⬜ |
+| Project macro | `cents_to_dollars` (all 3 domains) | ✅ |
+| Jinja macro with args | `cents_to_dollars(column, precision=2)` | ✅ |
+| `is_incremental()` usage | incremental fct in all 3 domains | ✅ |
 | `run_query()` | operations macro | ⬜ |
 | `statement()` blocks | hooks/ops | ⬜ |
 | `adapter.dispatch` | cross-db macro | ⬜ |
@@ -187,7 +187,7 @@
 | Resource | Example | Status |
 |----------|---------|--------|
 | **Sources** | `sources.yml` + `source()` | ✅ |
-| **Seeds** | `dbt seed` vs `load_raw.py` (idiomatic raw) | 🔶 |
+| **Seeds** | one reference seed per domain via `dbt seed`; bulk raw via `load_raw.py` | ✅ |
 | **Snapshots** | SCD2 on customer status | ⬜ |
 | **Snapshots in YAML** | declarative snapshot config | ⬜ |
 | **Analyses** | ad-hoc SQL not in DAG | ⬜ |
@@ -302,7 +302,7 @@
 |-------|--------|
 | File-per-env DuckDB paths | ✅ |
 | `read_csv_auto` load pattern | ✅ |
-| Incremental on DuckDB adapter | ⬜ verify & document |
+| Incremental on DuckDB adapter | ✅ `delete+insert` verified (re-run filters on `ordered_at`) |
 | Grants / contracts support level | ⬜ document limits |
 
 ---
@@ -324,4 +324,4 @@
 
 Update the **Status** column as we implement. Target: **≥95% ✅** for DuckDB-applicable rows; 🚫 only for truly warehouse-specific configs (with docs explaining why).
 
-*Last updated: 2026-06-22*
+*Last updated: 2026-06-26 — switched to the richer jaffle-shop star schema; added incremental/ephemeral materializations, `cents_to_dollars` macro, `not_negative` custom test, and per-domain seeds across all 3 projects.*

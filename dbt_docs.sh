@@ -8,10 +8,10 @@ DOMAIN="${1:-$DBT_PROJECT}"
 PORT="${2:-}"
 
 case "$DOMAIN" in
-  finance) PORT="${PORT:-$DBT_DOCS_PORT_FINANCE}" ;;
-  marketing) PORT="${PORT:-$DBT_DOCS_PORT_MARKETING}" ;;
-  operations) PORT="${PORT:-$DBT_DOCS_PORT_OPERATIONS}" ;;
-  *)
+finance) PORT="${PORT:-$DBT_DOCS_PORT_FINANCE}" ;;
+marketing) PORT="${PORT:-$DBT_DOCS_PORT_MARKETING}" ;;
+operations) PORT="${PORT:-$DBT_DOCS_PORT_OPERATIONS}" ;;
+*)
 	echo "usage: $0 [finance|marketing|operations] [port]" >&2
 	exit 1
 	;;

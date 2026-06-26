@@ -2,10 +2,14 @@ version: 2
 
 sources:
   - name: raw
-    description: Jaffle Shop raw app tables (dbt-labs/jaffle_shop_duckdb)
+    description: Jaffle Shop raw app tables (dbt-labs/jaffle-shop, jafgen sample)
     schema: raw
     tables:
       - name: raw_customers
-        description: Raw customer records
+        description: One row per customer.
       - name: raw_orders
-        description: Raw order records
+        description: One row per order. Money columns in cents.
+      - name: raw_items
+        description: One row per order line item (order_id -> sku).
+      - name: raw_products
+        description: Product catalog.

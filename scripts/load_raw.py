@@ -7,7 +7,14 @@ from pathlib import Path
 
 import duckdb
 
-TABLES = ("raw_customers", "raw_orders", "raw_payments")
+TABLES = (
+    "raw_customers",
+    "raw_orders",
+    "raw_items",
+    "raw_products",
+    "raw_stores",
+    "raw_supplies",
+)
 
 
 def main() -> None:

@@ -1,0 +1,102 @@
+# See https://pre-commit.com . Install once with: pre-commit install
+# Run on demand:            pre-commit run --all-files
+# Manifest-based dbt checks need compiled manifests (see dbt-checkpoint block).
+exclude: '^(data/|.*\.duckdb$)'
+
+repos:
+  # --- General hygiene ---
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-added-large-files
+        args: ["--maxkb=1024"]
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: mixed-line-ending
+        args: ["--fix=lf"]
+      - id: detect-private-key
+
+  # --- Python ---
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.18  # keep in sync with requirements.json dev extra
+    hooks:
+      - id: ruff
+        args: ["--fix"]
+      - id: ruff-format
+
+  # --- SQL / dbt models ---
+  - repo: https://github.com/sqlfluff/sqlfluff
+    rev: 4.2.2
+    hooks:
+      - id: sqlfluff-lint
+        files: ^projects/.*/models/.*\.sql$
+      - id: sqlfluff-fix
+        files: ^projects/.*/models/.*\.sql$
+
+  # --- dbt structural checks (dbt-checkpoint) ---
+  # All dbt-checkpoint hooks in v2.x load a compiled manifest (target/manifest.json),
+  # which only exists after a dbt build. Local commits don't have a built warehouse/profile,
+  # so these are gated to the `manual` stage and run in CI after the build (see .github/workflows/ci.yml).
+  # Invoke locally with: pre-commit run --hook-stage manual --all-files
+  - repo: https://github.com/dbt-checkpoint/dbt-checkpoint
+    rev: v2.0.10
+    hooks:
+      - id: check-script-semicolon
+        stages: [manual]
+        files: ^projects/.*/models/.*\.sql$
+      - id: check-script-has-no-table-name
+        stages: [manual]
+        files: ^projects/.*/models/.*\.sql$
+      # Manifest-based checks, one entry per dbt project.
+      - id: check-model-has-description
+        name: check-model-has-description (finance)
+        stages: [manual]
+        files: ^projects/finance/models/.*\.sql$
+        args: ["--manifest", "projects/finance/target/manifest.json"]
+      - id: check-model-has-tests
+        name: check-model-has-tests (finance)
+        stages: [manual]
+        files: ^projects/finance/models/.*\.sql$
+        args: ["--manifest", "projects/finance/target/manifest.json", "--test-cnt", "1"]
+      - id: check-model-has-description
+        name: check-model-has-description (marketing)
+        stages: [manual]
+        files: ^projects/marketing/models/.*\.sql$
+        args: ["--manifest", "projects/marketing/target/manifest.json"]
+      - id: check-model-has-tests
+        name: check-model-has-tests (marketing)
+        stages: [manual]
+        files: ^projects/marketing/models/.*\.sql$
+        args: ["--manifest", "projects/marketing/target/manifest.json", "--test-cnt", "1"]
+      - id: check-model-has-description
+        name: check-model-has-description (operations)
+        stages: [manual]
+        files: ^projects/operations/models/.*\.sql$
+        args: ["--manifest", "projects/operations/target/manifest.json"]
+      - id: check-model-has-tests
+        name: check-model-has-tests (operations)
+        stages: [manual]
+        files: ^projects/operations/models/.*\.sql$
+        args: ["--manifest", "projects/operations/target/manifest.json", "--test-cnt", "1"]
+
+  # --- Shell scripts ---
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.11.0.1
+    hooks:
+      - id: shellcheck
+        # SC1091: sourced files (env.sh, .venv activate) only exist at runtime, not lint time.
+        args: ["--exclude=SC1091"]
+  - repo: https://github.com/scop/pre-commit-shfmt
+    rev: v3.13.1-1
+    hooks:
+      - id: shfmt
+
+  # --- Secrets ---
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.0
+    hooks:
+      - id: gitleaks
