@@ -6,10 +6,28 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SEEDS="$ROOT/data/seeds"
 
+# Portable interpreter pick: Linux/macOS have python3; Windows Git Bash often python.
+if command -v python3 >/dev/null 2>&1; then
+	PY=python3
+elif command -v python >/dev/null 2>&1; then
+	PY=python
+else
+	echo "error: need python3 or python on PATH" >&2
+	exit 1
+fi
+
 cd "$SEEDS"
 
 echo "==> SHA-256 checksum verification"
-sha256sum -c checksums.sha256
+# macOS ships `shasum`, not `sha256sum`; Linux/Git Bash ship `sha256sum`.
+if command -v sha256sum >/dev/null 2>&1; then
+	sha256sum -c checksums.sha256
+elif command -v shasum >/dev/null 2>&1; then
+	shasum -a 256 -c checksums.sha256
+else
+	echo "error: need sha256sum or shasum on PATH" >&2
+	exit 1
+fi
 
 echo "==> File type checks"
 for f in raw_customers.csv raw_orders.csv raw_items.csv raw_products.csv raw_stores.csv raw_supplies.csv; do
@@ -23,7 +41,7 @@ for f in raw_customers.csv raw_orders.csv raw_items.csv raw_products.csv raw_sto
 	}
 done
 
-python3 -c "
+"$PY" -c "
 from pathlib import Path
 for f in Path('.').glob('raw_*.csv'):
     if b'\x00' in f.read_bytes():
@@ -32,7 +50,7 @@ print('  no null bytes')
 "
 
 echo "==> CSV structure parse"
-python3 <<'PY'
+"$PY" <<'PY'
 import csv
 from pathlib import Path
 

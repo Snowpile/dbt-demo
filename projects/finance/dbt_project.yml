@@ -15,17 +15,25 @@ clean-targets:
   - target
   - dbt_packages
 
-# Project vars: overridable at runtime with `dbt build --vars '{revenue_start_date: "2025-01-01"}'`.
+# Project vars: overridable at runtime with `dbt run --vars '{revenue_start_date: "2025-01-01"}'`.
 vars:
   # Earliest order date to include in revenue models. Default predates the sample
   # data, so nothing is filtered out unless a tighter value is supplied.
   revenue_start_date: "2000-01-01"
+  # Sandbox schema override (see macros/generate_schema_name.sql). Empty = off;
+  # set via `--vars '{"dev_schema":"dev"}'` to build a --defer run into one schema.
+  dev_schema: ""
 
+# Layered schemas via generate_schema_name: on prod/staging these are the bare
+# names (source_data / transform / mart); on dev they're prefixed (main_source_data ...).
 models:
   finance:
     staging:
       +materialized: view
+      +schema: source_data
     intermediate:
       +materialized: view
+      +schema: transform
     marts:
       +materialized: table
+      +schema: mart

@@ -47,6 +47,31 @@ dbt run --select finance_fct_order_revenue --full-refresh  # rebuild from scratc
 
 ---
 
+## Env-aware layered schemas (`generate_schema_name`)
+
+`finance` overrides `generate_schema_name` (`macros/generate_schema_name.sql`) and
+tags each layer with a `+schema` in `dbt_project.yml`:
+
+| Layer | `+schema` | dev target | prod / staging target |
+|---|---|---|---|
+| staging | `source_data` | `dev_source_data` | `source_data` |
+| intermediate | `transform` | `dev_transform` | `transform` |
+| marts | `mart` | `dev_mart` | `mart` |
+
+- **prod / staging / qa** → the bare layer name (`source_data`, `transform`, `mart`),
+  so higher environments get clean, predictable schemas.
+- **dev** → the layer name prefixed with the env (`dev_source_data`, …), so a local
+  build can never clobber the prod relations.
+- Nodes with no `+schema` (the snapshot, the seed) → the env's default schema:
+  `main` on prod/staging, `dev` on the dev target.
+
+```bash
+dbt ls --target prod --output json --output-keys "name schema" --select finance_fct_order_revenue
+# -> mart   (dev would resolve to dev_mart)
+```
+
+---
+
 ## `--defer` + `--state` — how they work
 
 `--defer` lets you build/test only the models you changed locally while
@@ -60,8 +85,9 @@ dbt compile --target prod
 cp target/manifest.json ../../state/finance/manifest.json
 
 # 2. Work on a single model, deferring unchanged refs to prod, and only build
-#    what changed vs. that state.
-dbt build --select state:modified+ --defer --state ../../state/finance --favor-state
+#    what changed vs. that state — into a sandbox `dev` schema.
+dbt build --select state:modified+ --defer --state ../../state/finance --favor-state \
+  --vars '{"dev_schema":"dev"}'
 ```
 
 - **`state:modified+`** — select models that changed vs. the state manifest, plus
@@ -69,6 +95,11 @@ dbt build --select state:modified+ --defer --state ../../state/finance --favor-s
 - **`--defer`** — for any `ref()` to a model *not* selected this run, resolve it
   to the relation from the state manifest instead of building it locally.
 - **`--favor-state`** — prefer the state version even if a local one exists.
+- **`--vars '{"dev_schema":"dev"}'`** — the `generate_schema_name` override
+  (`macros/generate_schema_name.sql`) reads this var and flattens the models you
+  *did* change into a single `dev` schema, so your local edits never clobber the
+  prod relations the rest of the DAG defers to. Unset → the env-aware layered
+  schemas above (`dev_source_data` / `dev_transform` / `dev_mart` on dev).
 
 Why it matters: this is the backbone of **Slim CI** — only build/test what a PR
 touched, deferring the rest to the prod build. (CI wiring is intentionally
@@ -94,10 +125,11 @@ dbt source freshness
 dbt snapshot
 
 # Stored test failures (warn_high_margin_orders, not_empty_string) are queryable:
-#   select * from main_dbt_test__audit.warn_high_margin_orders;
+#   select * from dev_dbt_test__audit.warn_high_margin_orders;   -- prod: dbt_test__audit.*
 
-# Override a project var at runtime
-dbt build --select finance_stg_orders --vars '{revenue_start_date: "2025-01-01"}'
+# Override a project var at runtime (use `run`, not `build`: a later start date
+# filters out the unit test's 2024 fixture rows, which would fail `build`'s tests)
+dbt run --select finance_stg_orders --vars '{revenue_start_date: "2025-01-01"}'
 
 # Docs (incl. {% docs %} blocks + the revenue_dashboard exposure)
 dbt docs generate && dbt docs serve

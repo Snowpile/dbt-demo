@@ -28,5 +28,13 @@ export DBT_DOCS_PORT_FINANCE="${DBT_DOCS_PORT_FINANCE:-8011}"
 export DBT_DOCS_PORT_MARKETING="${DBT_DOCS_PORT_MARKETING:-8012}"
 export DBT_DOCS_PORT_OPERATIONS="${DBT_DOCS_PORT_OPERATIONS:-8013}"
 
-export BENDERIK_DBT="${BENDERIK_ROOT}/.venv/bin/dbt"
-export BENDERIK_PYTHON="${BENDERIK_ROOT}/.venv/bin/python"
+# uv/venv layout differs by OS: POSIX uses .venv/bin, Windows uses .venv/Scripts.
+if [[ -d "$BENDERIK_ROOT/.venv/Scripts" ]]; then
+	BENDERIK_VENV_BIN="$BENDERIK_ROOT/.venv/Scripts"
+else
+	BENDERIK_VENV_BIN="$BENDERIK_ROOT/.venv/bin"
+fi
+export BENDERIK_VENV_BIN
+# Bare names; on Windows (Git Bash/MSYS) the exec layer resolves the .exe.
+export BENDERIK_DBT="${BENDERIK_VENV_BIN}/dbt"
+export BENDERIK_PYTHON="${BENDERIK_VENV_BIN}/python"

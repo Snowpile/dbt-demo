@@ -33,6 +33,20 @@ All items verified green via `./scripts/dbt_build_all.sh` + the manual dbt-check
 - **Docs:** `{% docs %}` blocks in `projects/finance/models/docs.md` (incl. incremental explainer) referenced via `doc()`; `dbt docs generate` clean.
 - **Extras:** warn-severity test `warn_high_margin_orders` (+`store_failures`), `store_failures` on a generic test, `revenue_dashboard` exposure, and a `dbt_project.yml` `vars` example (`revenue_start_date`) wired into `finance_stg_orders`.
 - **New explainer doc:** `docs/dbt-feature-guide.md` (incremental models + `--defer --state` + demo command cheat-sheet).
+- **Env-aware layered schemas (finance):** `generate_schema_name` override + per-layer `+schema` (`source_data` / `transform` / `mart`). prod/staging → bare names; dev → `dev_*` prefixed (un-tagged nodes → `dev`). `dev_schema` var flattens a `--defer` run into one sandbox schema. Fixed the `vars` demo command in the feature guide (`dbt run`, not `build`). All three projects still green.
+
+## Session log — 2026-06-29 (review pass: cross-platform + demo agenda)
+
+Reviewed a 5-item "what's missing" list. Items 1–3 (extra custom tests, `run-operation`,
+`--defer --state` + `dev_schema` var) were already present and verified. Fixed the two real gaps:
+
+- **Cross-platform (macOS + Windows).** `scripts/env.sh` hardcoded `.venv/bin/` — now detects
+  `.venv/Scripts/` (Windows uv layout). `scripts/scan_downloads.sh` used `sha256sum` (absent on
+  stock macOS) and bare `python3` (Windows Git Bash often `python`) — now falls back to
+  `shasum -a 256` and auto-picks `python3`/`python`. Build chain now portable across Linux/macOS/Windows.
+- **Demo agenda.** Added `docs/demo-agenda.md` — a sequential, timed step-by-step runbook
+  (say/run per step) on top of the topic-organized `docs/dbt-feature-guide.md`.
+- Re-verified: `./scripts/dbt_build_all.sh` green (finance/marketing/operations, 0 errors).
 
 ## Open items / next actions (priority order)
 
