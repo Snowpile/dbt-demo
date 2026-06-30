@@ -47,6 +47,12 @@ Reviewed a 5-item "what's missing" list. Items 1–3 (extra custom tests, `run-o
 - **Demo agenda.** Added `docs/demo-agenda.md` — a sequential, timed step-by-step runbook
   (say/run per step) on top of the topic-organized `docs/dbt-feature-guide.md`.
 - Re-verified: `./scripts/dbt_build_all.sh` green (finance/marketing/operations, 0 errors).
+- **Dry-ran the demo agenda locally** (ls / run-operation / source freshness / snapshot all green).
+  Caught + fixed a real bug in the `--defer --state` example: capturing state with `--target prod`
+  fails on the DuckDB-per-file setup (`Binder Error: Catalog "prod" does not exist!` — the prod file
+  isn't attached on the dev connection). Rewrote both `docs/demo-agenda.md` and `docs/dbt-feature-guide.md`
+  to defer against the **dev** baseline + make a real edit so `state:modified+` selects something;
+  added a DuckDB caveat note. Verified the corrected flow builds only the changed model + children (PASS, 0 err).
 
 ## Open items / next actions (priority order)
 

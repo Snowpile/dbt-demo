@@ -131,20 +131,33 @@ SHA-256 pins, MIME, null-byte + UTF-8 CSV parse).
 to prod, all flattened into one sandbox schema via a project var."
 
 ```bash
-# 1. Capture a prod manifest once = the "state" to defer against.
-dbt compile --target prod
+# 1. Capture the current dev baseline manifest = the "state" to defer against.
+#    (Use dev, not prod — see the DuckDB caveat below.)
 mkdir -p ../../state/finance
+dbt compile
 cp target/manifest.json ../../state/finance/manifest.json
 
-# 2. Build ONLY changed models + children, deferring unchanged refs to prod,
-#    flattened into a single `dev` schema via the dev_schema var.
+# 2. Make a real change so there's something to select (revert it after).
+printf '\n-- demo change\n' >> models/marts/finance_fct_daily_revenue.sql
+
+# 3. Build ONLY changed models + children, deferring unchanged refs to the
+#    baseline, flattened into a single `dev` schema via the dev_schema var.
 dbt build --select state:modified+ --defer --state ../../state/finance --favor-state \
   --vars '{"dev_schema":"dev"}'
+
+# 4. Revert the demo edit.
+git checkout -- models/marts/finance_fct_daily_revenue.sql
 ```
 
 Open `macros/generate_schema_name.sql` — show how the `dev_schema` var short-circuits
 the env-aware layered schemas (`dev_source_data` / `dev_transform` / `dev_mart`) into one
 flat `dev` sandbox. (Deep-dive: `docs/dbt-feature-guide.md`.)
+
+> **DuckDB caveat:** each env is its own DuckDB file and DuckDB names the catalog after
+> the file, so capturing state with `--target prod` then building on dev fails with
+> `Binder Error: Catalog "prod" does not exist!` (the prod file isn't attached). For a
+> local demo, defer against the **dev** baseline as above. True prod-deferred Slim CI
+> needs the prod DuckDB `attach`ed in the profile.
 
 ---
 
@@ -198,7 +211,9 @@ dbt test --select test_type:unit
 dbt run-operation audit_relations
 dbt source freshness
 dbt snapshot
-dbt compile --target prod && mkdir -p ../../state/finance && cp target/manifest.json ../../state/finance/manifest.json
+mkdir -p ../../state/finance && dbt compile && cp target/manifest.json ../../state/finance/manifest.json
+printf '\n-- demo change\n' >> models/marts/finance_fct_daily_revenue.sql
 dbt build --select state:modified+ --defer --state ../../state/finance --favor-state --vars '{"dev_schema":"dev"}'
+git checkout -- models/marts/finance_fct_daily_revenue.sql
 cd .. && ./dbt_docs.sh finance
 ```

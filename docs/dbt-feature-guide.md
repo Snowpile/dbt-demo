@@ -80,15 +80,29 @@ rebuilding the whole DAG. dbt reads a previous run's artifacts (the *state*,
 i.e. `manifest.json`) from a `--state` directory:
 
 ```bash
-# 1. Capture a production manifest once (the "state" to compare/defer against).
-dbt compile --target prod
+# 0. Have a full baseline build already in dev.duckdb (./scripts/dbt_build_all.sh).
+#    Capture that baseline's manifest as the "state" to compare/defer against.
+mkdir -p ../../state/finance
+dbt compile
 cp target/manifest.json ../../state/finance/manifest.json
 
-# 2. Work on a single model, deferring unchanged refs to prod, and only build
-#    what changed vs. that state — into a sandbox `dev` schema.
+# 1. Change one model (any edit dbt can hash — e.g. add a trailing SQL comment).
+#    Without a real change, `state:modified+` selects nothing.
+
+# 2. Build only what changed vs. that state, deferring unchanged refs to the
+#    baseline, flattened into a sandbox `dev` schema.
 dbt build --select state:modified+ --defer --state ../../state/finance --favor-state \
   --vars '{"dev_schema":"dev"}'
 ```
+
+> **DuckDB caveat (important):** each env is a *separate* DuckDB file, and DuckDB
+> names the catalog after the file (`dev.duckdb` → catalog `dev`, `prod.duckdb` →
+> catalog `prod`). If you capture the state with `--target prod` but build on `dev`,
+> the deferred refs resolve to catalog `prod`, which isn't attached on the dev
+> connection → `Binder Error: Catalog "prod" does not exist!`. So for a local,
+> single-connection demo, capture the state from the **dev** baseline (same catalog
+> the build runs against). A true prod-deferred Slim CI would need the prod DuckDB
+> file `attach`ed in the profile.
 
 - **`state:modified+`** — select models that changed vs. the state manifest, plus
   their downstream children (`+`). Pairs with `state:new` for brand-new models.
