@@ -45,12 +45,17 @@ repos:
   - repo: https://github.com/dbt-checkpoint/dbt-checkpoint
     rev: v2.0.10
     hooks:
+      # These two are file-content checks, but dbt-checkpoint v2 still insists on
+      # loading a manifest. The repo is multi-project (no root target/), so point
+      # them at any one built project's manifest to satisfy the loader.
       - id: check-script-semicolon
         stages: [manual]
         files: ^projects/.*/models/.*\.sql$
+        args: ["--manifest", "projects/finance/target/manifest.json"]
       - id: check-script-has-no-table-name
         stages: [manual]
         files: ^projects/.*/models/.*\.sql$
+        args: ["--manifest", "projects/finance/target/manifest.json"]
       # Manifest-based checks, one entry per dbt project.
       - id: check-model-has-description
         name: check-model-has-description (finance)

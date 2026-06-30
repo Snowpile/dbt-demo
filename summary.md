@@ -1,6 +1,6 @@
 # benderik — session summary
 
-*Last updated: 2026-06-26. Read this to pick up where we left off.*
+*Last updated: 2026-06-29. Read this to pick up where we left off.*
 
 ## What this repo is
 
@@ -12,56 +12,40 @@ AI-friendly data engineering sandbox: **3 dbt projects** on **DuckDB**, sharing 
 |------|--------|
 | AI config | `AGENTS.md`, `CLAUDE.md`, `.cursor/rules/` |
 | Sample data | jaffle-shop star schema (customers/orders/items/products/supplies/stores), ~62k orders, SHA-256 pinned + scanned |
-| dbt models | per domain: ≥3 stg (view) / 7 int (ephemeral+view+table) / 3 marts (table + **incremental**); **green on dev/staging/prod** (finance 50 / marketing 52 / operations 46 nodes) |
-| dbt features | per-domain seed, `cents_to_dollars` macro, `not_negative` custom generic test, `accepted_values` tests |
-| Tooling | `uv` + `requirements.json` (`./setup.sh`), `scripts/dbt_build_all.sh`, pre-commit + sqlfluff |
-| CI | `.github/workflows/ci.yml` (theoretical) |
-| **Local git** | commits on `main` |
+| dbt models | per domain: ≥3 stg (view) / 7 int (ephemeral+view+table) / 3 marts (table + **incremental**); **green on dev/staging/prod** |
+| dbt tests | `not_negative`, `not_empty_string`, parametrized `accepted_range` custom generic tests (×3); `accepted_values` (×3); singular + unit tests; `dbt_utils` tests; warn-severity + `store_failures` (finance) |
+| dbt features | per-domain seed, `cents_to_dollars` macro, `audit_relations` run-operation, SCD2 snapshot, source freshness, `vars`, exposure, `{% docs %}` blocks (finance) |
+| Packages | `dbt_utils` 1.4.1 via `packages.yml` + `dbt deps` (×3) |
+| Tooling | `uv` + `requirements.json` (`./setup.sh`), `scripts/dbt_build_all.sh`, pre-commit + sqlfluff + dbt-checkpoint |
+| CI | `.github/workflows/ci.yml` — build + manual structural hooks (script-hook manifest path **fixed** 06-29) |
+| **git** | on `main`, **pushed**, up to date with `origin/main` |
 
 ## Where we're at
 
-- **Local dbt:** `./scripts/dbt_build_all.sh` builds + seeds all 3 domains on dev/staging/prod
-- **Model build-out (Phase 1):** ✅ complete — see `docs/remaining-work.md`
-- **Uncommitted:** new seeds/models/macros/tests + pre-commit config (not committed)
-- **GitHub push:** **not done yet** — account/SSH mismatch (see below)
+- **Local dbt:** `./scripts/dbt_build_all.sh` is green — finance **61 PASS / 1 intentional WARN**, marketing **54**, operations **52**.
+- **Model build-out (Phase 1):** ✅ complete. **Phase 0.5 demo-readiness:** ✅ complete (see `docs/remaining-work.md`).
+- **Uncommitted:** the 2026-06-29 demo-readiness work (tests, `dbt_utils`, snapshot, freshness, unit test, docs, exposure, vars, CI hook fix) — green, ready for the human to commit. See `docs/STATUS.md` for the proposed commit message.
+- **GitHub push:** ✅ done — `origin` is `git@github-snowpile:Snowpile/benderik.git`, branch up to date. (The old Snowpile/Hoodie SSH mismatch is resolved.)
 
-## GitHub — pick up here tomorrow
-
-You have **two GitHub accounts** on this machine:
-
-| SSH key | Account |
-|---------|---------|
-| `~/.ssh/id_rsa_Snowpile` | **Snowpile** ← benderik belongs here |
-| `~/.ssh/id_rsa_Hoodie` | ErikRForsman-Hoodie |
-
-`origin` may still point at Hoodie. Fix:
-
-```bash
-# 1. Create empty repo "benderik" while logged in as Snowpile on github.com
-
-# 2. Fix remote + push with Snowpile key
-cd ~/Desktop/Contracting/benderik
-git remote set-url origin git@github.com:Snowpile/benderik.git
-GIT_SSH_COMMAND='ssh -i ~/.ssh/id_rsa_Snowpile -o IdentitiesOnly=yes' git push -u origin main
-```
-
-Optional: add `~/.ssh/config` with `github-snowpile` / `github-hoodie` hosts (see chat from 2026-06-22).
-
-## Tomorrow — dbt quick start
+## Quick start
 
 ```bash
 cd ~/Desktop/Contracting/benderik
 ./setup.sh
+source .venv/bin/activate && source scripts/env.sh
 ./scripts/dbt_build_all.sh
 ```
+
+## Demo feature cheat-sheet
+
+See `docs/dbt-feature-guide.md` for runnable commands + explainers (incremental models, `--defer --state`, run-operation, snapshot, freshness, unit/singular tests, store_failures, vars, docs).
 
 ## Still to do
 
 See `docs/remaining-work.md` for the full prioritized tracker. Headlines:
-1. Commit current work; push to GitHub (resolve Snowpile/Hoodie SSH)
-2. Advanced dbt features (Phase 2+): snapshots, more incremental strategies (merge/append/microbatch), unit/singular tests, `dbt_utils` package, `_showcase` configs, hooks, exposures
-3. Docs pipeline: `dbt docs generate` + `{% docs %}` + GitHub Pages
-4. Slim CI + defer with manifest artifacts
+1. Human: commit + push the 06-29 working tree; confirm CI green on GitHub.
+2. Optionally spread snapshot/freshness/unit-test/exposure to marketing + operations (currently finance-only, kept focused).
+3. Phase 2+ depth: more incremental strategies (merge/append/microbatch), more `dbt_utils` (`star`/`date_spine`), semantic models, GitHub Pages docs, Slim CI + defer.
 
 ## Key files
 

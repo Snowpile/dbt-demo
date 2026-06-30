@@ -1,0 +1,15 @@
+unit_tests:
+  - name: test_stg_orders_cents_to_dollars
+    description: >
+      finance_stg_orders must convert the cent-denominated money columns to USD
+      via the cents_to_dollars macro (integer cents / 100, rounded to 2dp).
+    model: finance_stg_orders
+    given:
+      - input: source('raw', 'raw_orders')
+        rows:
+          - {id: 'o1', customer: 'c1', store_id: 's1', ordered_at: '2024-01-01 10:00:00', subtotal: 700, tax_paid: 42, order_total: 742}
+          - {id: 'o2', customer: 'c2', store_id: 's1', ordered_at: '2024-01-02 11:30:00', subtotal: 1050, tax_paid: 63, order_total: 1113}
+    expect:
+      rows:
+        - {order_id: 'o1', subtotal_usd: 7.00, tax_paid_usd: 0.42, order_total_usd: 7.42}
+        - {order_id: 'o2', subtotal_usd: 10.50, tax_paid_usd: 0.63, order_total_usd: 11.13}

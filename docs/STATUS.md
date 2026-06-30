@@ -3,7 +3,7 @@
 *Living "where are we / pick up here" file. **Update this at the end of every working session.**
 Full backlog lives in `docs/remaining-work.md`; this file is the short, current snapshot + immediate next actions.*
 
-**Last updated:** 2026-06-28
+**Last updated:** 2026-06-29
 
 **Guardrail:** Only the human commits/pushes — the AI never runs `git commit`/`push`/`merge`/`rebase`/`reset` (see `.cursor/rules/core.mdc`).
 
@@ -11,39 +11,63 @@ Full backlog lives in `docs/remaining-work.md`; this file is the short, current 
 
 ## Snapshot
 
-- **Branch:** `main` · **Tree:** clean (all work committed)
-- **Last commit:** `f5b15cb` "Committing checkpoint" (Fri 2026-06-26)
-- **Not yet pushed** to GitHub — blocked, see Open items.
+- **Branch:** `main` · up to date with `origin/main` (push + the old Snowpile/Hoodie SSH issue are **resolved**).
+- **Last commit:** `5303106` "Committing checkpoint; Lots of AI stuff".
+- **Working tree:** has **uncommitted demo-readiness work** from the 2026-06-29 session (see log) — green and ready for the human to commit. Proposed message at the bottom.
+- **Build:** green on dev — finance **61 PASS / 1 intentional WARN**, marketing **54**, operations **52**, 0 errors.
 
-## Recently done (last session)
+## Session log — 2026-06-29 (demo-readiness pass)
 
-- **pre-commit is green** on the default stage (`pre-commit run --all-files` passes). Fixes made:
-  - `.sqlfluff`: added `load_macros_from_path` for the three `projects/*/macros` dirs so the jinja templater resolves `cents_to_dollars` (was causing TMP/PRS/LT02 cascade).
-  - Qualified ambiguous `ordered_at` (RF02) in the incremental `where` of `finance_fct_order_revenue`, `marketing_fct_customer_orders`, `operations_fct_orders` (aliased the `{{ this }}` subquery as `t`).
-  - `.pre-commit-config.yaml`: gated all dbt-checkpoint (manifest-based) hooks to `stages: [manual]` — they need a compiled `target/manifest.json` that doesn't exist on a local commit; shellcheck now ignores `SC1091`.
-  - `.github/workflows/ci.yml`: runs the manual-stage dbt-checkpoint structural checks after `dbt_build_all.sh` (manifests exist there).
-  - Added missing schema descriptions/tests: `finance_int_daily_revenue` (+desc, tests), `finance_stg_supplies`, `operations_int_store_performance`, `operations_stg_supplies`.
+All items verified green via `./scripts/dbt_build_all.sh` + the manual dbt-checkpoint hooks.
+
+- **Fixed a latent CI failure.** The gated `check-script-semicolon` / `check-script-has-no-table-name` hooks couldn't load a root `target/manifest.json` (repo is multi-project) and would have failed CI. Pinned both to `projects/finance/target/manifest.json` in `.pre-commit-config.yaml`. All four manual hooks now pass.
+- **Custom generic tests (×3 projects):** added `not_empty_string` and parametrized `accepted_range(min_value, max_value, inclusive)` on top of `not_negative`.
+- **`accepted_values`:** now in all three projects (added one to operations for parity).
+- **Modernized all test args** to the dbt 1.10+ `arguments:` nesting — cleared a `MissingArgumentsPropertyInGenericTestDeprecation` that fired on fresh CI parses.
+- **Singular tests (finance):** `assert_order_revenue_reconciles`, `assert_no_future_orders`.
+- **`dbt_utils`** (1.4.1) via `packages.yml` + `dbt deps` in all three; real usage in finance via `dbt_utils.expression_is_true` and `dbt_utils.unique_combination_of_columns` tests.
+- **`run-operation`** macro `audit_relations` (uses `run_query()`): `dbt run-operation audit_relations`.
+- **Snapshot (SCD2):** `finance_snapshot_products` (YAML config, `check` strategy).
+- **Source freshness:** on `raw_orders` (`loaded_at_field` + thresholds tuned for the static sample); `dbt source freshness` passes.
+- **Unit test:** `test_stg_orders_cents_to_dollars` (given/expect).
+- **Docs:** `{% docs %}` blocks in `projects/finance/models/docs.md` (incl. incremental explainer) referenced via `doc()`; `dbt docs generate` clean.
+- **Extras:** warn-severity test `warn_high_margin_orders` (+`store_failures`), `store_failures` on a generic test, `revenue_dashboard` exposure, and a `dbt_project.yml` `vars` example (`revenue_start_date`) wired into `finance_stg_orders`.
+- **New explainer doc:** `docs/dbt-feature-guide.md` (incremental models + `--defer --state` + demo command cheat-sheet).
 
 ## Open items / next actions (priority order)
 
-1. **[unverified]** The gated dbt-checkpoint checks were never confirmed locally — needs `setup.sh` (creates `.env` + `profiles.yml`) then build manifests and run:
-   `for h in check-script-semicolon check-script-has-no-table-name check-model-has-description check-model-has-tests; do uv run pre-commit run "$h" --hook-stage manual --all-files; done`
-   (Friday the shell had no `.env`/`profiles.yml`, so `dbt parse` failed with "Could not find profile named 'benderik'".)
-2. **Push to GitHub** — blocked on Snowpile vs Hoodie SSH account mismatch (fix steps in `summary.md`).
-3. **Refresh `summary.md`** — stale (dated 06-22; doesn't mention pre-commit / current state).
-4. Continue Phase 2 dbt feature coverage — see `docs/remaining-work.md`.
+1. **Human: commit + push** the 2026-06-29 working tree (proposed message below), then confirm CI is green on GitHub.
+2. **Spread breadth to marketing/operations** if desired — snapshot / freshness / unit test / exposure currently only demonstrated in finance (intentional, to keep the diff focused).
+3. Continue Phase 2 depth as time allows — see `docs/remaining-work.md` (microbatch, more `dbt_utils`, snapshots in other domains, semantic models).
 
 ## Resume quickly
 
 ```bash
-./setup.sh                  # .env + .venv + profiles.yml + hooks
-pre-commit run --all-files  # should be green
-git status && git log --oneline -3
+./setup.sh                                   # .env + .venv + profiles.yml + hooks (already present here)
+source .venv/bin/activate && source scripts/env.sh
+./scripts/dbt_build_all.sh                   # green: finance 61/1warn, marketing 54, operations 52
+# manual structural hooks (need built manifests):
+for h in check-script-semicolon check-script-has-no-table-name check-model-has-description check-model-has-tests; do
+  uv run pre-commit run "$h" --hook-stage manual --all-files; done
+```
+
+## Proposed commit message (human runs it)
+
+```
+Add demo-readiness dbt coverage: tests, dbt_utils, snapshot, freshness, unit test, docs
+
+- Fix gated dbt-checkpoint script hooks (manifest path) so CI passes
+- Add not_empty_string + parametrized accepted_range generic tests across all 3 projects
+- Modernize all test args to dbt 1.10+ arguments: syntax (clears deprecation)
+- Add singular tests, dbt_utils package + tests, run-operation macro, SCD2 snapshot,
+  source freshness, unit test, exposure, vars example, store_failures, {% docs %} blocks
+- Add docs/dbt-feature-guide.md (incremental + --defer/--state explainers)
 ```
 
 ## Pointers
 
 - Full prioritized backlog: `docs/remaining-work.md`
+- Demo cheat-sheet / feature explainers: `docs/dbt-feature-guide.md`
 - Token-lean AI patterns: `docs/ai-practices-cursor.md`, `docs/ai-practices-claude.md`
 - Exhaustive feature reference: `docs/dbt-master-checklist.md`
 - GitHub/push notes: `docs/github.md`, `summary.md`

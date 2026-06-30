@@ -1,0 +1,18 @@
+version: 2
+
+exposures:
+  - name: revenue_dashboard
+    label: Revenue Dashboard
+    type: dashboard
+    maturity: high
+    url: https://bi.example.com/dashboards/revenue
+    description: >
+      Executive daily revenue, COGS, and gross-margin dashboard. Shows lineage
+      from the finance marts out to the downstream BI tool in dbt docs.
+    depends_on:
+      - ref('finance_fct_daily_revenue')
+      - ref('finance_fct_order_revenue')
+      - ref('finance_dim_product')
+    owner:
+      name: Finance Analytics
+      email: analytics@example.com

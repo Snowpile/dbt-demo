@@ -19,6 +19,12 @@ models:
     columns:
       - name: sku
         tests: [unique, not_null]
+      - name: product_type
+        tests:
+          - not_empty_string
+          - accepted_values:
+              arguments:
+                values: ['jaffle', 'beverage']
   - name: operations_stg_supplies
     description: Bill-of-materials rows (supply per product).
     columns:
@@ -45,7 +51,12 @@ models:
     description: Per-store per-day order/item/revenue roll-up.
     columns:
       - name: order_count
-        tests: [not_negative]
+        description: Orders per store per day; any row present has at least one.
+        tests:
+          - not_negative
+          - accepted_range:
+              arguments:
+                min_value: 1
   - name: operations_int_product_supply_needs
     description: Supply requirements per product (table).
     columns:

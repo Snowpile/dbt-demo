@@ -21,8 +21,12 @@ models:
         tests: [unique, not_null]
       - name: product_type
         tests:
+          - not_empty_string:
+              config:
+                store_failures: true
           - accepted_values:
-              values: ['jaffle', 'beverage']
+              arguments:
+                values: ['jaffle', 'beverage']
   - name: finance_stg_supplies
     description: Bill-of-materials rows (supply per product).
     columns:
@@ -77,14 +81,31 @@ models:
 
   # --- marts ---
   - name: finance_fct_order_revenue
-    description: Incremental order-grain revenue fact (delete+insert on ordered_at).
+    description: '{{ doc("finance_fct_order_revenue__doc") }}'
+    tests:
+      # dbt_utils package test: order total can never be below its subtotal.
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "order_total_usd >= subtotal_usd"
     columns:
       - name: order_id
         tests: [unique, not_null]
       - name: order_total_usd
         tests: [not_null, not_negative]
+      - name: gross_margin_pct
+        description: '{{ doc("gross_margin_pct__doc") }}'
+        tests:
+          - accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 1
   - name: finance_fct_daily_revenue
     description: Daily revenue / profit per store.
+    tests:
+      # dbt_utils package test: one row per store per day.
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [store_id, order_date]
     columns:
       - name: daily_revenue_id
         tests: [unique, not_null]

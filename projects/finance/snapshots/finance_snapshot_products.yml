@@ -1,0 +1,11 @@
+snapshots:
+  - name: finance_snapshot_products
+    description: >
+      SCD2 history of the raw product catalog. Captures a new version whenever a
+      product's name, type, price, or description changes (check strategy).
+    relation: source('raw', 'raw_products')
+    config:
+      unique_key: sku
+      strategy: check
+      check_cols: [name, type, price, description]
+      dbt_valid_to_current: "cast('9999-12-31' as timestamp)"

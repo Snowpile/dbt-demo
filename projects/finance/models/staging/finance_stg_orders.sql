@@ -13,6 +13,8 @@ renamed as (
         {{ cents_to_dollars('tax_paid') }} as tax_paid_usd,
         {{ cents_to_dollars('order_total') }} as order_total_usd
     from source
+    -- Demonstrates a project var (overridable with --vars); default predates the data.
+    where cast(ordered_at as date) >= cast('{{ var("revenue_start_date") }}' as date)
 )
 
 select * from renamed

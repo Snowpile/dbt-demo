@@ -28,7 +28,7 @@ models:
     description: Acquisition channel reference (from seed).
     columns:
       - name: channel
-        tests: [unique, not_null]
+        tests: [unique, not_null, not_empty_string]
 
   # --- intermediate ---
   - name: marketing_int_customer_orders
@@ -36,6 +36,12 @@ models:
     columns:
       - name: customer_id
         tests: [unique, not_null]
+      - name: order_count
+        description: Orders per customer; every customer here has at least one.
+        tests:
+          - accepted_range:
+              arguments:
+                min_value: 1
   - name: marketing_int_customer_lifetime
     description: CLV metrics including recency and lifespan.
     columns:
@@ -61,7 +67,8 @@ models:
       - name: segment
         tests:
           - accepted_values:
-              values: ['champion', 'active', 'at_risk', 'dormant']
+              arguments:
+                values: ['champion', 'active', 'at_risk', 'dormant']
   - name: marketing_int_channel_attribution
     description: Deterministic channel attribution per customer.
     columns:
@@ -84,7 +91,8 @@ models:
       - name: segment
         tests:
           - accepted_values:
-              values: ['champion', 'active', 'at_risk', 'dormant', 'no_orders']
+              arguments:
+                values: ['champion', 'active', 'at_risk', 'dormant', 'no_orders']
   - name: marketing_fct_product_affinity
     description: Product-type popularity across orders and customers.
     columns:
