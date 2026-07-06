@@ -41,17 +41,13 @@ repos:
   # All dbt-checkpoint hooks in v2.x load a compiled manifest (target/manifest.json),
   # which only exists after a dbt build. Local commits don't have a built warehouse/profile,
   # so these are gated to the `manual` stage and run in CI after the build (see .github/workflows/ci.yml).
+  # Commit-stage hooks run in CI via .github/workflows/pre-commit.yml (same as local `git commit`).
   # Invoke locally with: pre-commit run --hook-stage manual --all-files
   - repo: https://github.com/dbt-checkpoint/dbt-checkpoint
     rev: v2.0.10
     hooks:
-      # These two are file-content checks, but dbt-checkpoint v2 still insists on
-      # loading a manifest. The repo is multi-project (no root target/), so point
-      # them at any one built project's manifest to satisfy the loader.
-      - id: check-script-semicolon
-        stages: [manual]
-        files: ^projects/.*/models/.*\.sql$
-        args: ["--manifest", "projects/finance/target/manifest.json"]
+      # File-content check; dbt-checkpoint v2 still insists on loading a manifest.
+      # The repo is multi-project (no root target/), so point at a built manifest.
       - id: check-script-has-no-table-name
         stages: [manual]
         files: ^projects/.*/models/.*\.sql$

@@ -47,19 +47,28 @@ data/seeds/*.csv  →  load_raw.py  →  raw.*  →  projects/<domain>/models  �
 
 ## Part B — CI/CD & GitHub (~5 min)
 
-**Show:** `.github/workflows/ci.yml`
+**Show:** `.github/workflows/pre-commit.yml` then `.github/workflows/ci.yml`
 
-**Say:** "Every PR and push to `main` runs the same pipeline as local pre-warm:"
+**Say:** "Two workflows on every PR / push to `main`:"
+
+**`pre-commit.yml`** — same hooks as local `git commit` (for devs without pre-commit installed):
 
 1. `actions/checkout`
 2. `astral-sh/setup-uv` (cached)
-3. `./setup.sh` — **same entrypoint as local** (scan seeds + load raw + `dbt build` dev + prod)
-4. **dbt-checkpoint** structural hooks (need manifests from step 3):
-   `check-script-semicolon`, `check-script-has-no-table-name`, `check-model-has-description`,
+3. `tj-actions/changed-files` — list files in the PR / push
+4. `pre-commit/action` with `--files …` — commit hooks on **changed files only** (skips if none)
+
+**`ci.yml`** — same pipeline as local pre-warm / full bootstrap:
+
+1. `actions/checkout`
+2. `astral-sh/setup-uv` (cached)
+3. `./setup.sh` — scan seeds + load raw + `dbt build` dev + prod
+4. **dbt-checkpoint** manual-stage hooks (need manifests from step 3):
+   `check-script-has-no-table-name`, `check-model-has-description`,
    `check-model-has-tests`
 
-**Say:** "Locally, `pre-commit` also runs ruff + SQLFluff on commit; CI runs the dbt structural
-checks only (SQLFluff in CI is backlog — `docs/remaining-work.md` Phase 4)."
+**Say:** "Commit hooks run even if you skipped `pre-commit install`. dbt structural checks run after
+a full build."
 
 **Branch + PR workflow** (one-time remote setup: `docs/github.md`):
 

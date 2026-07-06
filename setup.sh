@@ -3,9 +3,11 @@
 # Interactive use: ends in projects/finance with scripts/env.sh loaded (via exec).
 set -euo pipefail
 
+# Set the root directory of the project and enter
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"
 
+# If uv is not installed, print an error message, how to install, and exit
 if ! command -v uv >/dev/null 2>&1; then
 	echo "error: uv is required." >&2
 	echo "Install: https://docs.astral.sh/uv/getting-started/installation/" >&2
@@ -17,10 +19,10 @@ uv venv --python=python3.11
 
 case "$(uname -s)" in
 Darwin* | Linux*)
-	source ./.venv/bin/activate
+	source .venv/bin/activate
 	;;
 CYGWIN* | MINGW32* | MSYS* | MINGW*)
-	source ./.venv/Scripts/activate
+	source .venv/Scripts/activate
 	;;
 *)
 	echo "Other OS detected — activate .venv manually."
@@ -45,10 +47,10 @@ if [[ ! -f profiles.yml ]]; then
 	cp profiles.yml.example profiles.yml
 fi
 
+# Ensure the data directory exists before creating files there.
 mkdir -p data
 
 echo "==> Loading environment"
-# shellcheck source=scripts/env.sh
 source "$ROOT/scripts/env.sh"
 
 echo "==> Verifying dbt"
@@ -65,12 +67,5 @@ DBT_TARGET=prod "$ROOT/scripts/dbt_build_all.sh"
 
 echo ""
 echo "Setup complete."
-
-if [[ -z "${CI:-}" && -t 0 && -t 1 ]]; then
-	echo "==> Entering project shell (projects/${DBT_PROJECT})"
-	cd "$ROOT/projects/$DBT_PROJECT"
-	exec "${SHELL:-bash}" -i
-fi
-
 echo ""
 echo "Docs (second terminal): ./dbt_docs.sh finance"

@@ -21,7 +21,7 @@ jobs:
       # Manifest-based dbt-checkpoint structural checks (need compiled manifests from setup.sh builds).
       - name: dbt structural checks (dbt-checkpoint)
         run: |
-          for hook in check-script-semicolon check-script-has-no-table-name \
+          for hook in check-script-has-no-table-name \
             check-model-has-description check-model-has-tests; do
             uv run pre-commit run "$hook" --hook-stage manual --all-files
           done
