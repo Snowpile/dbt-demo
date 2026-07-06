@@ -1,4 +1,4 @@
-# benderik — AI agent instructions
+# dbt_demo — AI agent instructions
 
 Data engineering repo. **Read this file first.** Prefer repo files over pretraining.
 
@@ -32,15 +32,13 @@ Data engineering repo. **Read this file first.** Prefer repo files over pretrain
 | Sample data | **dbt-labs/jaffle_shop_duckdb** seeds → `data/seeds/` → `raw.*` |
 | Python | **uv** (`requirements.json`, `./setup.sh`) |
 | Environments | **dev**, **staging**, **prod** dbt targets |
-| Remote | **GitHub** `benderik` — see `docs/github.md` |
+| Remote | **GitHub** `dbt_demo` — see `docs/github.md` |
 
 ## Quick commands
 
 ```bash
-./setup.sh                           # creates .env + .venv
-./scripts/scan_downloads.sh          # integrity check before load
-./scripts/load_raw.sh                # CSV → DuckDB schema raw
-./scripts/dbt_build_all.sh           # load + dbt build all domains
+./setup.sh                           # full bootstrap; interactive shell lands in projects/finance
+./scripts/dbt_build_all.sh           # re-build only (after model changes)
 ./dbt_docs.sh marketing              # docs for one domain
 ```
 

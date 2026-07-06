@@ -1,4 +1,4 @@
-# benderik — Remaining Work (execution tracker)
+# dbt_demo — Remaining Work (execution tracker)
 
 *Working plan. Check items off as we go. The exhaustive feature reference stays in `docs/dbt-master-checklist.md`; this file is the prioritized "what's left + how" view.*
 

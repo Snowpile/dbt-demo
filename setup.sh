@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Create .venv (uv) and install benderik deps from requirements.json (setup.py).
+# Bootstrap dbt_demo: venv, config, seed scan, dev + prod builds.
+# Interactive use: ends in projects/finance with scripts/env.sh loaded (via exec).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -36,7 +37,7 @@ fi
 
 if [[ ! -f .env ]]; then
 	echo "==> Creating .env from .env.example"
-	sed "s|/absolute/path/to/benderik|${ROOT}|g" .env.example >.env
+	sed "s|/absolute/path/to/dbt_demo|${ROOT}|g" .env.example >.env
 fi
 
 if [[ ! -f profiles.yml ]]; then
@@ -46,10 +47,30 @@ fi
 
 mkdir -p data
 
+echo "==> Loading environment"
+# shellcheck source=scripts/env.sh
+source "$ROOT/scripts/env.sh"
+
+echo "==> Verifying dbt"
+"$DBT_DEMO_DBT" --version
+
+echo "==> Seed integrity check"
+"$ROOT/scripts/scan_downloads.sh"
+
+echo "==> Building all domains (dev)"
+"$ROOT/scripts/dbt_build_all.sh"
+
+echo "==> Building all domains (prod)"
+DBT_TARGET=prod "$ROOT/scripts/dbt_build_all.sh"
+
 echo ""
 echo "Setup complete."
+
+if [[ -z "${CI:-}" && -t 0 && -t 1 ]]; then
+	echo "==> Entering project shell (projects/${DBT_PROJECT})"
+	cd "$ROOT/projects/$DBT_PROJECT"
+	exec "${SHELL:-bash}" -i
+fi
+
 echo ""
-echo "Verify:"
-echo "  uv run dbt --version"
-echo "  ./scripts/dbt_build_all.sh"
-echo "  ./dbt_docs.sh"
+echo "Docs (second terminal): ./dbt_docs.sh finance"

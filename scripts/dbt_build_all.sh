@@ -4,11 +4,11 @@ set -euo pipefail
 
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/env.sh"
 
-"$BENDERIK_ROOT/scripts/load_raw.sh"
+"$DBT_DEMO_ROOT/scripts/load_raw.sh"
 
 for domain in finance marketing operations; do
 	echo "==> dbt build: $domain"
-	(cd "$BENDERIK_ROOT/projects/$domain" && "$BENDERIK_DBT" build --target "$DBT_TARGET")
+	(cd "$DBT_DEMO_ROOT/projects/$domain" && "$DBT_DEMO_DBT" build --target "$DBT_TARGET")
 done
 
 echo "All projects built."

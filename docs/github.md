@@ -1,15 +1,21 @@
 # GitHub — remote setup & PR workflow
 
-Repo: **`benderik`** on GitHub. **CI pipeline walkthrough:** Part B of `docs/demo-agenda.md`.
+Repo: **`dbt-demo`** on GitHub ([`Snowpile/dbt-demo`](https://github.com/Snowpile/dbt-demo)). Local folder and dbt profile use `dbt_demo` (underscore). **CI pipeline walkthrough:** Part B of `docs/demo-agenda.md`.
+
+## Remote URL
+
+```bash
+git remote set-url origin git@github-snowpile:Snowpile/dbt-demo.git
+```
 
 ## One-time setup
 
 ```bash
 # 1. Create empty repo on GitHub (no README if you already have local files)
-#    https://github.com/new → name: benderik
+#    https://github.com/new → name: dbt-demo
 
 # 2. Link remote (replace YOUR_USER)
-git remote add origin git@github.com:YOUR_USER/benderik.git
+git remote add origin git@github.com:YOUR_USER/dbt-demo.git
 
 # 3. Auth — SSH key or: gh auth login
 

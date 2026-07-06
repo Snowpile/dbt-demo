@@ -17,18 +17,18 @@ operations) PORT="${PORT:-$DBT_DOCS_PORT_OPERATIONS}" ;;
 	;;
 esac
 
-[[ -x "$BENDERIK_DBT" ]] || {
+[[ -x "$DBT_DEMO_DBT" ]] || {
 	echo "error: run ./setup.sh first" >&2
 	exit 1
 }
 
-"$BENDERIK_ROOT/scripts/load_raw.sh"
+"$DBT_DEMO_ROOT/scripts/load_raw.sh"
 
 echo "==> dbt build: $DOMAIN"
-(cd "$BENDERIK_ROOT/projects/$DOMAIN" && "$BENDERIK_DBT" build --target "$DBT_TARGET")
+(cd "$DBT_DEMO_ROOT/projects/$DOMAIN" && "$DBT_DEMO_DBT" build --target "$DBT_TARGET")
 
 echo "==> dbt docs generate: $DOMAIN"
-(cd "$BENDERIK_ROOT/projects/$DOMAIN" && "$BENDERIK_DBT" docs generate --target "$DBT_TARGET")
+(cd "$DBT_DEMO_ROOT/projects/$DOMAIN" && "$DBT_DEMO_DBT" docs generate --target "$DBT_TARGET")
 
 echo "==> dbt docs serve: $DOMAIN on http://127.0.0.1:${PORT}"
-(cd "$BENDERIK_ROOT/projects/$DOMAIN" && "$BENDERIK_DBT" docs serve --target "$DBT_TARGET" --port "$PORT")
+(cd "$DBT_DEMO_ROOT/projects/$DOMAIN" && "$DBT_DEMO_DBT" docs serve --target "$DBT_TARGET" --port "$PORT")

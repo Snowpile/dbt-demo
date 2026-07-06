@@ -6,7 +6,7 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/env.sh"
 
 TARGET="${1:-$DBT_TARGET}"
 
-"$BENDERIK_ROOT/scripts/scan_downloads.sh"
+"$DBT_DEMO_ROOT/scripts/scan_downloads.sh"
 
 case "$TARGET" in
 dev) DB="$DUCKDB_DEV_PATH" ;;
@@ -19,5 +19,5 @@ prod) DB="$DUCKDB_PROD_PATH" ;;
 esac
 
 mkdir -p "$(dirname "$DB")"
-"$BENDERIK_PYTHON" "$BENDERIK_ROOT/scripts/load_raw.py" --database "$DB"
+"$DBT_DEMO_PYTHON" "$DBT_DEMO_ROOT/scripts/load_raw.py" --database "$DB"
 echo "Loaded raw.* into $DB"

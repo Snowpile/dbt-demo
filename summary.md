@@ -1,4 +1,4 @@
-# benderik — quick pointer
+# dbt_demo — quick pointer
 
 | Need | File |
 |------|------|
@@ -7,4 +7,4 @@
 | Backlog | `docs/remaining-work.md` |
 | AI rules | `AGENTS.md` |
 
-**Quick start:** `./setup.sh` → `source .venv/bin/activate && source scripts/env.sh` → `./scripts/dbt_build_all.sh`
+**Quick start:** `./setup.sh`

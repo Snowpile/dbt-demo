@@ -1,4 +1,4 @@
-# dbt Master Feature Checklist — benderik
+# dbt Master Feature Checklist — dbt_demo
 
 **Goal:** Make this repo the **#1 local, multi-domain reference** for dbt Core + DuckDB — covering everything Jaffle Shop *deliberately skips* and what advanced demos only touch in fragments.
 
@@ -10,7 +10,7 @@
 
 ## Your list (expanded)
 
-| # | Feature | What “done” looks like in benderik | Status |
+| # | Feature | What “done” looks like in dbt_demo | Status |
 |---|---------|-----------------------------------|--------|
 | 1 | **dbt docs — generate** | `dbt docs generate` per project; `persist_docs` example; doc blocks `{% docs %}` | ⬜ |
 | 2 | **dbt docs — serve locally** | `scripts/docs_serve.sh`; documented port/host | ⬜ |
@@ -28,22 +28,22 @@
 
 ---
 
-## vs. other repos (why benderik should win)
+## vs. other repos (why dbt_demo should win)
 
-| Repo | What it teaches | What it **skips** (benderik opportunity) |
+| Repo | What it teaches | What it **skips** (dbt_demo opportunity) |
 |------|-----------------|------------------------------------------|
 | [jaffle_shop_duckdb](https://github.com/dbt-labs/jaffle_shop_duckdb) | basics, seeds-as-raw anti-pattern | macros, packages, hooks, defer, incremental, snapshots, unit tests |
 | [jaffle-shop](https://github.com/dbt-labs/jaffle-shop) | dbt Cloud, jafgen scale | advanced Core patterns, multi-project |
 | [dbt-learn-demo](https://github.com/dbt-labs/dbt-learn-demo) | best practices naming | exhaustive config catalog |
 | Community “advanced” blogs | one feature deep | single repo with **all** features cross-linked |
 
-**benderik edge:** multi-domain monorepo + DuckDB (free/local) + **feature matrix with runnable examples** + AI agent docs.
+**dbt_demo edge:** multi-domain monorepo + DuckDB (free/local) + **feature matrix with runnable examples** + AI agent docs.
 
 ---
 
 ## Commands (every CLI entry point)
 
-| Command | Demonstrate in benderik | Status |
+| Command | Demonstrate in dbt_demo | Status |
 |---------|-------------------------|--------|
 | `dbt build` | `scripts/dbt_build_all.sh` | ✅ |
 | `dbt run` | documented per-domain | 🔶 |

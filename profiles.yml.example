@@ -1,4 +1,4 @@
-benderik:
+dbt_demo:
   target: dev
   outputs:
     dev:

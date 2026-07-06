@@ -6,7 +6,7 @@ with open("requirements.json") as fp:
     requirements = json.load(fp)
 
 setup(
-    name="benderik",
+    name="dbt_demo",
     description="Data engineering — dbt (DuckDB) multi-domain",
     version="0.1.0",
     packages=find_packages(exclude=["tests"]),

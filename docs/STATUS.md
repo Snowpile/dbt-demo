@@ -1,9 +1,9 @@
-# benderik — Current Status (AI handoff)
+# dbt_demo — Current Status (AI handoff)
 
 *Living "where are we / pick up here" file. **Update at the end of every working session.***
 *Backlog: `docs/remaining-work.md` · Meeting script: `docs/demo-agenda.md`*
 
-**Last updated:** 2026-07-03
+**Last updated:** 2026-07-05
 
 **Guardrail:** Only the human commits/pushes (see `.cursor/rules/core.mdc`).
 
@@ -11,8 +11,10 @@
 
 ## Snapshot
 
-- **Branch:** `main` · working tree clean.
+- **Repo:** renamed `benderik` → **`dbt_demo`** (local folder, dbt profile, docs, scripts). Remote URL updated locally; **rename on GitHub** (Settings → General) then push.
+- **Branch:** `main` · rename changes unstaged (see `git status`).
 - **Build:** green — `./scripts/dbt_build_all.sh` (finance 61/1 warn, marketing 54, operations 52).
+- **Setup:** `./setup.sh` is the single entrypoint (venv, config, seed scan, dev + prod builds; drops into `projects/finance` with env loaded).
 - **Docs:** `docs/demo-agenda.md` is the full meeting runbook (platform + CI + dbt + AI).
   Supporting docs deduped; deep-dives in `docs/dbt-feature-guide.md`, `docs/ai-practices.md`.
 
@@ -25,9 +27,7 @@
 ## Resume quickly
 
 ```bash
-source .venv/bin/activate && source scripts/env.sh
-./scripts/dbt_build_all.sh
-cd projects/finance
+./setup.sh
 ```
 
 ## Doc index
