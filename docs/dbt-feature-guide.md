@@ -1,14 +1,13 @@
-# dbt feature guide / demo cheat-sheet
+# dbt feature guide (deep-dive reference)
 
-Demo-facing notes for the features showcased in this repo. Run all dbt commands
-from inside a domain project (`cd projects/finance` etc.) after `source scripts/env.sh`.
+Mechanics behind the live demo. **Commands and order of operations:** `docs/demo-agenda.md` Part C.
+Run dbt from inside a domain project (`cd projects/finance`) after `source scripts/env.sh`.
 
 ---
 
-## Incremental models — how they work
+## Incremental models
 
-`finance_fct_order_revenue`, `marketing_fct_customer_orders`, and
-`operations_fct_orders` are materialized `incremental`:
+`finance_fct_order_revenue` (and marketing/operations equivalents) use:
 
 ```sql
 {{ config(
@@ -19,132 +18,54 @@ from inside a domain project (`cd projects/finance` etc.) after `source scripts/
 ) }}
 ```
 
-- **First run / `--full-refresh`** — dbt builds the entire table from scratch.
-- **Later runs** — the `{% if is_incremental() %}` branch adds a filter so only
-  *new* rows are processed:
-
-  ```sql
-  {% if is_incremental() %}
-    where ordered_at > (select coalesce(max(t.ordered_at), '1900-01-01') from {{ this }} as t)
-  {% endif %}
-  ```
-
-- **`unique_key='order_id'`** — re-loaded orders replace the existing row instead
-  of duplicating.
-- **`incremental_strategy='delete+insert'`** — dbt deletes the keys in the new
-  batch, then inserts the new rows (atomic swap of just the changed slice).
-- **`on_schema_change='append_new_columns'`** — new upstream columns are appended
-  to the target instead of erroring.
-
-Why it matters: warehouse cost scales with *new* data, not full history (~62k orders).
-
-Demo it:
-
-```bash
-dbt run --select finance_fct_order_revenue                 # incremental (no-op if no new rows)
-dbt run --select finance_fct_order_revenue --full-refresh  # rebuild from scratch
-```
+- **First run / `--full-refresh`** — full table from scratch.
+- **Later runs** — `{% if is_incremental() %}` filters to new rows only.
+- **`unique_key`** — re-loaded keys replace, don't duplicate.
+- **`delete+insert`** — delete changed keys, insert new batch.
+- **`on_schema_change='append_new_columns'`** — new upstream columns append instead of erroring.
 
 ---
 
 ## Env-aware layered schemas (`generate_schema_name`)
 
-`finance` overrides `generate_schema_name` (`macros/generate_schema_name.sql`) and
-tags each layer with a `+schema` in `dbt_project.yml`:
+`finance` overrides `macros/generate_schema_name.sql` with per-layer `+schema` in `dbt_project.yml`:
 
-| Layer | `+schema` | dev target | prod / staging target |
+| Layer | `+schema` | dev target | prod / staging |
 |---|---|---|---|
 | staging | `source_data` | `dev_source_data` | `source_data` |
 | intermediate | `transform` | `dev_transform` | `transform` |
 | marts | `mart` | `dev_mart` | `mart` |
 
-- **prod / staging / qa** → the bare layer name (`source_data`, `transform`, `mart`),
-  so higher environments get clean, predictable schemas.
-- **dev** → the layer name prefixed with the env (`dev_source_data`, …), so a local
-  build can never clobber the prod relations.
-- Nodes with no `+schema` (the snapshot, the seed) → the env's default schema:
-  `main` on prod/staging, `dev` on the dev target.
-
-```bash
-dbt ls --target prod --output json --output-keys "name schema" --select finance_fct_order_revenue
-# -> mart   (dev would resolve to dev_mart)
-```
+- **prod / staging / qa** → bare layer names.
+- **dev** → env-prefixed (`dev_source_data`, …) so local builds can't clobber prod.
+- **`dev_schema` var** — when set (`--vars '{"dev_schema":"dev"}'`), flattens everything into
+  one schema (used with `--defer` so branch edits stay sandboxed).
 
 ---
 
-## `--defer` + `--state` — how they work
+## `--defer` + `--state`
 
-`--defer` lets you build/test only the models you changed locally while
-**referencing the production (or CI) versions** of everything else, instead of
-rebuilding the whole DAG. dbt reads a previous run's artifacts (the *state*,
-i.e. `manifest.json`) from a `--state` directory:
+**Prerequisite:** prod fully built (`DBT_TARGET=prod ./scripts/dbt_build_all.sh`).
 
-```bash
-# 0. Have a full baseline build already in dev.duckdb (./scripts/dbt_build_all.sh).
-#    Capture that baseline's manifest as the "state" to compare/defer against.
-mkdir -p ../../state/finance
-dbt compile
-cp target/manifest.json ../../state/finance/manifest.json
+| Flag / selector | Role |
+|---|---|
+| `state:modified+` | Changed vs. state manifest + downstream children |
+| `--defer` | Unselected `ref()`s resolve to state manifest relations |
+| `--state /tmp/dbt` | Directory containing baseline `manifest.json` |
+| `--target-path /tmp/dbt` | Write baseline manifest outside working `target/` |
+| `--vars '{"dev_schema":"dev"}'` | Sandbox schema for models you *did* build |
+| `--target prod` (both steps) | DuckDB catalog must match (`prod.duckdb` → catalog `prod`) |
 
-# 1. Change one model (any edit dbt can hash — e.g. add a trailing SQL comment).
-#    Without a real change, `state:modified+` selects nothing.
-
-# 2. Build only what changed vs. that state, deferring unchanged refs to the
-#    baseline, flattened into a sandbox `dev` schema.
-dbt build --select state:modified+ --defer --state ../../state/finance --favor-state \
-  --vars '{"dev_schema":"dev"}'
-```
-
-> **DuckDB caveat (important):** each env is a *separate* DuckDB file, and DuckDB
-> names the catalog after the file (`dev.duckdb` → catalog `dev`, `prod.duckdb` →
-> catalog `prod`). If you capture the state with `--target prod` but build on `dev`,
-> the deferred refs resolve to catalog `prod`, which isn't attached on the dev
-> connection → `Binder Error: Catalog "prod" does not exist!`. So for a local,
-> single-connection demo, capture the state from the **dev** baseline (same catalog
-> the build runs against). A true prod-deferred Slim CI would need the prod DuckDB
-> file `attach`ed in the profile.
-
-- **`state:modified+`** — select models that changed vs. the state manifest, plus
-  their downstream children (`+`). Pairs with `state:new` for brand-new models.
-- **`--defer`** — for any `ref()` to a model *not* selected this run, resolve it
-  to the relation from the state manifest instead of building it locally.
-- **`--favor-state`** — prefer the state version even if a local one exists.
-- **`--vars '{"dev_schema":"dev"}'`** — the `generate_schema_name` override
-  (`macros/generate_schema_name.sql`) reads this var and flattens the models you
-  *did* change into a single `dev` schema, so your local edits never clobber the
-  prod relations the rest of the DAG defers to. Unset → the env-aware layered
-  schemas above (`dev_source_data` / `dev_transform` / `dev_mart` on dev).
-
-Why it matters: this is the backbone of **Slim CI** — only build/test what a PR
-touched, deferring the rest to the prod build. (CI wiring is intentionally
-theoretical in this repo; see `docs/remaining-work.md` Phase 4.)
+Slim CI in GitHub Actions is Phase 4 backlog (`docs/remaining-work.md`).
 
 ---
 
-## Other showcased commands
+## Extras not shown live in the agenda
 
 ```bash
-# Custom + parametrized generic tests, singular tests, unit tests
-dbt test --select test_type:generic
-dbt test --select test_type:singular
-dbt test --select test_type:unit
-
-# run-operation: live row counts via run_query()
-dbt run-operation audit_relations
-
-# Source freshness (thresholds tuned for the static sample data)
-dbt source freshness
-
-# SCD2 snapshot of the product catalog
-dbt snapshot
-
-# Stored test failures (warn_high_margin_orders, not_empty_string) are queryable:
-#   select * from dev_dbt_test__audit.warn_high_margin_orders;   -- prod: dbt_test__audit.*
-
-# Override a project var at runtime (use `run`, not `build`: a later start date
-# filters out the unit test's 2024 fixture rows, which would fail `build`'s tests)
+# Runtime var override (use `run`, not `build` — tighter date filters out unit-test fixtures)
 dbt run --select finance_stg_orders --vars '{revenue_start_date: "2025-01-01"}'
 
-# Docs (incl. {% docs %} blocks + the revenue_dashboard exposure)
-dbt docs generate && dbt docs serve
+# Query stored test failures
+# select * from dev_dbt_test__audit.warn_high_margin_orders;
 ```

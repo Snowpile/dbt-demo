@@ -56,8 +56,9 @@ Data engineering repo. **Read this file first.** Prefer repo files over pretrain
 |-------|------|
 | Current status / handoff | `docs/STATUS.md` |
 | Remaining work (backlog) | `docs/remaining-work.md` |
-| AI practices (Cursor) | `docs/ai-practices-cursor.md` |
-| AI practices (Claude) | `docs/ai-practices-claude.md` |
+| AI practices | `docs/ai-practices.md` |
+| Meeting / demo script | `docs/demo-agenda.md` |
+| dbt mechanics (deep-dive) | `docs/dbt-feature-guide.md` |
 | GitHub / PRs | `docs/github.md` |
 | Architecture | `docs/architecture.md` |
 | Naming | `docs/conventions.md` |

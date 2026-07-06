@@ -1,207 +1,273 @@
-# benderik — dbt demo agenda (step-by-step runbook)
+# benderik — meeting agenda (step-by-step runbook)
 
-A sequential script for live-demoing this repo. ~20–25 min. Each step has **say**
-(the point) and **run** (the exact command). Feature deep-dives live in
-`docs/dbt-feature-guide.md`; this file is the *order of operations*.
+~45–50 min. Each step has **say** (the point) and **run** / **show** (what to do).
+Deep-dives: `docs/dbt-feature-guide.md` (dbt mechanics), `docs/ai-practices.md` (AI patterns).
 
-> Works on **macOS, Linux, and Windows (Git Bash / WSL)**. On Windows use Git Bash
-> so the `./*.sh` scripts run; everything else is identical.
+> **macOS / Linux / Windows (Git Bash / WSL).** On Windows use Git Bash for `./*.sh`.
 
 ---
 
-## 0. Before the room joins (one-time, ~3 min)
+## Pre-warm (before the room, ~5 min)
 
-**Say:** "Single command sets up a reproducible Python env (uv), profiles, and seeds."
+**Say:** "One command gives us a reproducible Python env — same locally and in CI."
 
 ```bash
-./setup.sh                              # .venv + .env + profiles.yml (+ hooks if a git repo)
+./setup.sh                              # .venv + .env + profiles.yml (+ pre-commit hooks)
 source .venv/bin/activate               # Windows Git Bash: source .venv/Scripts/activate
-source scripts/env.sh                   # exports DBT_PROFILES_DIR, DuckDB paths, etc.
-uv run dbt --version                    # sanity check
+source scripts/env.sh
+uv run dbt --version
+./scripts/dbt_build_all.sh              # dev baseline
+DBT_TARGET=prod ./scripts/dbt_build_all.sh   # prod baseline — required for Part C defer demo
+cd projects/finance                       # live dbt terminal for Part C
 ```
 
-**Pre-warm the warehouse so the live build is fast:**
+Open a **second terminal** for `./dbt_docs.sh` (Part C — it blocks on port 8011).
 
-```bash
-./scripts/dbt_build_all.sh              # green: finance 61/1 warn, marketing 54, operations 52
+---
+
+## Part A — Reproducible environment (~5 min)
+
+**Say:** "We don't ship a Docker image in this demo — **`uv` + `./setup.sh` is the runtime contract**.
+CI runs the exact same script; in production you'd wrap this in a container with the same
+`requirements.json`."
+
+| Piece | Role |
+|---|---|
+| `requirements.json` + `setup.py` | Pinned deps (`dbt-duckdb`, `duckdb`); dev extras (`ruff`, `pre-commit`) |
+| `./setup.sh` | `uv venv` → install → copy `.env` / `profiles.yml` → `pre-commit install` |
+| `scripts/env.sh` | Exports `DBT_PROFILES_DIR`, DuckDB paths, venv bin (`.venv/bin` or `.venv/Scripts`) |
+| `.env` / `profiles.yml` | Local paths (gitignored); one DuckDB **file per env** (dev / staging / prod) |
+
+**Show:** `requirements.json`, `setup.sh`, `profiles.yml.example`.
+
+**Say:** "Raw CSVs are integrity-checked (`scan_downloads.sh`: SHA-256, MIME, UTF-8) then loaded
+into DuckDB schema `raw` (`load_raw.sh` → `load_raw.py`). dbt never reads CSVs directly."
+
+Data flow (see `docs/architecture.md` for detail):
+
 ```
-
-Leave a second terminal open in `projects/finance` for the live commands:
-
-```bash
-cd projects/finance
+data/seeds/*.csv  →  load_raw.py  →  raw.*  →  projects/<domain>/models  →  stg → int → fct/dim
 ```
 
 ---
 
-## 1. Framing (1 min, no commands)
+## Part B — CI/CD & GitHub (~5 min)
 
-**Say:**
-- Mono-repo, **3 dbt projects** (`finance`, `marketing`, `operations`) on **DuckDB**, one file per env (dev / staging / prod).
-- Same shared seed data (`dbt-labs/jaffle-shop`, ~62k orders) flowing through stage → intermediate → mart.
-- Goal of the demo: show the full dbt feature surface, not just `dbt run`.
+**Show:** `.github/workflows/ci.yml`
+
+**Say:** "Every PR and push to `main` runs the same pipeline as local pre-warm:"
+
+1. `actions/checkout`
+2. `astral-sh/setup-uv` (cached)
+3. `./setup.sh` — **same entrypoint as local**
+4. `./scripts/scan_downloads.sh` — seed integrity gate
+5. `./scripts/dbt_build_all.sh` — load raw + `dbt build` all three domains
+6. **dbt-checkpoint** structural hooks (need manifests from step 5):
+   `check-script-semicolon`, `check-script-has-no-table-name`, `check-model-has-description`,
+   `check-model-has-tests`
+
+**Say:** "Locally, `pre-commit` also runs ruff + SQLFluff on commit; CI runs the dbt structural
+checks only (SQLFluff in CI is backlog — `docs/remaining-work.md` Phase 4)."
+
+**Branch + PR workflow** (one-time remote setup: `docs/github.md`):
+
+```bash
+git checkout -b feat/my-change
+# ... work; human commits when ready ...
+git push -u origin feat/my-change
+gh pr create --title "..." --body "..."
+```
+
+**Say:** "Part C step 7 shows **Slim CI** locally (`--defer --state`). Wiring that into GitHub
+Actions (manifest artifact from `main`, matrix per domain) is Phase 4 backlog — intentionally
+not implemented yet."
 
 ---
 
-## 2. The DAG: stage → intermediate → mart (3 min)
+## Part C — dbt live demo (~20–25 min)
 
-**Say:** "Layered models, mixed materializations — `view` for staging, `ephemeral`/`view`/`table` for intermediate, `table` + `incremental` for marts."
+### C1. Framing (1 min)
 
-```bash
-dbt ls --select staging                 # the bronze views
-dbt ls --select marts                   # the gold tables
-dbt build --select finance_fct_order_revenue+   # build a slice + its children
-```
-
-Point at `models/` folder structure and `dbt_project.yml` `models:` config block.
+**Say:** Mono-repo, **3 dbt projects** on **DuckDB**, shared jaffle-shop data (~62k orders).
+Goal: full dbt feature surface, not just `dbt run`. Naming: `docs/conventions.md`.
 
 ---
 
-## 3. Incremental models (3 min)
+### C2. DAG: stage → intermediate → mart (3 min)
 
-**Say:** "Marts are incremental — cost scales with *new* rows, not full history."
+**Say:** Layered models, mixed materializations.
 
 ```bash
-dbt run --select finance_fct_order_revenue                 # incremental: no-op if no new rows
-dbt run --select finance_fct_order_revenue --full-refresh  # rebuild from scratch
+dbt ls --select staging
+dbt ls --select marts
+dbt build --select finance_fct_order_revenue+
 ```
 
-Open `models/marts/finance_fct_order_revenue.sql`, point at the
-`{% if is_incremental() %}` filter, `unique_key`, `incremental_strategy='delete+insert'`,
-`on_schema_change`. (Full explainer: `docs/dbt-feature-guide.md`.)
+**Show:** `models/` tree, `dbt_project.yml` `models:` block (+schema layers in finance).
 
 ---
 
-## 4. Tests — built-in, custom, singular, unit (4 min)
-
-**Say:** "Four kinds of tests, all in one project."
+### C3. Incremental models (3 min)
 
 ```bash
-dbt test --select test_type:generic     # unique, not_null, accepted_values, relationships,
-                                         # dbt_utils.*, AND our custom generics
-dbt test --select test_type:singular     # assert_order_revenue_reconciles, assert_no_future_orders
-dbt test --select test_type:unit         # test_stg_orders_cents_to_dollars (given/expect)
+dbt run --select finance_fct_order_revenue
+dbt run --select finance_fct_order_revenue --full-refresh
 ```
 
-**Custom generic tests** (more than just "not negative") — open:
-- `tests/generic/not_negative.sql`
-- `tests/generic/not_empty_string.sql`     (null / blank text)
-- `tests/generic/accepted_range.sql`       (parametrized: `min_value`, `max_value`, `inclusive`)
+**Show:** `models/marts/finance_fct_order_revenue.sql` — `is_incremental()`, `unique_key`,
+`incremental_strategy='delete+insert'`, `on_schema_change`. Mechanics: `docs/dbt-feature-guide.md`.
 
-**Severity + stored failures:** `warn_high_margin_orders` warns instead of failing the
-build, and `store_failures: true` keeps the rows for inspection:
+---
+
+### C4. Tests — built-in, custom, singular, unit (4 min)
+
+```bash
+dbt test --select test_type:generic
+dbt test --select test_type:singular
+dbt test --select test_type:unit
+```
+
+**Show custom generics** (more than `not_negative`):
+- `tests/generic/not_empty_string.sql`
+- `tests/generic/accepted_range.sql` (parametrized)
+
+**Show:** `warn_high_margin_orders` — `severity: warn` + `store_failures: true`.
 
 ```bash
 dbt test --select warn_high_margin_orders
-# then query the audit table (dev schema shown):
-#   select * from dev_dbt_test__audit.warn_high_margin_orders;
+# select * from dev_dbt_test__audit.warn_high_margin_orders;
 ```
 
 ---
 
-## 5. Macros + run-operation (2 min)
-
-**Say:** "Macros: a shared `cents_to_dollars`, an env-aware `generate_schema_name`, and an
-operational macro you invoke directly."
+### C5. Macros + run-operation (2 min)
 
 ```bash
-dbt run-operation audit_relations        # live row counts per mart via run_query()
+dbt run-operation audit_relations
 ```
 
-Open `macros/audit_relations.sql` (uses `run_query()` / `execute`) and
-`macros/cents_to_dollars.sql` (used in staging).
+**Show:** `macros/audit_relations.sql` (`run_query()`), `macros/cents_to_dollars.sql`,
+`macros/generate_schema_name.sql`.
 
 ---
 
-## 6. Sources, freshness, snapshots, seeds (2 min)
+### C6. Sources, freshness, snapshots, seeds (2 min)
 
 ```bash
-dbt source freshness                     # loaded_at_field + thresholds on raw_orders
-dbt snapshot                             # finance_snapshot_products (SCD2, check strategy)
+dbt source freshness
+dbt snapshot
 ```
 
-**Say:** seeds are vendored CSVs, integrity-checked before load (`scripts/scan_downloads.sh`:
-SHA-256 pins, MIME, null-byte + UTF-8 CSV parse).
+**Say:** SCD2 snapshot (`finance_snapshot_products`), source freshness on `raw_orders`.
 
 ---
 
-## 7. `--defer` + `--state` with the `dev_schema` var (3 min) — the headline
+### C7. `--defer` + `--state` + `dev_schema` (3 min) — headline
 
-**Say:** "This is the backbone of Slim CI: build only what changed, defer everything else
-to prod, all flattened into one sandbox schema via a project var."
+**Prerequisite:** prod fully built (pre-warm).
 
 ```bash
-# 1. Capture the current dev baseline manifest = the "state" to defer against.
-#    (Use dev, not prod — see the DuckDB caveat below.)
-mkdir -p ../../state/finance
-dbt compile
-cp target/manifest.json ../../state/finance/manifest.json
+git checkout main
+dbt compile --target-path /tmp/dbt --target prod
 
-# 2. Make a real change so there's something to select (revert it after).
+git checkout <your-branch>
 printf '\n-- demo change\n' >> models/marts/finance_fct_daily_revenue.sql
 
-# 3. Build ONLY changed models + children, deferring unchanged refs to the
-#    baseline, flattened into a single `dev` schema via the dev_schema var.
-dbt build --select state:modified+ --defer --state ../../state/finance --favor-state \
-  --vars '{"dev_schema":"dev"}'
+dbt build --select state:modified+ --defer --state /tmp/dbt \
+  --vars '{"dev_schema":"dev"}' --target prod
 
-# 4. Revert the demo edit.
 git checkout -- models/marts/finance_fct_daily_revenue.sql
 ```
 
-Open `macros/generate_schema_name.sql` — show how the `dev_schema` var short-circuits
-the env-aware layered schemas (`dev_source_data` / `dev_transform` / `dev_mart`) into one
-flat `dev` sandbox. (Deep-dive: `docs/dbt-feature-guide.md`.)
-
-> **DuckDB caveat:** each env is its own DuckDB file and DuckDB names the catalog after
-> the file, so capturing state with `--target prod` then building on dev fails with
-> `Binder Error: Catalog "prod" does not exist!` (the prod file isn't attached). For a
-> local demo, defer against the **dev** baseline as above. True prod-deferred Slim CI
-> needs the prod DuckDB `attach`ed in the profile.
+**Say:** On `main`, capture prod manifest to `/tmp/dbt`. On your branch, build only
+`state:modified+`; defer unchanged refs to prod; `dev_schema` flattens your builds into one
+sandbox schema. Both steps use `--target prod` so DuckDB catalog names match (`prod.duckdb` →
+catalog `prod`). Detail: `docs/dbt-feature-guide.md`.
 
 ---
 
-## 8. Docs site + exposure (2 min)
+### C8. Docs + exposure (2 min)
 
 ```bash
-cd ..                                    # back to repo root
-./dbt_docs.sh finance                    # build + generate + serve on :8011
+cd .. && ./dbt_docs.sh finance    # second terminal — serves :8011
 ```
 
-Open the browser: show the DAG graph, `{% docs %}` blocks (`models/docs.md`), column
-descriptions, and the **`revenue_dashboard` exposure** as a downstream consumer.
+**Show:** DAG graph, `{% docs %}` blocks, `revenue_dashboard` exposure.
 
 ---
 
-## 9. Packages + multi-project (1 min)
+### C9. Packages + multi-project (1 min)
 
-**Say:** "`dbt_utils` pulled via `packages.yml` / `dbt deps`; used for
-`expression_is_true` and `unique_combination_of_columns` tests. The same patterns
-repeat across all three domains."
+**Say:** `dbt_utils` via `packages.yml` / `dbt deps`; same patterns in all three domains.
 
 ```bash
-cd ../marketing && dbt build             # parity across projects
+cd projects/marketing && dbt build
 cd ../operations && dbt build
 ```
 
 ---
 
-## 10. Wrap (1 min, no commands)
+## Part D — AI workflow (~10 min)
 
-**Recap the surface shown:** layered DAG, all materializations, incremental,
-4 test types + custom/parametrized generics + severity/store_failures, macros +
-run-operation, sources/freshness/snapshots/seeds, `--defer --state` Slim-CI pattern,
-docs + exposure, dbt_utils, 3-project mono-repo. CI wiring is intentionally theoretical
-(see `docs/remaining-work.md` Phase 4).
+**Say:** "The repo is structured so AI agents need minimal prompting — durable context lives
+in files, not chat history."
+
+| Layer | File | Purpose |
+|---|---|---|
+| Source of truth | `AGENTS.md` | Stack, commands, autonomy matrix, doc index |
+| Auto-loaded rules | `.cursor/rules/*.mdc` | Cursor reads every chat (`core`, `dbt`, `python`) |
+| Claude entry | `CLAUDE.md` | Imports `AGENTS.md`; no MCP in this repo |
+| Session handoff | `docs/STATUS.md` | Read first, update last — resume in a fresh chat |
+| Token patterns | `docs/ai-practices.md` | How to work lean (both Cursor and Claude) |
+| Backlog | `docs/remaining-work.md` | What to pick up next |
+
+**Token-efficiency rules (say these out loud):**
+
+- **`@`-reference files** — don't paste whole files or logs into chat
+- **Scoped asks** — "fix X in `finance_fct_order_revenue`" not "review everything"
+- **Fresh chat when stale** — resume via `docs/STATUS.md`, not megabytes of history
+- **Don't re-explain the stack** — `AGENTS.md` + rules already load it
+- **Subagents for broad exploration** — parent synthesizes; main thread stays small
+- **Human commits/pushes only** — AI may stage + propose a message, never `git commit`/`push`
+
+**Cursor vs Claude Code:**
+
+| | Cursor | Claude Code |
+|---|---|---|
+| Config | `.cursor/rules/*.mdc` | `CLAUDE.md` → `AGENTS.md` |
+| File refs | `@path` in chat | path in prompt |
+| MCP | optional (not used here) | **disabled** — terminal + files only |
+| Skills | user-level `~/.cursor/skills-cursor/` | N/A |
+
+**Skills (Cursor):** not vendored in this repo — they live in your Cursor user directory
+(`~/.cursor/skills-cursor/<name>/SKILL.md`). The agent reads a skill when the task matches
+(e.g. create-rule, create-skill, babysit PR). You can add repo-specific skills there or
+author new ones with the create-skill skill.
+
+**Demo prompt for a new chat:**
+
+> Read `docs/STATUS.md` and continue.
 
 ---
 
-## Quick reference — all demo commands in order
+## Part E — Wrap (~3 min)
+
+**Recap:** reproducible env (uv = container contract) → CI mirrors local → full dbt surface →
+AI config keeps tokens low. Backlog: Slim CI in Actions, SQLFluff in CI, spread finance-only
+features to other domains — `docs/remaining-work.md`.
+
+---
+
+## Quick reference — all commands in order
 
 ```bash
+# Pre-warm
 ./setup.sh && source .venv/bin/activate && source scripts/env.sh
 ./scripts/dbt_build_all.sh
+DBT_TARGET=prod ./scripts/dbt_build_all.sh
 cd projects/finance
+
+# Part C — dbt
 dbt ls --select staging
 dbt build --select finance_fct_order_revenue+
 dbt run --select finance_fct_order_revenue --full-refresh
@@ -211,9 +277,10 @@ dbt test --select test_type:unit
 dbt run-operation audit_relations
 dbt source freshness
 dbt snapshot
-mkdir -p ../../state/finance && dbt compile && cp target/manifest.json ../../state/finance/manifest.json
+git checkout main && dbt compile --target-path /tmp/dbt --target prod
+git checkout <your-branch>
 printf '\n-- demo change\n' >> models/marts/finance_fct_daily_revenue.sql
-dbt build --select state:modified+ --defer --state ../../state/finance --favor-state --vars '{"dev_schema":"dev"}'
+dbt build --select state:modified+ --defer --state /tmp/dbt --vars '{"dev_schema":"dev"}' --target prod
 git checkout -- models/marts/finance_fct_daily_revenue.sql
 cd .. && ./dbt_docs.sh finance
 ```

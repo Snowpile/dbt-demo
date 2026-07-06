@@ -8,7 +8,7 @@ alwaysApply: true
 ## On every new chat, read these first
 1. `docs/STATUS.md` — current state / where we left off
 2. `docs/remaining-work.md` — backlog / checklist
-3. `docs/ai-practices-cursor.md` + `docs/ai-practices-claude.md` — token-lean working patterns
+3. `docs/ai-practices.md` — token-lean working patterns
 
 ## Behavior
 - Follow `AGENTS.md` as source of truth.
