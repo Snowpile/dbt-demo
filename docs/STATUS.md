@@ -3,7 +3,7 @@
 *Living "where are we / pick up here" file. **Update at the end of every working session.***
 *Backlog: `docs/remaining-work.md` · Meeting script: `docs/demo-agenda.md`*
 
-**Last updated:** 2026-07-05
+**Last updated:** 2026-07-07
 
 **Guardrail:** Only the human commits/pushes (see `.cursor/rules/core.mdc`).
 
@@ -11,29 +11,29 @@
 
 ## Snapshot
 
-- **Repo:** renamed `benderik` → **`dbt_demo`** (local folder, dbt profile, docs, scripts). Remote URL updated locally; **rename on GitHub** (Settings → General) then push.
-- **Branch:** `main` · rename changes unstaged (see `git status`).
+- **Repo:** **`dbt_demo`** — local folder, dbt profile, docs, scripts.
 - **Build:** green — `./scripts/dbt_build_all.sh` (finance 61/1 warn, marketing 54, operations 52).
-- **Setup:** `./setup.sh` is the single entrypoint (venv, config, seed scan, dev + prod builds; drops into `projects/finance` with env loaded).
-- **Docs:** `docs/demo-agenda.md` is the full meeting runbook (platform + CI + dbt + AI).
-  Supporting docs deduped; deep-dives in `docs/dbt-feature-guide.md`, `docs/ai-practices.md`.
+- **Setup:** `. ./setup.sh` — venv, config, seed scan, dev + prod builds; source so activation + env stick.
+- **Demo prep:** walkthrough checklist at **`DEMO_CHECKLIST.md`** (repo root); runbook at `docs/demo-agenda.md`.
+- **CI:** `pre-commit.yml` (changed-file hooks) + `ci.yml` (full `./setup.sh` + dbt-checkpoint).
 
 ## Open items (priority)
 
-1. Run through `docs/demo-agenda.md` before the meeting (pre-warm + Part C defer demo).
-2. Optionally spread finance-only features (snapshot, freshness, unit test, exposure) to other domains.
-3. Phase 2+ depth — see `docs/remaining-work.md` (Slim CI in Actions, SQLFluff in CI, microbatch, semantic models).
+1. Continue demo walkthrough — **`DEMO_CHECKLIST.md`** (next: #4 repo layout & architecture).
+2. Run end-to-end dry run before the meeting.
+3. Phase 2+ depth — see `docs/remaining-work.md` (Slim CI in Actions, `_showcase/`, spread finance features).
 
 ## Resume quickly
 
 ```bash
-./setup.sh
+. ./setup.sh
 ```
 
 ## Doc index
 
 | Topic | Path |
 |-------|------|
+| **Demo walkthrough checklist** | **`DEMO_CHECKLIST.md`** (progress summary at top) |
 | Meeting / demo script | `docs/demo-agenda.md` |
 | dbt mechanics (deep-dive) | `docs/dbt-feature-guide.md` |
 | AI token patterns | `docs/ai-practices.md` |

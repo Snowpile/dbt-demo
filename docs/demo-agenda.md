@@ -1,6 +1,6 @@
 # dbt_demo — meeting agenda (step-by-step runbook)
 
-~45–50 min. Each step has **say** (the point) and **run** / **show** (what to do).
+~50–55 min. Each step has **say** (the point) and **run** / **show** (what to do).
 Deep-dives: `docs/dbt-feature-guide.md` (dbt mechanics), `docs/ai-practices.md` (AI patterns).
 
 > **macOS / Linux / Windows (Git Bash / WSL).** On Windows use Git Bash for `./*.sh`.
@@ -12,7 +12,7 @@ Deep-dives: `docs/dbt-feature-guide.md` (dbt mechanics), `docs/ai-practices.md` 
 **Say:** "One command gives us a reproducible Python env — same locally and in CI."
 
 ```bash
-./setup.sh    # venv, config, seed scan, dev + prod builds → lands in projects/finance
+. ./setup.sh    # venv, config, seed scan, dev + prod builds
 ```
 
 Open a **second terminal** for `./dbt_docs.sh finance` (Part C8 — blocks on port 8011).
@@ -28,9 +28,20 @@ CI runs the exact same script; in production you'd wrap this in a container with
 | Piece | Role |
 |---|---|
 | `requirements.json` + `setup.py` | Pinned deps (`dbt-duckdb`, `duckdb`); dev extras (`ruff`, `pre-commit`) |
-| `./setup.sh` | `uv venv` → install → copy `.env` / `profiles.yml` → `pre-commit install` → scan seeds → `dbt build` dev + prod → project shell |
+| `./setup.sh` | `uv venv` → install → copy `.env` / `profiles.yml` → `pre-commit install` → scan seeds → `dbt build` dev + prod |
 | `scripts/env.sh` | Exports `DBT_PROFILES_DIR`, DuckDB paths, venv bin (`.venv/bin` or `.venv/Scripts`) |
 | `.env` / `profiles.yml` | Local paths (gitignored); one DuckDB **file per env** (dev / staging / prod) |
+
+**Show:** `profiles.yml.example` — three targets; demo builds **dev + prod** in setup; **staging**
+exists for promote-path discussion (Part F).
+
+**Discuss (demo vs prod — preview Part F):**
+
+| This demo | Typical production |
+|-----------|-------------------|
+| `uv` + `./setup.sh` | Same deps in a **Docker** image or devcontainer |
+| Local DuckDB files | **Snowflake / BigQuery / Postgres** via Terraform or cloud IAM |
+| `load_raw.py` from CSV | Ingestion tool (Fivetran, Airbyte, custom pipeline) |
 
 **Show:** `requirements.json`, `setup.sh`, `profiles.yml.example`.
 
@@ -70,18 +81,19 @@ data/seeds/*.csv  →  load_raw.py  →  raw.*  →  projects/<domain>/models  �
 **Say:** "Commit hooks run even if you skipped `pre-commit install`. dbt structural checks run after
 a full build."
 
-**Branch + PR workflow** (one-time remote setup: `docs/github.md`):
+### B3. Branch → PR (gloss, ~30 sec)
 
-```bash
-git checkout -b feat/my-change
-# ... work; human commits when ready ...
-git push -u origin feat/my-change
-gh pr create --title "..." --body "..."
-```
+**Say:** "Standard flow — branch, push, open PR; both workflows above run on the PR. Details:
+`docs/github.md`."
 
-**Say:** "Part C step 7 shows **Slim CI** locally (`--defer --state`). Wiring that into GitHub
-Actions (manifest artifact from `main`, matrix per domain) is Phase 4 backlog — intentionally
-not implemented yet."
+### B4. Slim CI in Actions (discuss, ~1 min)
+
+**Say:** "Part C7 demos **Slim CI** locally (`--defer --state`). Here we run a **full** build every
+PR. Production pattern: upload manifest artifact from `main`, matrix per domain, PR job runs
+`state:modified+ --defer` only — faster, same trust model. Backlog: `docs/remaining-work.md`
+Phase 4."
+
+**Show:** `.github/workflows/ci.yml` line 19 vs C7 commands — contrast full build vs deferred build.
 
 ---
 
@@ -139,6 +151,12 @@ dbt test --select warn_high_margin_orders
 # select * from dev_dbt_test__audit.warn_high_margin_orders;
 ```
 
+**Discuss — observability beyond dbt tests (~30 sec):**
+
+**Say:** "dbt tests catch logic at build time. At scale teams add **observability** products
+(Elementary, Monte Carlo, etc.) for anomaly detection, lineage alerts, and incident workflows.
+This repo stops at native dbt tests + `store_failures` — enough for the demo."
+
 ---
 
 ### C5. Macros + run-operation (2 min)
@@ -160,6 +178,12 @@ dbt snapshot
 ```
 
 **Say:** SCD2 snapshot (`finance_snapshot_products`), source freshness on `raw_orders`.
+
+**Discuss — governance (~30 sec):**
+
+**Say:** "Enterprise warehouses add **grants**, **RLS**, and model **contracts**. DuckDB demo
+skips those — documented as N/A in `docs/remaining-work.md`. Same dbt project structure ports
+to Snowflake/BigQuery with warehouse-native permissions."
 
 ---
 
@@ -185,6 +209,9 @@ git checkout -- models/marts/finance_fct_daily_revenue.sql
 sandbox schema. Both steps use `--target prod` so DuckDB catalog names match (`prod.duckdb` →
 catalog `prod`). Detail: `docs/dbt-feature-guide.md`.
 
+**Say:** "This is the local proof for **Slim CI** (see B4). In Actions you'd persist this manifest
+from `main` and run the same selector on every PR."
+
 ---
 
 ### C8. Docs + exposure (2 min)
@@ -205,6 +232,37 @@ cd .. && ./dbt_docs.sh finance    # second terminal — serves :8011
 cd projects/marketing && dbt build
 cd ../operations && dbt build
 ```
+
+**Discuss — feature sandbox (~30 sec):**
+
+**Say:** "Finance carries the richest feature set (snapshots, exposures, unit tests). Backlog:
+`projects/_showcase/` for one worked example of each dbt config, then spread patterns to all
+domains — `docs/remaining-work.md` Phase 2."
+
+---
+
+## Part F — Production & platform path (~5 min)
+
+**Say:** "The demo is intentionally local and small. This table is what we'd add or swap in a
+real platform — same repo shape, different runtime."
+
+| Topic | In this demo | Typical production |
+|-------|--------------|-------------------|
+| **Runtime** | `uv` + `./setup.sh` | Docker / devcontainer with same `requirements.json` |
+| **Infrastructure** | None (local files) | **Terraform** / cloud IaC — warehouse, IAM, buckets |
+| **Warehouse** | DuckDB file per env | Snowflake, BigQuery, Postgres, etc. |
+| **Environments** | dev + prod built in setup; **staging** in profile but not demo'd | dev → staging → prod promote; CI secrets per target |
+| **Ingestion** | `load_raw.py` + vendored CSVs | Fivetran, Airbyte, streaming, API loads |
+| **CI — PR checks** | `pre-commit.yml` + full `ci.yml` build | Same, plus **Slim CI** manifest defer (B4, C7) |
+| **CI — schedule** | Manual / `dbt_build_all.sh` | Cron Action, Airflow, Dagster, dbt Cloud |
+| **Observability** | dbt tests + `store_failures` | Elementary, Monte Carlo, custom alerting |
+| **Governance** | Descriptions + tests enforced in CI | Grants, RLS, model contracts |
+| **Feature lab** | Finance-heavy | `projects/_showcase/` then roll out to domains |
+
+**Show:** `docs/architecture.md` (env table, DuckDB single-writer note), `docs/remaining-work.md`.
+
+**Say:** "DuckDB keeps the demo free and offline. The dbt projects, tests, and CI patterns transfer
+directly — only the profile target and orchestration layer change."
 
 ---
 
@@ -254,8 +312,8 @@ author new ones with the create-skill skill.
 ## Part E — Wrap (~3 min)
 
 **Recap:** reproducible env (uv = container contract) → CI mirrors local → full dbt surface →
-AI config keeps tokens low. Backlog: Slim CI in Actions, SQLFluff in CI, spread finance-only
-features to other domains — `docs/remaining-work.md`.
+production path (Part F) → AI config keeps tokens low. Backlog: Slim CI in Actions, GitHub Pages
+docs, `_showcase/` — `docs/remaining-work.md`.
 
 ---
 
