@@ -30,7 +30,7 @@ dbt-demo/
 │   ├── load_raw.sh          # load seeds → DuckDB schema raw.*
 │   ├── load_raw.py          #   (the actual loader)
 │   ├── dbt_build_all.sh     # load raw + dbt build across all projects
-│   └── bootstrap.sh         # scan → load raw → dbt build dev + prod (demo / CI step)
+│   └── bootstrap.sh         # scan → load raw → dbt build dev + prod (CI / local full build)
 ├── dbt_docs.sh              # build + generate + serve dbt docs for one project
 ├── data/seeds/              # vendored jaffle-shop CSVs (source of truth before DuckDB)
 ├── mart_finance/            # dbt project — revenue, margin, tax
@@ -57,7 +57,7 @@ All three read from the same `raw.*` tables.
 # 1. Environment (venv + config only; ~1 min). Source it so the venv/env stay active.
 . ./setup.sh
 
-# 2. Build the warehouse: scan seeds → load raw.* → dbt build (dev + prod).
+# 2. (optional) Full local build — same as CI. For the live demo, run Part C commands one at a time instead.
 ./scripts/bootstrap.sh
 
 # 3. (optional) Serve docs for one project in a second terminal.

@@ -7,36 +7,38 @@ Deep-dives: `docs/dbt-feature-guide.md` (dbt mechanics), `docs/ai-practices.md` 
 
 ---
 
-## Pre-warm (before the room, ~5 min)
+## Pre-warm (before the room, ~2 min)
 
-**Say:** "Two steps — environment, then warehouse builds."
+**Say:** "One step sets up the Python environment — dbt runs live in Part C, one command at a time."
 
 ```bash
-. ./setup.sh              # venv, config, dbt --version (~1 min)
-./scripts/bootstrap.sh    # seed scan + load raw + dbt build dev + prod (~4 min)
+. ./setup.sh    # venv, config, dbt --version (~1 min)
 ```
 
-Open a **second terminal** for `./dbt_docs.sh mart_finance` (Part C8 — blocks on port 8011).
+**Optional (off-line, for C7 defer demo only):** run `./scripts/bootstrap.sh` or at least a prod build so
+`--defer --state` has a manifest to point at. **Do not** run full bootstrap on screen in the room.
 
-*Optional:* run `./scripts/bootstrap.sh` **live in the room** during Part A instead of pre-warming.
+Open a **second terminal** when you reach Part C8: `./dbt_docs.sh mart_finance` (port 8011).
 
 ---
 
 ## Part A — Reproducible environment (~5 min)
 
-**Say:** "We don't ship a Docker image in this demo — **`uv` + `./setup.sh`** installs the runtime;
-**`./scripts/bootstrap.sh`** runs the data pipeline (scan → load → build). CI runs both.
-In production you'd wrap the same `requirements.json` in a container."
+**Say:** "We don't ship a Docker image in this demo — **`uv` + `./setup.sh`** installs the runtime.
+**`./scripts/bootstrap.sh`** is what **CI** runs (scan → load → full build); in **Part C** we run the
+same steps **one command at a time** so you can see each piece. In production you'd wrap the same
+`requirements.json` in a container."
 
 | Piece | Role |
 |---|---|
 | `requirements.json` + `setup.py` | Pinned deps (`dbt-duckdb`, `duckdb`); dev extras (`ruff`, `pre-commit`) |
 | `./setup.sh` | `uv venv` → install → copy `.env` / `profiles.yml` → `pre-commit install` → `dbt --version` |
-| `./scripts/bootstrap.sh` | `scan_downloads` → `load_raw` → `dbt build` dev + prod (all domains) |
+| `./scripts/bootstrap.sh` | **CI** (and optional off-line C7 pre-warm): `scan_downloads` → `load_raw` → `dbt build` dev + prod |
+| `scripts/load_raw.sh` | Load seeds → DuckDB `raw.*` — run in **Part C** before first dbt build |
 | `scripts/env.sh` | Exports `DBT_PROFILES_DIR`, DuckDB paths, venv bin (`.venv/bin` or `.venv/Scripts`) |
 | `.env` / `profiles.yml` | Local paths (gitignored); one DuckDB **file per env** (dev / staging / prod) |
 
-**Show:** `profiles.yml.example` — three targets; demo builds **dev + prod** in setup; **staging**
+**Show:** `profiles.yml.example` — three targets; **CI** builds dev + prod via bootstrap; **staging**
 exists for promote-path discussion (Part F).
 
 **Discuss (demo vs prod — preview Part F):**
@@ -73,7 +75,7 @@ data/seeds/*.csv  →  load_raw.py  →  raw.*  →  mart_<domain>/models  →  
 3. `tj-actions/changed-files` — list files in the PR / push
 4. `pre-commit/action` with `--files …` — commit hooks on **changed files only** (skips if none)
 
-**`ci.yml`** — environment + warehouse bootstrap (same as local pre-warm):
+**`ci.yml`** — environment + warehouse bootstrap (full build — not shown live in the demo room):
 
 1. `actions/checkout`
 2. `astral-sh/setup-uv` (cached)
@@ -103,6 +105,15 @@ Phase 4."
 ---
 
 ## Part C — dbt live demo (~20–25 min)
+
+**Before C2** (repo root, then project dir):
+
+```bash
+./scripts/load_raw.sh          # from repo root — CSV → raw.*
+cd mart_finance
+```
+
+Run each dbt command below **one at a time** (do not run `./scripts/bootstrap.sh` on screen).
 
 ### C1. Framing (1 min)
 
@@ -325,11 +336,15 @@ docs, `_showcase/` — `docs/remaining-work.md`.
 ## Quick reference — all commands in order
 
 ```bash
-# Pre-warm
+# Pre-warm (repo root, before the room)
 . ./setup.sh
+
+# Optional off-line (C7 defer manifest)
 ./scripts/bootstrap.sh
 
-# Part C — dbt
+# Part C — from repo root, then mart_finance
+./scripts/load_raw.sh
+cd mart_finance
 dbt ls --select staging
 dbt build --select finance_fct_order_revenue+
 dbt run --select finance_fct_order_revenue --full-refresh

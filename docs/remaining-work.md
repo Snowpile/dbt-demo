@@ -14,9 +14,11 @@
 
 ---
 
-## Phase 0.5 — Demo readiness ✅ DONE
+## Phase 0.5 — Demo readiness [~] in progress
 
-Live script: **`docs/demo-agenda.md`** (platform + CI + dbt + AI). Deep-dives: `docs/dbt-feature-guide.md`, `docs/ai-practices.md`.
+Live script: **`docs/demo-agenda.md`**. Walkthrough checklist: **`DEMO_CHECKLIST.md`** (progress + **re-review** sections at top).
+
+**Next week:** re-review §1–§4 in checklist, then §5–§10 (finish with timed dry run).
 
 ---
 
