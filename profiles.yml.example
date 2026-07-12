@@ -15,4 +15,4 @@ dbt_demo:
       threads: 4
 
 # Copy to profiles.yml (gitignored). Per-project profile name must match
-# profile: in each projects/<domain>/dbt_project.yml
+# profile: in each mart_<domain>/dbt_project.yml

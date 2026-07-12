@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Bootstrap dbt_demo: venv, config, seed scan, dev + prod builds.
-# Interactive use: ends in projects/finance with scripts/env.sh loaded (via exec).
+# Python environment + local config for dbt_demo (fast — no dbt builds).
+# Source for an interactive shell: `. ./setup.sh`
+# Warehouse builds: `./scripts/bootstrap.sh` (pre-warm or live in demo Part A).
 set -euo pipefail
 
 # Set the root directory of the project and enter
@@ -40,6 +41,15 @@ fi
 if [[ ! -f .env ]]; then
 	echo "==> Creating .env from .env.example"
 	sed "s|/absolute/path/to/dbt_demo|${ROOT}|g" .env.example >.env
+else
+	echo "==> Refreshing .env paths for this machine (${ROOT})"
+	# Repo may have moved or been renamed since first setup; path keys must match ROOT.
+	sed -i \
+		-e "s|^DBT_PROFILES_DIR=.*|DBT_PROFILES_DIR=${ROOT}|" \
+		-e "s|^DUCKDB_DEV_PATH=.*|DUCKDB_DEV_PATH=${ROOT}/data/dev.duckdb|" \
+		-e "s|^DUCKDB_STAGING_PATH=.*|DUCKDB_STAGING_PATH=${ROOT}/data/staging.duckdb|" \
+		-e "s|^DUCKDB_PROD_PATH=.*|DUCKDB_PROD_PATH=${ROOT}/data/prod.duckdb|" \
+		.env
 fi
 
 if [[ ! -f profiles.yml ]]; then
@@ -56,16 +66,7 @@ source "$ROOT/scripts/env.sh"
 echo "==> Verifying dbt"
 "$DBT_DEMO_DBT" --version
 
-echo "==> Seed integrity check"
-"$ROOT/scripts/scan_downloads.sh"
-
-echo "==> Building all domains (dev)"
-"$ROOT/scripts/dbt_build_all.sh"
-
-echo "==> Building all domains (prod)"
-DBT_TARGET=prod "$ROOT/scripts/dbt_build_all.sh"
-
 echo ""
-echo "Setup complete."
-echo ""
-echo "Docs (second terminal): ./dbt_docs.sh finance"
+echo "Environment ready."
+echo "Next: ./scripts/bootstrap.sh   # seed scan + load raw + dbt build (dev + prod)"
+echo "Docs (second terminal, after bootstrap): ./dbt_docs.sh finance"

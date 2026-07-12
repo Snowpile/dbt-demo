@@ -13,7 +13,7 @@ How to work on this repo with Cursor or Claude Code using the fewest tokens.
 - **Subagents for broad exploration** — parent synthesizes a short answer; main thread stays small.
 - **Targeted diffs**, not full-file rewrites. Short replies, no drive-by refactors.
 - **Load `docs/` only when the task needs depth.**
-- **Multi-project dbt:** always `cd projects/<domain>` before dbt commands.
+- **Multi-project dbt:** always `cd mart_<domain>` before dbt commands.
 - **Only the human commits/pushes** — AI may stage + propose a message; never `git commit`/`push`
   (see `.cursor/rules/core.mdc`).
 

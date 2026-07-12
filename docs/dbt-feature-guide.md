@@ -1,7 +1,7 @@
 # dbt feature guide (deep-dive reference)
 
 Mechanics behind the live demo. **Commands and order of operations:** `docs/demo-agenda.md` Part C.
-Run dbt from inside a domain project (`cd projects/finance`) after `source scripts/env.sh`.
+Run dbt from inside a domain project (`cd mart_finance`) after `source scripts/env.sh`.
 
 ---
 

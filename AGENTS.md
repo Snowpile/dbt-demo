@@ -27,7 +27,7 @@ Data engineering repo. **Read this file first.** Prefer repo files over pretrain
 | Layer | Choice |
 |-------|--------|
 | Warehouse | **DuckDB** (file per env) |
-| Transform | **dbt Core** — `projects/{finance,marketing,operations}/` |
+| Transform | **dbt Core** — `mart_{finance,marketing,operations}/` (root-level projects) |
 | Orchestration | **GitHub Actions** + `scripts/dbt_build_all.sh` (cron optional) |
 | Sample data | **dbt-labs/jaffle_shop_duckdb** seeds → `data/seeds/` → `raw.*` |
 | Python | **uv** (`requirements.json`, `./setup.sh`) |
@@ -37,9 +37,10 @@ Data engineering repo. **Read this file first.** Prefer repo files over pretrain
 ## Quick commands
 
 ```bash
-./setup.sh                           # full bootstrap; interactive shell lands in projects/finance
+./setup.sh                           # venv + config (~1 min)
+./scripts/bootstrap.sh               # scan + load raw + dbt build dev + prod
 ./scripts/dbt_build_all.sh           # re-build only (after model changes)
-./dbt_docs.sh marketing              # docs for one domain
+./dbt_docs.sh mart_marketing         # docs for one domain
 ```
 
 ## dbt conventions
@@ -47,6 +48,7 @@ Data engineering repo. **Read this file first.** Prefer repo files over pretrain
 - Names: `{domain}_{layer}_{entity}` — `stg` / `int` / `fct` / `dim`.
 - Sources: `raw.raw_customers`, `raw.raw_orders`, `raw.raw_payments` (see `data/seeds/PROVENANCE.md`).
 - PK tests: `unique` + `not_null` on every mart PK.
+- Python lint/format: **Ruff** (`ruff.toml`); SQL: **SQLFluff** (`.sqlfluff`).
 
 ## Docs index
 

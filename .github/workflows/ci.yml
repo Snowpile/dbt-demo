@@ -18,7 +18,9 @@ jobs:
 
       - run: ./setup.sh
 
-      # Manifest-based dbt-checkpoint structural checks (need compiled manifests from setup.sh builds).
+      - run: ./scripts/bootstrap.sh
+
+      # Manifest-based dbt-checkpoint structural checks (need compiled manifests from bootstrap).
       - name: dbt structural checks (dbt-checkpoint)
         run: |
           for hook in check-script-has-no-table-name \

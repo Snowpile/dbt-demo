@@ -1,4 +1,4 @@
-name: operations
+name: mart_operations
 version: 1.0.0
 config-version: 2
 
@@ -16,7 +16,7 @@ clean-targets:
   - dbt_packages
 
 models:
-  operations:
+  mart_operations:
     staging:
       +materialized: view
     intermediate:

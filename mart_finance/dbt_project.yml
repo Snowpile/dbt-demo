@@ -1,4 +1,4 @@
-name: finance
+name: mart_finance
 version: 1.0.0
 config-version: 2
 
@@ -27,7 +27,7 @@ vars:
 # Layered schemas via generate_schema_name: on prod/staging these are the bare
 # names (source_data / transform / mart); on dev they're prefixed (main_source_data ...).
 models:
-  finance:
+  mart_finance:
     staging:
       +materialized: view
       +schema: source_data

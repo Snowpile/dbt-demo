@@ -1,12 +1,12 @@
 ---
 description: dbt SQL/YAML — DuckDB, multi-project, domain-prefixed models
-globs: "projects/**/*.{sql,yml,yaml}"
+globs: "mart_*/**/*.{sql,yml,yaml}"
 alwaysApply: false
 ---
 
-# dbt (projects/)
+# dbt (mart_* projects)
 
-- Run from `projects/<domain>/` (each has its own `dbt_project.yml`).
+- Run from `mart_<domain>/` (each has its own `dbt_project.yml`).
 - Names: `{domain}_{layer}_{entity}` — `stg` / `int` / `fct` / `dim`.
 - DuckDB targets: dev / staging / prod (see `profiles.yml.example`).
 - PKs: `{entity}_id` — `unique` + `not_null` in `schema.yml`.

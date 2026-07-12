@@ -9,26 +9,30 @@ Deep-dives: `docs/dbt-feature-guide.md` (dbt mechanics), `docs/ai-practices.md` 
 
 ## Pre-warm (before the room, ~5 min)
 
-**Say:** "One command gives us a reproducible Python env — same locally and in CI."
+**Say:** "Two steps — environment, then warehouse builds."
 
 ```bash
-. ./setup.sh    # venv, config, seed scan, dev + prod builds
+. ./setup.sh              # venv, config, dbt --version (~1 min)
+./scripts/bootstrap.sh    # seed scan + load raw + dbt build dev + prod (~4 min)
 ```
 
-Open a **second terminal** for `./dbt_docs.sh finance` (Part C8 — blocks on port 8011).
+Open a **second terminal** for `./dbt_docs.sh mart_finance` (Part C8 — blocks on port 8011).
+
+*Optional:* run `./scripts/bootstrap.sh` **live in the room** during Part A instead of pre-warming.
 
 ---
 
 ## Part A — Reproducible environment (~5 min)
 
-**Say:** "We don't ship a Docker image in this demo — **`uv` + `./setup.sh` is the runtime contract**.
-CI runs the exact same script; in production you'd wrap this in a container with the same
-`requirements.json`."
+**Say:** "We don't ship a Docker image in this demo — **`uv` + `./setup.sh`** installs the runtime;
+**`./scripts/bootstrap.sh`** runs the data pipeline (scan → load → build). CI runs both.
+In production you'd wrap the same `requirements.json` in a container."
 
 | Piece | Role |
 |---|---|
 | `requirements.json` + `setup.py` | Pinned deps (`dbt-duckdb`, `duckdb`); dev extras (`ruff`, `pre-commit`) |
-| `./setup.sh` | `uv venv` → install → copy `.env` / `profiles.yml` → `pre-commit install` → scan seeds → `dbt build` dev + prod |
+| `./setup.sh` | `uv venv` → install → copy `.env` / `profiles.yml` → `pre-commit install` → `dbt --version` |
+| `./scripts/bootstrap.sh` | `scan_downloads` → `load_raw` → `dbt build` dev + prod (all domains) |
 | `scripts/env.sh` | Exports `DBT_PROFILES_DIR`, DuckDB paths, venv bin (`.venv/bin` or `.venv/Scripts`) |
 | `.env` / `profiles.yml` | Local paths (gitignored); one DuckDB **file per env** (dev / staging / prod) |
 
@@ -51,7 +55,7 @@ into DuckDB schema `raw` (`load_raw.sh` → `load_raw.py`). dbt never reads CSVs
 Data flow (see `docs/architecture.md` for detail):
 
 ```
-data/seeds/*.csv  →  load_raw.py  →  raw.*  →  projects/<domain>/models  →  stg → int → fct/dim
+data/seeds/*.csv  →  load_raw.py  →  raw.*  →  mart_<domain>/models  →  stg → int → fct/dim
 ```
 
 ---
@@ -69,12 +73,13 @@ data/seeds/*.csv  →  load_raw.py  →  raw.*  →  projects/<domain>/models  �
 3. `tj-actions/changed-files` — list files in the PR / push
 4. `pre-commit/action` with `--files …` — commit hooks on **changed files only** (skips if none)
 
-**`ci.yml`** — same pipeline as local pre-warm / full bootstrap:
+**`ci.yml`** — environment + warehouse bootstrap (same as local pre-warm):
 
 1. `actions/checkout`
 2. `astral-sh/setup-uv` (cached)
-3. `./setup.sh` — scan seeds + load raw + `dbt build` dev + prod
-4. **dbt-checkpoint** manual-stage hooks (need manifests from step 3):
+3. `./setup.sh` — venv, config, `dbt --version`
+4. `./scripts/bootstrap.sh` — scan seeds + load raw + `dbt build` dev + prod
+5. **dbt-checkpoint** manual-stage hooks (need manifests from step 4):
    `check-script-has-no-table-name`, `check-model-has-description`,
    `check-model-has-tests`
 
@@ -217,7 +222,7 @@ from `main` and run the same selector on every PR."
 ### C8. Docs + exposure (2 min)
 
 ```bash
-cd .. && ./dbt_docs.sh finance    # second terminal — serves :8011
+./dbt_docs.sh mart_finance    # second terminal (repo root) — serves :8011
 ```
 
 **Show:** DAG graph, `{% docs %}` blocks, `revenue_dashboard` exposure.
@@ -229,14 +234,14 @@ cd .. && ./dbt_docs.sh finance    # second terminal — serves :8011
 **Say:** `dbt_utils` via `packages.yml` / `dbt deps`; same patterns in all three domains.
 
 ```bash
-cd projects/marketing && dbt build
-cd ../operations && dbt build
+cd ../mart_marketing && dbt build
+cd ../mart_operations && dbt build
 ```
 
 **Discuss — feature sandbox (~30 sec):**
 
 **Say:** "Finance carries the richest feature set (snapshots, exposures, unit tests). Backlog:
-`projects/_showcase/` for one worked example of each dbt config, then spread patterns to all
+`mart_showcase/` for one worked example of each dbt config, then spread patterns to all
 domains — `docs/remaining-work.md` Phase 2."
 
 ---
@@ -257,7 +262,7 @@ real platform — same repo shape, different runtime."
 | **CI — schedule** | Manual / `dbt_build_all.sh` | Cron Action, Airflow, Dagster, dbt Cloud |
 | **Observability** | dbt tests + `store_failures` | Elementary, Monte Carlo, custom alerting |
 | **Governance** | Descriptions + tests enforced in CI | Grants, RLS, model contracts |
-| **Feature lab** | Finance-heavy | `projects/_showcase/` then roll out to domains |
+| **Feature lab** | Finance-heavy | `mart_showcase/` then roll out to domains |
 
 **Show:** `docs/architecture.md` (env table, DuckDB single-writer note), `docs/remaining-work.md`.
 
@@ -321,7 +326,8 @@ docs, `_showcase/` — `docs/remaining-work.md`.
 
 ```bash
 # Pre-warm
-./setup.sh
+. ./setup.sh
+./scripts/bootstrap.sh
 
 # Part C — dbt
 dbt ls --select staging
@@ -338,5 +344,5 @@ git checkout <your-branch>
 printf '\n-- demo change\n' >> models/marts/finance_fct_daily_revenue.sql
 dbt build --select state:modified+ --defer --state /tmp/dbt --vars '{"dev_schema":"dev"}' --target prod
 git checkout -- models/marts/finance_fct_daily_revenue.sql
-cd .. && ./dbt_docs.sh finance
+./dbt_docs.sh mart_finance
 ```

@@ -19,6 +19,7 @@ jobs:
         uses: tj-actions/changed-files@v47
 
       # Official pre-commit action (install + cache). Default is --all-files; we pass --files instead.
+      # Python lint/format: Ruff only (ruff-check + ruff-format hooks in .pre-commit-config.yaml).
       - name: Run pre-commit
         if: steps.changed-files.outputs.any_changed == 'true'
         uses: pre-commit/action@v3.0.1

@@ -90,7 +90,7 @@
 
 ## Model configs — literally everything
 
-*One minimal model per config in `projects/_showcase/` (recommended) or spread across domains.*
+*One minimal model per config in `mart_showcase/` (recommended) or spread across domains.*
 
 ### Core
 
@@ -309,7 +309,7 @@
 
 ## Suggested implementation order (when we work the list)
 
-1. `projects/_showcase/` — one model per config (single catalog)
+1. `mart_showcase/` — one model per config (single catalog)
 2. `dbt_utils` package + macro examples
 3. Docs generate + GitHub Pages deploy
 4. Snapshots + incremental mart

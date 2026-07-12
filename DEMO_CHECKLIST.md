@@ -15,8 +15,8 @@ Portable checklist for preparing and delivering the demo. Check items off as you
 
 | # | Section | Status | Notes |
 |---|---------|--------|-------|
-| 1 | Bootstrap — `setup.sh` | **Done** | Line-by-line review complete |
-| 2 | Setup subprocesses | **Done** | Deps, env, config, data scripts reviewed; 2 Part A show-files still open |
+| 1 | Bootstrap — `setup.sh` | **Done** | Env only (venv, config, `dbt --version`) — builds moved to `bootstrap.sh` |
+| 2 | Setup subprocesses + `bootstrap.sh` | **Done** | Deps, env, config, data scripts; builds via `scripts/bootstrap.sh` |
 | 3 | CI / GitHub (Part B) | **Done** | Workflows reviewed; skim `.pre-commit-config.yaml` / `.sqlfluff` if demo audience asks |
 | 4 | Repo layout & architecture | **Next** | Part C1 framing |
 | 5 | Data & sources | Not started | Overlaps Part A show-files + C6 |
@@ -28,8 +28,8 @@ Portable checklist for preparing and delivering the demo. Check items off as you
 
 ### Done (reviewed)
 
-- [x] **§1** — full `setup.sh` walkthrough (venv, deps, config, scan, build dev+prod)
-- [x] **§2** — `setup.py`, `requirements.json`, `env.sh`, `.env` / `profiles.yml`, `scan_downloads`, `load_raw`, `dbt_build_all`
+- [x] **§1** — `setup.sh` (venv, deps, config, `dbt --version` only)
+- [x] **§2** — `setup.py`, `requirements.json`, `env.sh`, `.env` / `profiles.yml`, `scan_downloads`, `load_raw`, `dbt_build_all`, **`bootstrap.sh`**
 - [x] **§3** — `pre-commit.yml`, `ci.yml`, branch→PR gloss, Slim CI discuss (B4); removed semicolon hook
 
 ### Left to review
@@ -37,7 +37,7 @@ Portable checklist for preparing and delivering the demo. Check items off as you
 - [ ] **§2** — `data/seeds/PROVENANCE.md` (show in Part A)
 - [ ] **§2** — `docs/architecture.md` (show in Part A / Part F)
 - [ ] **§3** — `.pre-commit-config.yaml`, `.sqlfluff` (optional deep-dive)
-- [ ] **§4** — mono-repo layout, `projects/README.md`, `docs/conventions.md`, root README decision
+- [x] **§4** — mono-repo layout, root `README.md` added, `projects/README.md` removed, `docs/conventions.md`; projects renamed `mart_*` at root
 - [ ] **§5** — `sources.yml` per domain, seed files
 - [ ] **§6** — all Part C steps C1–C9 + finance project files
 - [ ] **§7** — Part F production table (walk + confirm talking points)
@@ -51,7 +51,7 @@ Items to confirm the repo **has** (or consciously defers) before calling the dem
 
 | Area | Have? | Action during review |
 |------|-------|----------------------|
-| Bootstrap entrypoint | Yes — `. ./setup.sh` | Dry run on clean machine |
+| Bootstrap entrypoint | Yes — `. ./setup.sh` then `./scripts/bootstrap.sh` | Dry run on clean machine |
 | CI: lint on changed files | Yes — `pre-commit.yml` | Confirm green on a test PR |
 | CI: full build + dbt-checkpoint | Yes — `ci.yml` | Confirm green on a test PR |
 | Multi-env DuckDB | Yes — dev/staging/prod in profile | Decide if staging needs a demo mention |
@@ -63,7 +63,7 @@ Items to confirm the repo **has** (or consciously defers) before calling the dem
 | Root `README.md` for humans | **No** | Decide: add or point to `summary.md` |
 | Slim CI in GitHub Actions | **No** (backlog) | Discuss only (B4, C7) |
 | GitHub Pages docs deploy | **No** (backlog) | Discuss in C8 |
-| `projects/_showcase/` | **No** (backlog) | Discuss in C9 |
+| `mart_showcase/` | **No** (backlog) | Discuss in C9 |
 | Docker / devcontainer | **No** (by design) | Discuss in Part F |
 | Observability tooling | **No** (by design) | Discuss in C4 |
 
@@ -93,15 +93,13 @@ Second terminal: `./dbt_docs.sh finance` (leave running for C8, port 8011).
 - [x] Line 51: `mkdir -p data`
 - [x] Lines 53–54: `source scripts/env.sh`
 - [x] Lines 56–57: `dbt --version` sanity check
-- [x] Lines 59–60: `scripts/scan_downloads.sh`
-- [x] Lines 62–63: `scripts/dbt_build_all.sh` (dev)
-- [x] Lines 65–66: `DBT_TARGET=prod scripts/dbt_build_all.sh` (prod)
-- [x] Lines 68–71: completion message + docs hint
-- [x] Removed interactive `exec` into `projects/finance` (stay at repo root with `. ./setup.sh`)
+- [x] Builds moved to `scripts/bootstrap.sh` (not in setup.sh)
+- [x] Removed interactive `exec` into a project dir (stay at repo root with `. ./setup.sh`)
 
-**Pre-warm command:**
+**Pre-warm commands:**
 ```bash
 . ./setup.sh
+./scripts/bootstrap.sh
 ```
 
 ---
@@ -121,6 +119,7 @@ Second terminal: `./dbt_docs.sh finance` (leave running for C8, port 8011).
 - [x] `scripts/scan_downloads.sh` — SHA-256, file type, null bytes, CSV schema
 - [x] `scripts/load_raw.sh` + `scripts/load_raw.py` — CSV → DuckDB `raw.*`
 - [x] `scripts/dbt_build_all.sh` — load raw + `dbt build` for finance, marketing, operations
+- [x] `scripts/bootstrap.sh` — scan + dev build + prod build (demo / CI pipeline step)
 
 ### Supporting files to show in Part A
 - [ ] `data/seeds/` + `PROVENANCE.md` (seed provenance)
@@ -140,28 +139,28 @@ Second terminal: `./dbt_docs.sh finance` (leave running for C8, port 8011).
   - [x] Job `dbt-build` on `ubuntu-latest`
   - [x] `actions/checkout@v4`
   - [x] `astral-sh/setup-uv@v5` (cached)
-  - [x] `./setup.sh`
+  - [x] `./setup.sh` then `./scripts/bootstrap.sh`
   - [x] Manual-stage hooks: `check-script-has-no-table-name`, `check-model-has-description`, `check-model-has-tests`
   - [x] Removed `check-script-semicolon` (dbt models must NOT end with `;`)
 
 ### Local quality (reference, not a separate demo section)
-- [~] `.pre-commit-config.yaml` — ruff, SQLFluff, shellcheck, shfmt, gitleaks (exists; skim if asked)
+- [x] `.pre-commit-config.yaml` — Ruff (lint + format), SQLFluff, shellcheck, shfmt, gitleaks
 - [ ] `.sqlfluff` — jinja templater, macro paths
 
 ### Git flow (gloss ~30 sec)
 - [x] Branch → push → PR → both workflows run (`docs/github.md`)
 
 ### Slim CI in Actions (discuss B4 — not implemented)
-- [x] Contrast full `./setup.sh` in CI vs local C7 `--defer --state`
+- [x] Contrast full `bootstrap.sh` in CI vs local C7 `--defer --state`
 - [x] Backlog: manifest artifact from `main`, matrix per domain (`docs/remaining-work.md` Phase 4)
 
 ---
 
 ## 4. Repo layout & architecture
 
-- [ ] Mono-repo: `projects/finance`, `projects/marketing`, `projects/operations`
+- [x] Mono-repo: `mart_finance`, `mart_marketing`, `mart_operations` (root-level dbt projects)
 - [ ] Shared `raw.*` in DuckDB; domain-specific marts
-- [ ] `projects/README.md` — why three projects
+- [x] Root `README.md` — purpose, contents, usage (replaces `projects/README.md`)
 - [ ] `docs/architecture.md` — data flow, env table, DuckDB single-writer note
 - [ ] `docs/conventions.md` — `{domain}_{layer}_{entity}` naming, PK tests
 - [ ] **Discuss:** no root `README.md` for humans (only `AGENTS.md` / `summary.md`) — add?
@@ -179,7 +178,7 @@ Second terminal: `./dbt_docs.sh finance` (leave running for C8, port 8011).
 
 ---
 
-## 6. dbt live demo — Part C (`cd projects/finance`)
+## 6. dbt live demo — Part C (`cd mart_finance`)
 
 ### C2 — DAG (staging → int → marts)
 - [ ] `dbt ls --select staging`
@@ -223,9 +222,9 @@ Second terminal: `./dbt_docs.sh finance` (leave running for C8, port 8011).
 
 ### C9 — Packages + multi-project
 - [ ] `packages.yml` / `dbt deps` / `dbt_utils`
-- [ ] `cd projects/marketing && dbt build`
-- [ ] `cd projects/operations && dbt build`
-- [ ] **Discuss:** `projects/_showcase/` feature lab — backlog Phase 2
+- [ ] `cd ../mart_marketing && dbt build`
+- [ ] `cd ../mart_operations && dbt build`
+- [ ] **Discuss:** `mart_showcase/` feature lab — backlog Phase 2
 
 ### Per-project structure (review as needed)
 - [ ] `dbt_project.yml` — profile, paths, materializations
@@ -277,7 +276,7 @@ Show `docs/architecture.md` + table in `docs/demo-agenda.md` Part F.
 - [ ] `. ./setup.sh` from repo root
 - [ ] Second terminal `./dbt_docs.sh finance`
 - [ ] Walk Part B files in GitHub Actions tab (or explain from yaml)
-- [ ] `cd projects/finance` — run C2–C7 commands
+- [ ] `cd mart_finance` — run C2–C7 commands
 - [ ] Part F table (5 min)
 - [ ] Part D files (5–10 min)
 - [ ] Total time fits ~50–55 min
@@ -289,11 +288,12 @@ Show `docs/architecture.md` + table in `docs/demo-agenda.md` Part F.
 ```bash
 # Pre-warm (repo root)
 . ./setup.sh
+./scripts/bootstrap.sh
 
 # Second terminal (repo root)
 ./dbt_docs.sh finance
 
-# Part C (projects/finance)
+# Part C (cd mart_finance)
 dbt ls --select staging
 dbt ls --select marts
 dbt build --select finance_fct_order_revenue+
@@ -319,7 +319,8 @@ git checkout -- models/marts/finance_fct_daily_revenue.sql
 
 ## Changes made during prep (for reference)
 
-- `setup.sh`: venv-focused workflow; no `exec` into `projects/finance`; use `. ./setup.sh`
+- `setup.sh`: env only; use `. ./setup.sh`
+- `scripts/bootstrap.sh`: scan + dbt build dev + prod (pre-warm or live in Part A)
 - Added `.github/workflows/pre-commit.yml` (changed-files + official pre-commit action)
 - Removed `check-script-semicolon` from CI and pre-commit config
 - Part F (production path) and M-topics woven into `docs/demo-agenda.md`

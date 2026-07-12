@@ -15,7 +15,7 @@ Three domain dbt projects on **DuckDB** (one file per env). Shared **raw** layer
 ```
 data/seeds/*.csv  →  scripts/load_raw.py  →  raw.* (DuckDB)
                                               ↓
-                         projects/<domain>/models  →  stg → int → fct/dim
+                         mart_<domain>/models  →  stg → int → fct/dim
 ```
 
 ## Environments

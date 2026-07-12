@@ -20,12 +20,12 @@ repos:
         args: ["--fix=lf"]
       - id: detect-private-key
 
-  # --- Python ---
+  # --- Python (Ruff: lint + format — no Black, Flake8, isort, pylint) ---
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.15.18  # keep in sync with requirements.json dev extra
     hooks:
-      - id: ruff
-        args: ["--fix"]
+      - id: ruff-check
+        args: [--fix]
       - id: ruff-format
 
   # --- SQL / dbt models ---
@@ -33,9 +33,9 @@ repos:
     rev: 4.2.2
     hooks:
       - id: sqlfluff-lint
-        files: ^projects/.*/models/.*\.sql$
+        files: ^mart_.*/models/.*\.sql$
       - id: sqlfluff-fix
-        files: ^projects/.*/models/.*\.sql$
+        files: ^mart_.*/models/.*\.sql$
 
   # --- dbt structural checks (dbt-checkpoint) ---
   # All dbt-checkpoint hooks in v2.x load a compiled manifest (target/manifest.json),
@@ -50,39 +50,39 @@ repos:
       # The repo is multi-project (no root target/), so point at a built manifest.
       - id: check-script-has-no-table-name
         stages: [manual]
-        files: ^projects/.*/models/.*\.sql$
-        args: ["--manifest", "projects/finance/target/manifest.json"]
+        files: ^mart_.*/models/.*\.sql$
+        args: ["--manifest", "mart_finance/target/manifest.json"]
       # Manifest-based checks, one entry per dbt project.
       - id: check-model-has-description
-        name: check-model-has-description (finance)
+        name: check-model-has-description (mart_finance)
         stages: [manual]
-        files: ^projects/finance/models/.*\.sql$
-        args: ["--manifest", "projects/finance/target/manifest.json"]
+        files: ^mart_finance/models/.*\.sql$
+        args: ["--manifest", "mart_finance/target/manifest.json"]
       - id: check-model-has-tests
-        name: check-model-has-tests (finance)
+        name: check-model-has-tests (mart_finance)
         stages: [manual]
-        files: ^projects/finance/models/.*\.sql$
-        args: ["--manifest", "projects/finance/target/manifest.json", "--test-cnt", "1"]
+        files: ^mart_finance/models/.*\.sql$
+        args: ["--manifest", "mart_finance/target/manifest.json", "--test-cnt", "1"]
       - id: check-model-has-description
-        name: check-model-has-description (marketing)
+        name: check-model-has-description (mart_marketing)
         stages: [manual]
-        files: ^projects/marketing/models/.*\.sql$
-        args: ["--manifest", "projects/marketing/target/manifest.json"]
+        files: ^mart_marketing/models/.*\.sql$
+        args: ["--manifest", "mart_marketing/target/manifest.json"]
       - id: check-model-has-tests
-        name: check-model-has-tests (marketing)
+        name: check-model-has-tests (mart_marketing)
         stages: [manual]
-        files: ^projects/marketing/models/.*\.sql$
-        args: ["--manifest", "projects/marketing/target/manifest.json", "--test-cnt", "1"]
+        files: ^mart_marketing/models/.*\.sql$
+        args: ["--manifest", "mart_marketing/target/manifest.json", "--test-cnt", "1"]
       - id: check-model-has-description
-        name: check-model-has-description (operations)
+        name: check-model-has-description (mart_operations)
         stages: [manual]
-        files: ^projects/operations/models/.*\.sql$
-        args: ["--manifest", "projects/operations/target/manifest.json"]
+        files: ^mart_operations/models/.*\.sql$
+        args: ["--manifest", "mart_operations/target/manifest.json"]
       - id: check-model-has-tests
-        name: check-model-has-tests (operations)
+        name: check-model-has-tests (mart_operations)
         stages: [manual]
-        files: ^projects/operations/models/.*\.sql$
-        args: ["--manifest", "projects/operations/target/manifest.json", "--test-cnt", "1"]
+        files: ^mart_operations/models/.*\.sql$
+        args: ["--manifest", "mart_operations/target/manifest.json", "--test-cnt", "1"]
 
   # --- Shell scripts ---
   - repo: https://github.com/shellcheck-py/shellcheck-py

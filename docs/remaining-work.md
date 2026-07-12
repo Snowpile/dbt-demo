@@ -27,7 +27,7 @@ Verified green on dev/staging/prod via `./scripts/dbt_build_all.sh`.
 
 ---
 
-## Phase 2 — dbt feature coverage (`projects/_showcase/` + spread across domains)
+## Phase 2 — dbt feature coverage (`mart_showcase/` + spread across domains)
 
 ### Materializations & incremental (crucial)
 - [ ] `view` — covered by stage/int *(verify after Phase 1)*
@@ -63,7 +63,7 @@ Verified green on dev/staging/prod via `./scripts/dbt_build_all.sh`.
 - [ ] `dbt_utils` (`star`, `union_relations`, `date_spine`)
 - [ ] `dbt_expectations`, `audit_helper`, `codegen`
 
-### Model configs (one worked example each, `projects/_showcase/`)
+### Model configs (one worked example each, `mart_showcase/`)
 - [ ] Core: `enabled`, `alias`, `schema`, `tags`, `meta`, `group`, `access`
 - [ ] Docs: `persist_docs`, `docs.node_color`
 - [ ] Governance: `contract.enforced`, `grants`, `versions`
