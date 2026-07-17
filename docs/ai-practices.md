@@ -6,7 +6,7 @@ How to work on this repo with Cursor or Claude Code using the fewest tokens.
 ## Shared (both tools)
 
 - **`AGENTS.md` is auto-loaded** — stack, commands, autonomy matrix. Don't restate it in prompts.
-- **`docs/STATUS.md`** — read first on a new chat; update at end so the next chat resumes fast.
+- **`docs/STATUS.md`** — read first on a new chat; **update at end of every session** per `.cursor/rules/session-handoff.mdc`.
 - **`@`-reference or name paths** — don't paste whole files, logs, or specs into chat.
 - **Scoped asks** — "fix RF02 in `finance_fct_order_revenue`" beats "review everything".
 - **Let the agent search** (Grep / semantic) rather than dumping content into chat.
@@ -47,3 +47,5 @@ create-skill skill; keep repo-specific conventions in `AGENTS.md` / `.cursor/rul
 ## Resume a session (new chat)
 
 > Read `docs/STATUS.md` and continue.
+
+The agent should read **Resume here** in `STATUS.md` and pick up without re-litigating prior decisions. Handoff protocol: `.cursor/rules/session-handoff.mdc`.

@@ -8,7 +8,7 @@
 
 ## Phase 0 — Housekeeping
 
-- [x] Pre-commit + sqlfluff + dbt-checkpoint wired (`setup.sh`, `.pre-commit-config.yaml`)
+- [x] Pre-commit + sqlfluff + dbt-checkpoint wired (`setup.sh`, `.pre-commit-config.yaml`; SQLFluff also runs in `pre-commit.yml` on changed model SQL)
 - [x] `summary.md` → pointer to `docs/STATUS.md` + `docs/demo-agenda.md`
 - [ ] Run `pre-commit run --all-files` (formatting churn) vs. later — optional
 
@@ -18,7 +18,7 @@
 
 Live script: **`docs/demo-agenda.md`**. Walkthrough checklist: **`DEMO_CHECKLIST.md`** (progress + **re-review** sections at top).
 
-**Next week:** re-review §1–§4 in checklist, then §5–§10 (finish with timed dry run).
+**Next week:** §3–§10 in checklist (§1 done; §2 N/A). Finish with timed dry run.
 
 ---
 
@@ -92,9 +92,9 @@ Verified green on dev/staging/prod via `./scripts/dbt_build_all.sh`.
 ---
 
 ## Phase 4 — CI/CD (theoretical, never runs per repo rule)
+- [x] SQLFluff + pre-commit in CI — via `pre-commit.yml` (changed files); not a separate workflow step
 - [ ] Slim CI + defer + manifest artifact upload from `main`
 - [ ] Matrix build across 3 domain projects
-- [ ] Add SQLFluff + pre-commit stages to CI workflow
 
 ---
 

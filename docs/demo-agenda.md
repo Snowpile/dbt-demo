@@ -70,10 +70,20 @@ data/seeds/*.csv  →  load_raw.py  →  raw.*  →  mart_<domain>/models  →  
 
 **`pre-commit.yml`** — same hooks as local `git commit` (for devs without pre-commit installed):
 
-1. `actions/checkout`
-2. `astral-sh/setup-uv` (cached)
-3. `tj-actions/changed-files` — list files in the PR / push
-4. `pre-commit/action` with `--files …` — commit hooks on **changed files only** (skips if none)
+1. `actions/checkout` (`fetch-depth: 0` so changed-files works on PRs)
+2. `tj-actions/changed-files` — list files in the PR / push
+3. `pre-commit/action` — **no explicit `run:` in our YAML**; the action installs pre-commit and
+   executes (equivalent to):
+   `pre-commit run --show-diff-on-failure --color=always --files <changed files>`
+   Uses the runner's built-in Python + pip (not `uv` / not our `.venv`). Each hook in
+   `.pre-commit-config.yaml` gets its own isolated env. Skips if no files changed.
+
+**Say (hooks):** "Two linters in that hook set: **Ruff** for Python (`scripts/`, `setup.py` —
+`ruff.toml`), **SQLFluff** for dbt models (`mart_*/models/**/*.sql` — `.sqlfluff`). Both run on
+local commit and again in this workflow on the PR diff. Dirty Python or SQL fails the job."
+
+**Optional show:** `.pre-commit-config.yaml` Ruff block then SQLFluff block (`sqlfluff-lint` /
+`sqlfluff-format`).
 
 **`ci.yml`** — environment + warehouse bootstrap (full build — not shown live in the demo room):
 

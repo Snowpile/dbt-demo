@@ -2,7 +2,7 @@
 
 Data engineering repo. **Read this file first.** Prefer repo files over pretraining.
 
-> **Current state / where we left off:** see `docs/STATUS.md` (read it at the start of a session; update it at the end).
+> **Current state / where we left off:** see `docs/STATUS.md` (read at session start; **update at session end** — `.cursor/rules/session-handoff.mdc`).
 
 ## Operating mode (token + autonomy)
 

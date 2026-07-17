@@ -6,9 +6,12 @@ alwaysApply: true
 # Core
 
 ## On every new chat, read these first
-1. `docs/STATUS.md` — current state / where we left off
+1. `docs/STATUS.md` — current state / where we left off (**Resume here** section)
 2. `docs/remaining-work.md` — backlog / checklist
 3. `docs/ai-practices.md` — token-lean working patterns
+
+## End of every session
+- Follow `.cursor/rules/session-handoff.mdc` — update `docs/STATUS.md` (and checklist/backlog if touched) so the next chat resumes with zero context from this one.
 
 ## Behavior
 - Follow `AGENTS.md` as source of truth.
@@ -20,4 +23,3 @@ alwaysApply: true
 ## Git: only the human commits/pushes
 - **NEVER run `git commit`, `git push`, `git merge`, `git rebase`, `git reset`, `git tag`, or any history-/remote-altering command** — not even when asked. The user performs ALL commits and pushes themselves.
 - You MAY run read-only git (`status`, `diff`, `log`, `show`) and stage files (`git add`) only to help prepare. Then stop and hand off: tell the user it's ready and propose a commit message.
-- At end of a session, update `docs/STATUS.md` so the next chat resumes fast.
