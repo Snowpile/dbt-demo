@@ -139,9 +139,9 @@ Goal: full dbt feature surface, not just `dbt run`. Naming: `docs/conventions.md
 ```bash
 dbt ls --select staging
 dbt ls --select marts
-# Pre-mart gate (verify staging + intermediate BEFORE marts):
+# Pre-mart gate: build (and test) staging + intermediate BEFORE marts.
+# dbt build already runs tests attached to the selected nodes — no separate dbt test needed here.
 dbt build --select staging intermediate
-dbt test  --select staging intermediate
 dbt build --select marts
 # Or a single mart + upstream:
 dbt build --select +finance_fct_order_revenue
@@ -151,6 +151,9 @@ dbt build --select +finance_fct_order_revenue
 colors in dbt Docs, `+persist_docs`, `+schema`, `vars.dev_schema`, `on-run-start`/`on-run-end`).
 Contrast project vs `schema.yml` `config:` vs model `config()` (alias + **pre_hook** on
 `finance_fct_order_revenue`; **post_hook** on `finance_fct_daily_revenue`).
+
+**Note:** Reserve standalone `dbt test --select …` for demo C4 (test_type filters / one-off
+custom selections) — not as a redundant step after `dbt build` on the same graph.
 
 ---
 
@@ -293,9 +296,9 @@ cd ../mart_operations && dbt build
 
 **Discuss — orchestration options (~30 sec):**
 
-**Say:** "Two non-Airflow stubs: `.github/workflows/orchestrate.yml` (pseudo-runnable) and
-`prefect/README.md` (docs-only). CI remains the PR gate; orchestration is how you'd schedule
-the same scripts in production."
+**Say:** "Three stubs: GitHub Actions `orchestrate.yml`, `prefect/`, and `airflow/` (Airflow is
+still the industry default). CI remains the PR gate; orchestration schedules the same scripts.
+Docs links and optional extras are in the README / stub READMEs."
 
 ---
 
@@ -312,7 +315,7 @@ real platform — same repo shape, different runtime."
 | **Environments** | dev + prod built in setup; **staging** in profile but not demo'd | dev → staging → prod promote; CI secrets per target |
 | **Ingestion** | `load_raw.py` + vendored CSVs | Fivetran, Airbyte, streaming, API loads |
 | **CI — PR checks** | `pre-commit.yml` + full `ci.yml` build | Same, plus **Slim CI** manifest defer (B4, C7) |
-| **CI — schedule** | `orchestrate.yml` stub + `prefect/` stub | Cron Action, Prefect, Dagster, dbt Cloud (not Airflow-first) |
+| **CI — schedule** | `orchestrate.yml` + `prefect/` + `airflow/` stubs | Cron Action, Prefect, Airflow, Dagster, dbt Cloud |
 | **Observability** | dbt tests + `store_failures` | Elementary, Monte Carlo, custom alerting |
 | **Governance** | Descriptions + tests enforced in CI | Grants, RLS, model contracts |
 | **Feature lab** | Finance-heavy | `mart_showcase/` then roll out to domains |

@@ -30,7 +30,7 @@ Portable checklist for preparing and delivering the demo. Check items off as you
 **Resume here (human):**
 
 1. Continue **§4** layout review (README / AGENTS / `dbt_project.yml` / `models/docs.md`)
-2. **After §4:** review `#16` `.github/workflows/orchestrate.yml` (+ skim `prefect/README.md`)
+2. **After §4:** review `#16` — `orchestrate.yml` + `airflow/README.md` (+ skim `prefect/README.md`)
 3. Re-check cleanup #1/#4/#9/#14 (docs consolidate, split hooks, incr explain, deploy section)
 4. Finalize `docs/demo-agenda.md` (#11) — C2/C3
 5. Checklist §5 → §10, then timed dry run
@@ -41,7 +41,7 @@ Also listed in `docs/STATUS.md` → **Left for you**.
 ### Deferred (mention in demo, not built yet)
 
 Slim CI in Actions · GitHub Pages docs · `mart_showcase/` · Docker / observability tooling
-*(Prefect + GHA orchestration stubs are now tracked in Pre-review cleanup, not deferred forever.)*
+*(Prefect + Airflow + GHA orchestration stubs are tracked in Pre-review cleanup.)*
 
 ---
 
@@ -59,16 +59,16 @@ Slim CI in Actions · GitHub Pages docs · `mart_showcase/` · Docker / observab
 | 4 | Pre/post hooks on **separate** models + audit | `[x]` / `[↻]` | **pre** → `finance_fct_order_revenue`; **post** → `finance_fct_daily_revenue`. |
 | 5 | `dev_schema` + `generate_schema_name` in **all** projects | `[x]` | Copied to marketing + operations. |
 | 6 | Convert `ai-practices.md` → `.agents/skills`; rest → `AGENTS.md` / `README.md` | `[📝]` | After remaining review polish. |
-| 7 | Pre-mart gate (build/test stg+int before marts) | `[x]` | Catch bad mid-layer data before facts. Agenda C2. |
+| 7 | Pre-mart gate (build stg+int before marts) | `[x]` | `dbt build` includes attached tests; separate `dbt test` only for selective/custom (C4). |
 | 8 | Roll `docs/architecture.md` into `AGENTS.md` + `README.md`, remove | `[x]` | Done; file deleted. |
 | 9 | Incremental-of-incrementals (union changed IDs) | `[x]` | Agenda C3 “why this pattern” — single key list for multi-parent child. |
-| 10 | Explain `docs/dbt-master-checklist.md` usage | `[x]` | **Repo feature-coverage catalog** (finish the reference), not the meeting runbook. |
+| 10 | Explain `docs/dbt-master-checklist.md` usage | `[ ]` | Blurb removed from README/AGENTS — walk the doc itself later. |
 | 11 | Re-finalize `docs/demo-agenda.md` | `[~]` | Human re-walk before dry run. |
 | 12 | Roll `docs/github.md` into `AGENTS.md` + `README.md`, remove | `[x]` | Done; file deleted. |
 | 13 | Roll `docs/remaining-work.md` into this checklist | `[x]` | **Why:** one execution tracker — avoid parallel checklists. |
-| 14 | Cleanup `README.md` + sustainable deploy notes | `[~]` / `[↻]` | Dockerfile / deployment.yml / orchestrate path — skim. |
-| 15 | Stub orchestration — **Prefect** | `[x]` | `prefect/README.md` docs-only. |
-| 16 | Stub orchestration — **GitHub Actions** | `[x]` | `orchestrate.yml` — **review after §4**. |
+| 14 | Cleanup `README.md` + sustainable deploy notes | `[~]` / `[↻]` | Orchestration + Airflow + build/test note — skim. |
+| 15 | Stub orchestration — **Prefect** | `[x]` | `prefect/README.md` + `.[prefect]` extra (not in setup). |
+| 16 | Stub orchestration — **GitHub Actions** + **Airflow** | `[x]` | `orchestrate.yml` + `airflow/README.md` — **review after §4**. |
 | — | Remove unnecessary `.gitkeep` files | `[x]` | Done. |
 
 ### Phase 2+ backlog (after pre-review or mention-only)
@@ -155,7 +155,7 @@ Show these in **Part A** per `docs/demo-agenda.md` — not a standalone review s
 - `.pre-commit-config.yaml`, `.sqlfluff`, `ruff.toml`
 - Branch → PR gloss: `AGENTS.md` (GitHub section)
 - **B4 talk:** CI does a full build; Slim CI (`--defer --state`) is local in C7 / backlog — not in Actions yet
-- Orchestration stubs: `orchestrate.yml` + `prefect/README.md` (Part C9 / F)
+- Orchestration stubs: `orchestrate.yml` + `prefect/` + `airflow/` (Part C9 / F)
 
 ---
 
@@ -188,8 +188,8 @@ Load raw when needed: `./scripts/load_raw.sh` (from repo root) before first dbt 
 
 ### C2 — DAG (staging → int → marts) + pre-mart gate
 - [ ] `dbt ls --select staging` / `marts`
-- [ ] `dbt build --select staging intermediate` then `dbt test --select staging intermediate`
-- [ ] `dbt build --select marts`
+- [ ] `dbt build --select staging intermediate` then `dbt build --select marts`
+  - (`dbt build` already runs attached tests — no redundant `dbt test` on the same select)
 - [ ] Show `dbt_project.yml` configs (tags, **docs.node_color**, persist_docs, vars, on-run hooks)
 - [ ] Show project vs schema.yml vs model `config()` layers
 - [ ] Show `models/docs.md` (combined `{% docs %}` + `{{ doc() }}`)
@@ -254,7 +254,7 @@ Show `README.md` / `AGENTS.md` + table in `docs/demo-agenda.md` Part F. Mention 
 - [ ] **Environments:** dev + prod in setup; staging in profile but not demo'd
 - [ ] **Ingestion:** `load_raw.py` vs Fivetran / Airbyte
 - [ ] **CI PR checks:** pre-commit.yml + full ci.yml vs + Slim CI defer
-- [ ] **CI schedule:** manual / cron script vs Airflow / Dagster / dbt Cloud
+- [ ] **CI schedule:** `orchestrate.yml` / Prefect / Airflow stubs vs production schedulers
 - [ ] **Observability:** dbt tests vs Elementary / Monte Carlo
 - [ ] **Governance:** CI descriptions/tests vs grants / RLS / contracts
 - [ ] **Feature lab:** finance-heavy vs `_showcase/` roll-out

@@ -32,7 +32,7 @@ Data engineering repo. **Read this file first.** Prefer repo files over pretrain
 |-------|--------|
 | Warehouse | **DuckDB** (file per env) — **single-writer** per file; run domains/targets sequentially |
 | Transform | **dbt Core** — `mart_{finance,marketing,operations}/` at repo root |
-| Orchestration (demo) | **GitHub Actions** CI + optional `orchestrate.yml` stub; **Prefect** stub under `prefect/` (not Airflow) |
+| Orchestration (demo) | **GitHub Actions** (`ci.yml` + `orchestrate.yml` stub); **Prefect** (`prefect/`); **Airflow** (`airflow/`) — docs stubs; deps in `requirements.json` extras, not default install |
 | Sample data | jaffle-shop seeds → `data/seeds/` → `raw.*` |
 | Python | **uv** (`requirements.json`, `./setup.sh`) |
 | Environments | **dev** / **staging** / **prod** → `data/{dev,staging,prod}.duckdb` |
@@ -64,7 +64,7 @@ git push -u origin HEAD
 gh pr create --title "..." --body "..."
 ```
 
-CI on PR/push to `main`: `pre-commit.yml` (changed-files lint) + `ci.yml` (setup → bootstrap → dbt-checkpoint). Orchestration stub (not CI): `.github/workflows/orchestrate.yml`.
+CI on PR/push to `main`: `pre-commit.yml` (changed-files lint) + `ci.yml` (setup → bootstrap → dbt-checkpoint). Orchestration stubs (not the PR gate): `.github/workflows/orchestrate.yml`, `prefect/`, `airflow/`.
 
 ## Quick commands
 
@@ -94,9 +94,3 @@ CI on PR/push to `main`: `pre-commit.yml` (changed-files lint) + `ci.yml` (setup
 | Naming | `docs/conventions.md` |
 | AI practices (interim) | `docs/ai-practices.md` |
 | Seed provenance | `data/seeds/PROVENANCE.md` |
-
-### How we use `docs/dbt-master-checklist.md`
-
-Exhaustive **repo feature-coverage catalog** (✅ / 🔶 / ⬜) — “have we demonstrated this dbt capability yet?”
-`DEMO_CHECKLIST.md` + `docs/demo-agenda.md` are the **meeting** execution path.
-Different jobs: finish the reference vs deliver the talk.

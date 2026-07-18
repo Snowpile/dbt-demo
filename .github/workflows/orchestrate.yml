@@ -1,7 +1,10 @@
 # Pseudo-runnable orchestration pipeline (NOT the PR CI gate).
 #
-# Purpose: show GitHub Actions as a non-Airflow orchestrator — scheduled or manual
-# full pipeline — distinct from pre-commit.yml (lint) and ci.yml (PR build).
+# Purpose: show GitHub Actions as one orchestrator option (alongside Prefect and Airflow)
+# — scheduled or manual full pipeline — distinct from pre-commit.yml (lint) and ci.yml (PR build).
+#
+# Docs: https://docs.github.com/en/actions
+#       https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
 #
 # Status: stub for demo / pre-review cleanup #16. Jobs are structured like a real
 # pipeline but may be disabled or no-op until you enable the schedule.

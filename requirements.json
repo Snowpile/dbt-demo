@@ -7,6 +7,23 @@
         "dev": [
             "ruff==0.15.18",
             "pre-commit==3.6.2"
+        ],
+        "prefect": [
+            "prefect>=3.0,<4"
+        ],
+        "airflow": [
+            "apache-airflow>=2.9.0,<3"
         ]
-    }
+    },
+    "_commented_out_orchestration_note": [
+        "NOT installed by ./setup.sh (uses .[dev] only).",
+        "When wiring stubs, enable one of:",
+        "  uv pip install -e '.[prefect]'",
+        "  uv pip install -e '.[airflow]'",
+        "Equivalent pinned lines (keep commented until then):",
+        "# prefect>=3.0,<4",
+        "# apache-airflow>=2.9.0,<3",
+        "# apache-airflow-providers-docker  # optional, if tasks run in containers",
+        "# apache-airflow-providers-cncf-kubernetes  # optional, K8sExecutor"
+    ]
 }
