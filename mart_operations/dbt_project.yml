@@ -10,16 +10,44 @@ test-paths: ["tests"]
 seed-paths: ["seeds"]
 macro-paths: ["macros"]
 snapshot-paths: ["snapshots"]
+docs-paths: ["models/docs"]
 
 clean-targets:
   - target
   - dbt_packages
 
+# `dev_schema` is REQUIRED in every project — see macros/generate_schema_name.sql.
+vars:
+  dev_schema: ""
+
+on-run-start:
+  - "{{ log('mart_operations on-run-start target=' ~ target.name, info=True) }}"
+on-run-end:
+  - "{{ log('mart_operations on-run-end target=' ~ target.name, info=True) }}"
+
 models:
   mart_operations:
+    +persist_docs:
+      relation: true
+      columns: true
+    +meta:
+      domain: operations
+      owner: data-operations
     staging:
       +materialized: view
+      +schema: source_data
+      +tags: ["operations", "staging"]
+      +docs:
+        node_color: "#8FBC8F"
     intermediate:
       +materialized: view
+      +schema: transform
+      +tags: ["operations", "intermediate"]
+      +docs:
+        node_color: "#F0E68C"
     marts:
       +materialized: table
+      +schema: mart
+      +tags: ["operations", "marts"]
+      +docs:
+        node_color: "#87CEEB"

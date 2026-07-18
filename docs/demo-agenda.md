@@ -54,7 +54,7 @@ exists for promote-path discussion (Part F).
 **Say:** "Raw CSVs are integrity-checked (`scan_downloads.sh`: SHA-256, MIME, UTF-8) then loaded
 into DuckDB schema `raw` (`load_raw.sh` → `load_raw.py`). dbt never reads CSVs directly."
 
-Data flow (see `docs/architecture.md` for detail):
+Data flow (see `AGENTS.md` / `README.md` for architecture):
 
 ```
 data/seeds/*.csv  →  load_raw.py  →  raw.*  →  mart_<domain>/models  →  stg → int → fct/dim
@@ -100,8 +100,8 @@ a full build."
 
 ### B3. Branch → PR (gloss, ~30 sec)
 
-**Say:** "Standard flow — branch, push, open PR; both workflows above run on the PR. Details:
-`docs/github.md`."
+**Say:** "Standard flow — branch, push, open PR; both CI workflows run on the PR. Details:
+`AGENTS.md` (GitHub / PR workflow)."
 
 ### B4. Slim CI in Actions (discuss, ~1 min)
 
@@ -134,27 +134,46 @@ Goal: full dbt feature surface, not just `dbt run`. Naming: `docs/conventions.md
 
 ### C2. DAG: stage → intermediate → mart (3 min)
 
-**Say:** Layered models, mixed materializations.
+**Say:** Layered models, mixed materializations. Prefer building **up to** marts, testing, then marts.
 
 ```bash
 dbt ls --select staging
 dbt ls --select marts
-dbt build --select finance_fct_order_revenue+
+# Pre-mart gate (verify staging + intermediate BEFORE marts):
+dbt build --select staging intermediate
+dbt test  --select staging intermediate
+dbt build --select marts
+# Or a single mart + upstream:
+dbt build --select +finance_fct_order_revenue
 ```
 
-**Show:** `models/` tree, `dbt_project.yml` `models:` block (+schema layers in finance).
+**Show:** `models/` tree, `dbt_project.yml` (`+tags`, `+meta`, `+docs.node_color`, `+persist_docs`,
+`+schema`, `vars.dev_schema`, `on-run-start`/`on-run-end`). Contrast project vs `schema.yml`
+`config:` vs model `config()` (alias/hooks on `finance_fct_order_revenue`).
 
 ---
 
-### C3. Incremental models (3 min)
+### C3. Incremental models (4 min)
 
 ```bash
-dbt run --select finance_fct_order_revenue
+dbt run --select finance_int_orders_delta finance_int_order_items_delta finance_int_changed_order_ids finance_fct_order_revenue
 dbt run --select finance_fct_order_revenue --full-refresh
 ```
 
-**Show:** `models/marts/finance_fct_order_revenue.sql` — `is_incremental()`, `unique_key`,
-`incremental_strategy='delete+insert'`, `on_schema_change`. Mechanics: `docs/dbt-feature-guide.md`.
+**Show:**
+
+1. Two incremental **parents**: `finance_int_orders_delta`, `finance_int_order_items_delta`
+2. **Changed-ID union**: `finance_int_changed_order_ids` (unions keys from both parents)
+3. **Child**: `finance_fct_order_revenue` — on incremental runs joins to that ID set
+4. `is_incremental()`, `unique_key`, `delete+insert`, `on_schema_change`
+
+**Say:** "When a child incremental depends on more than one incremental parent, materialize a
+union of IDs first so the child only rebuilds keys that need work."
+
+**Also show hooks on the child:** `pre_hook` retention `DELETE` + audit insert;
+`post_hook` `UPDATE loaded_at` + audit insert → `audit.dbt_model_hooks`.
+
+Mechanics: `docs/dbt-feature-guide.md`.
 
 ---
 
@@ -203,13 +222,14 @@ dbt source freshness
 dbt snapshot
 ```
 
-**Say:** SCD2 snapshot (`finance_snapshot_products`), source freshness on `raw_orders`.
+**Say:** SCD2 snapshot (`finance_snapshot_products`), source freshness on `raw_orders`
+(**all three projects** declare freshness).
 
 **Discuss — governance (~30 sec):**
 
 **Say:** "Enterprise warehouses add **grants**, **RLS**, and model **contracts**. DuckDB demo
-skips those — documented as N/A in `docs/remaining-work.md`. Same dbt project structure ports
-to Snowflake/BigQuery with warehouse-native permissions."
+skips those — called out as N/A in `dbt_project.yml` comments / Phase 2 backlog. Same project
+structure ports to Snowflake/BigQuery with warehouse-native permissions."
 
 ---
 
@@ -246,24 +266,26 @@ from `main` and run the same selector on every PR."
 ./dbt_docs.sh mart_finance    # second terminal (repo root) — serves :8011
 ```
 
-**Show:** DAG graph, `{% docs %}` blocks, `revenue_dashboard` exposure.
+**Show:** DAG graph, shared `{% docs %}` in `models/docs/*.md` (e.g. `order_id` reused across
+tables), `revenue_dashboard` exposure.
 
 ---
 
 ### C9. Packages + multi-project (1 min)
 
-**Say:** `dbt_utils` via `packages.yml` / `dbt deps`; same patterns in all three domains.
+**Say:** `dbt_utils` via `packages.yml` / `dbt deps`; same patterns in all three domains
+(`dev_schema`, freshness, shared docs).
 
 ```bash
 cd ../mart_marketing && dbt build
 cd ../mart_operations && dbt build
 ```
 
-**Discuss — feature sandbox (~30 sec):**
+**Discuss — orchestration options (~30 sec):**
 
-**Say:** "Finance carries the richest feature set (snapshots, exposures, unit tests). Backlog:
-`mart_showcase/` for one worked example of each dbt config, then spread patterns to all
-domains — `docs/remaining-work.md` Phase 2."
+**Say:** "Two non-Airflow stubs: `.github/workflows/orchestrate.yml` (pseudo-runnable) and
+`prefect/README.md` (docs-only). CI remains the PR gate; orchestration is how you'd schedule
+the same scripts in production."
 
 ---
 
@@ -280,12 +302,12 @@ real platform — same repo shape, different runtime."
 | **Environments** | dev + prod built in setup; **staging** in profile but not demo'd | dev → staging → prod promote; CI secrets per target |
 | **Ingestion** | `load_raw.py` + vendored CSVs | Fivetran, Airbyte, streaming, API loads |
 | **CI — PR checks** | `pre-commit.yml` + full `ci.yml` build | Same, plus **Slim CI** manifest defer (B4, C7) |
-| **CI — schedule** | Manual / `dbt_build_all.sh` | Cron Action, Airflow, Dagster, dbt Cloud |
+| **CI — schedule** | `orchestrate.yml` stub + `prefect/` stub | Cron Action, Prefect, Dagster, dbt Cloud (not Airflow-first) |
 | **Observability** | dbt tests + `store_failures` | Elementary, Monte Carlo, custom alerting |
 | **Governance** | Descriptions + tests enforced in CI | Grants, RLS, model contracts |
 | **Feature lab** | Finance-heavy | `mart_showcase/` then roll out to domains |
 
-**Show:** `docs/architecture.md` (env table, DuckDB single-writer note), `docs/remaining-work.md`.
+**Show:** `README.md` / `AGENTS.md` (env table, DuckDB single-writer), `DEMO_CHECKLIST.md` Pre-review cleanup / Phase 2+.
 
 **Say:** "DuckDB keeps the demo free and offline. The dbt projects, tests, and CI patterns transfer
 directly — only the profile target and orchestration layer change."

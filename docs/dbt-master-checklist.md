@@ -2,9 +2,12 @@
 
 **Goal:** Make this repo the **#1 local, multi-domain reference** for dbt Core + DuckDB — covering everything Jaffle Shop *deliberately skips* and what advanced demos only touch in fragments.
 
-**How to use:** Work top-to-bottom. Status: `✅` done · `🔶` partial · `⬜` not started · `🚫` N/A (DuckDB/scope).
+**How we use this file:** Exhaustive **coverage catalog** (✅ / 🔶 / ⬜ / 🚫).
+Day-of execution = `DEMO_CHECKLIST.md` + `docs/demo-agenda.md`. Tick rows here as patterns land; do not present this as the live runbook.
 
-**Current baseline:** 3 projects (`finance`, `marketing`, `operations`), stg→int→mart, generic tests, sources, CI `dbt build`. Most advanced features below are **⬜**.
+**How to use (editing):** Work top-to-bottom. Status: `✅` done · `🔶` partial · `⬜` not started · `🚫` N/A (DuckDB/scope).
+
+**Current baseline:** 3 projects at repo root with shared docs, freshness, `dev_schema`, layered configs, finance incr-of-incr + hooks. Many advanced rows below still ⬜/🔶 — update as you add features.
 
 ---
 
@@ -12,15 +15,15 @@
 
 | # | Feature | What “done” looks like in dbt_demo | Status |
 |---|---------|-----------------------------------|--------|
-| 1 | **dbt docs — generate** | `dbt docs generate` per project; `persist_docs` example; doc blocks `{% docs %}` | ⬜ |
-| 2 | **dbt docs — serve locally** | `scripts/docs_serve.sh`; documented port/host | ⬜ |
+| 1 | **dbt docs — generate** | `dbt docs generate` per project; `persist_docs` example; doc blocks `{% docs %}` | 🔶 |
+| 2 | **dbt docs — serve locally** | `dbt_docs.sh`; documented port/host | ✅ |
 | 3 | **dbt docs — deploy** | GitHub Pages from `target/` artifacts **or** object-store static hosting **or** CI artifact + README | ⬜ |
-| 4 | **Macros** | Project macros + package macros; documented call sites | ⬜ |
+| 4 | **Macros** | Project macros + package macros; documented call sites | 🔶 |
 | 5 | **Tests — generic (built-in)** | `unique`, `not_null`, `accepted_values` across domains (`relationships` pending) | 🔶 |
-| 6 | **Tests — singular** | `.sql` tests in `tests/` | ⬜ |
+| 6 | **Tests — singular** | `.sql` tests in `tests/` | ✅ |
 | 7 | **Tests — custom generic** | `not_negative` reusable test in `tests/generic/` (all 3 domains) | ✅ |
-| 8 | **Tests — unit tests** | YAML `unit_tests:` with `given`/`expect`, macro overrides | ⬜ |
-| 9 | **Tests — freshness** | `loaded_at_field` + `freshness` on sources | ⬜ |
+| 8 | **Tests — unit tests** | YAML `unit_tests:` with `given`/`expect`, macro overrides | 🔶 |
+| 9 | **Tests — freshness** | `loaded_at_field` + `freshness` on sources | ✅ |
 | 10 | **dbt defer** | `state/` artifact dir; `dbt build --select state:modified+ --defer --state state/` | ⬜ |
 | 11 | **State selectors** | `state:modified`, `state:new`, `state:old`, `+state:modified+` in CI slim build | ⬜ |
 | 12 | **dbt clone** | `dbt clone --state state/` example for zero-copy dev tables | ⬜ |

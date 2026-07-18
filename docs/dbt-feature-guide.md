@@ -24,11 +24,27 @@ Run dbt from inside a domain project (`cd mart_finance`) after `source scripts/e
 - **`delete+insert`** — delete changed keys, insert new batch.
 - **`on_schema_change='append_new_columns'`** — new upstream columns append instead of erroring.
 
+### Incremental-of-incrementals (finance)
+
+When a child incremental depends on **more than one** incremental parent:
+
+1. `finance_int_orders_delta` + `finance_int_order_items_delta` — incremental parents
+2. `finance_int_changed_order_ids` — unions `order_id`s from both
+3. `finance_fct_order_revenue` — on incremental runs, joins to that ID set (plus watermark)
+
+That keeps the child from re-scanning wide joins just to discover what changed.
+
+### Hooks (finance fact)
+
+- **Project:** `on-run-start` creates `audit.dbt_model_hooks`; `on-run-end` logs.
+- **Model:** `pre_hook` retention `DELETE` + audit insert; `post_hook` `UPDATE loaded_at` + audit insert.
+
 ---
 
 ## Env-aware layered schemas (`generate_schema_name`)
 
-`finance` overrides `macros/generate_schema_name.sql` with per-layer `+schema` in `dbt_project.yml`:
+**All three projects** override `macros/generate_schema_name.sql` with per-layer `+schema`
+in `dbt_project.yml` and declare `vars.dev_schema` (required pattern):
 
 | Layer | `+schema` | dev target | prod / staging |
 |---|---|---|---|
@@ -56,7 +72,7 @@ Run dbt from inside a domain project (`cd mart_finance`) after `source scripts/e
 | `--vars '{"dev_schema":"dev"}'` | Sandbox schema for models you *did* build |
 | `--target prod` (both steps) | DuckDB catalog must match (`prod.duckdb` → catalog `prod`) |
 
-Slim CI in GitHub Actions is Phase 4 backlog (`docs/remaining-work.md`).
+Slim CI in GitHub Actions is Phase 2+ backlog (`DEMO_CHECKLIST.md`).
 
 ---
 

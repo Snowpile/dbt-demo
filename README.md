@@ -12,67 +12,60 @@ Show a realistic, opinionated dbt setup end to end:
 - Reproducible environment (`uv` + `setup.sh`) that CI uses verbatim
 - A shared **raw** layer loaded from vendored CSVs into DuckDB
 - Three independent dbt projects, one per business domain, sharing that raw data
-- The full dbt feature surface (staging → intermediate → marts, tests, macros, snapshots,
-  sources/freshness, incremental models, exposures, `--defer`/`--state`)
-- CI that mirrors local work (pre-commit hooks + a full build)
+- Full dbt feature surface (stg → int → marts, tests, macros, snapshots, sources/freshness,
+  incremental / incr-of-incr, hooks, shared `{% docs %}`, exposures, `--defer`/`--state`)
+- CI that mirrors local work, plus **orchestration stubs** (GitHub Actions + Prefect) — not Airflow
 
-It doubles as a live demo script (see `docs/demo-agenda.md`) and an AI-agent-friendly repo
-(`AGENTS.md`, `.cursor/rules/`).
+It doubles as a live demo script (`docs/demo-agenda.md`, `DEMO_CHECKLIST.md`) and an
+AI-agent-friendly repo (`AGENTS.md`, `.cursor/rules/`).
 
 ## What's in here
 
 ```
 dbt-demo/
-├── setup.sh                 # create venv + install deps + local config (fast, no builds)
-├── scripts/
-│   ├── env.sh               # shared env (paths, DuckDB targets, venv bin)
-│   ├── scan_downloads.sh    # integrity-check seed CSVs (checksums, type, schema)
-│   ├── load_raw.sh          # load seeds → DuckDB schema raw.*
-│   ├── load_raw.py          #   (the actual loader)
-│   ├── dbt_build_all.sh     # load raw + dbt build across all projects
-│   └── bootstrap.sh         # scan → load raw → dbt build dev + prod (CI / local full build)
-├── dbt_docs.sh              # build + generate + serve dbt docs for one project
-├── data/seeds/              # vendored jaffle-shop CSVs (source of truth before DuckDB)
-├── mart_finance/            # dbt project — revenue, margin, tax
-├── mart_marketing/          # dbt project — customers, CLV, segments
-├── mart_operations/         # dbt project — orders, stores, supplies
-├── profiles.yml.example     # dbt profile (dev / staging / prod DuckDB files)
-├── .github/workflows/       # CI: pre-commit (changed files) + full build
-└── docs/                    # architecture, conventions, demo runbook, backlog
+├── setup.sh                 # venv + deps + local config (fast, no builds)
+├── scripts/                 # env, scan, load_raw, dbt_build_all, bootstrap
+├── dbt_docs.sh              # docs server for one project
+├── data/seeds/              # vendored jaffle-shop CSVs
+├── mart_finance/            # revenue, margin, tax (+ headline dbt patterns)
+├── mart_marketing/          # customers, CLV, segments
+├── mart_operations/         # orders, stores, supplies
+├── prefect/                 # Prefect orchestration stub (docs only)
+├── profiles.yml.example
+├── .github/workflows/       # pre-commit, ci, orchestrate (stub)
+└── docs/                    # STATUS, demo-agenda, conventions, feature checklists
 ```
 
-Each `mart_*` folder is a **separate dbt project** with its own `dbt_project.yml`, `models/`
-(`staging/`, `intermediate/`, `marts/`), `macros/`, `tests/`, `seeds/`, and (finance) `snapshots/`.
-All three read from the same `raw.*` tables.
+Each `mart_*` is a **separate dbt project** (`dbt_project.yml`, `models/`, `macros/`, …).
+All three read the same `raw.*` tables. **Every project** includes `dev_schema` +
+`generate_schema_name` and shared field docs under `models/docs/*.md`.
 
 ## Requirements
 
-- [`uv`](https://docs.astral.sh/uv/getting-started/installation/) (Python package manager)
-- Python 3.11 (uv can install it)
-- macOS / Linux / Windows (Git Bash or WSL for the `*.sh` scripts)
+- [`uv`](https://docs.astral.sh/uv/getting-started/installation/)
+- Python 3.11
+- macOS / Linux / Windows (Git Bash or WSL for `*.sh`)
 
 ## Quick start
 
 ```bash
-# 1. Environment (venv + config only; ~1 min). Source it so the venv/env stay active.
-. ./setup.sh
-
-# 2. (optional) Full local build — same as CI. For the live demo, run Part C commands one at a time instead.
-./scripts/bootstrap.sh
-
-# 3. (optional) Serve docs for one project in a second terminal.
-./dbt_docs.sh mart_finance      # http://127.0.0.1:8011
+. ./setup.sh                 # env only (~1 min)
+./scripts/bootstrap.sh       # optional full build (same as CI)
+./dbt_docs.sh mart_finance   # optional docs → http://127.0.0.1:8011
 ```
 
-To work in a single project:
+Single project:
 
 ```bash
 cd mart_finance
 dbt build --target dev
-dbt test --select mart_finance_fct_order_revenue+   # example
+# Pre-mart gate (demo pattern):
+dbt build --select staging intermediate
+dbt test  --select staging intermediate
+dbt build --select marts
 ```
 
-## Data flow
+## Data flow & environments
 
 ```
 data/seeds/*.csv  →  scripts/load_raw.py  →  raw.* (DuckDB)
@@ -80,46 +73,48 @@ data/seeds/*.csv  →  scripts/load_raw.py  →  raw.* (DuckDB)
                      mart_<domain>/models  →  stg → int → fct/dim
 ```
 
-dbt never reads the CSVs directly — `load_raw.py` loads them into the `raw` schema first, and
-models reference them via `{{ source('raw', ...) }}`.
+| Target | DuckDB file | Notes |
+|--------|-------------|-------|
+| dev | `data/dev.duckdb` | Local iteration |
+| staging | `data/staging.duckdb` | Ask before writing |
+| prod | `data/prod.duckdb` | Ask before writing |
 
-## Environments
+DuckDB is **single-writer** per file — run domains/targets sequentially. Real platforms
+swap the profile to Snowflake/BigQuery/etc.; project layout stays the same.
 
-One DuckDB file per target (paths come from `.env`, consumed by `profiles.yml`):
+## CI & orchestration
 
-| Target | DuckDB file |
-|--------|-------------|
-| dev | `data/dev.duckdb` |
-| staging | `data/staging.duckdb` |
-| prod | `data/prod.duckdb` |
+| Workflow | Role |
+|----------|------|
+| `pre-commit.yml` | Lint changed files (Ruff, SQLFluff, …) |
+| `ci.yml` | `setup.sh` → `bootstrap.sh` → dbt-checkpoint (PR gate) |
+| `orchestrate.yml` | **Stub** scheduled/manual pipeline (non-Airflow orchestrator) |
+| `prefect/` | **Stub** docs-only alternative orchestrator |
 
-## CI
-
-Two workflows run on every PR / push to `main`:
-
-- **`pre-commit.yml`** — the same hooks as a local `git commit`, on changed files only
-  (Ruff lint/format, SQLFluff, shellcheck, shfmt, gitleaks, …).
-- **`ci.yml`** — `setup.sh` → `bootstrap.sh` (full build) → dbt-checkpoint structural checks.
+Remote: [`Snowpile/dbt-demo`](https://github.com/Snowpile/dbt-demo). Branch → push → `gh pr create`.
+**Only humans commit/push** (agents may stage and open PRs after commits).
 
 ## Conventions
 
-- Model names: `{domain}_{layer}_{entity}` — e.g. `finance_stg_orders`, `finance_fct_order_revenue`.
-- PK tests: `unique` + `not_null` on every mart primary key.
-- See `docs/conventions.md` for the full set.
+- Model names: `{domain}_{layer}_{entity}`
+- PK tests: `unique` + `not_null` on every mart PK
+- Shared column docs: `models/docs/<field>.md` → `{{ doc('field') }}` in `schema.yml`
+- Details: `docs/conventions.md`
+
+## How we use `docs/dbt-master-checklist.md`
+
+It is the exhaustive **dbt feature coverage catalog** (✅ / 🔶 / ⬜).
+Day-of execution lives in `DEMO_CHECKLIST.md` and `docs/demo-agenda.md`.
+Update the master checklist as patterns are added; do not present it as the live runbook.
 
 ## More docs
 
 | Topic | Path |
 |-------|------|
-| Architecture | `docs/architecture.md` |
-| Conventions (naming, tests, SQL style) | `docs/conventions.md` |
+| Session handoff / status | `docs/STATUS.md` |
+| Demo walkthrough checklist | `DEMO_CHECKLIST.md` |
 | Live demo runbook | `docs/demo-agenda.md` |
-| dbt mechanics (deep-dive) | `docs/dbt-feature-guide.md` |
-| Backlog / remaining work | `docs/remaining-work.md` |
-| GitHub / PR workflow | `docs/github.md` |
+| dbt feature matrix | `docs/dbt-master-checklist.md` |
+| dbt mechanics | `docs/dbt-feature-guide.md` |
+| Naming / SQL style | `docs/conventions.md` |
 | AI agent instructions | `AGENTS.md` |
-
-## Note on commits
-
-Only humans commit and push in this repo. Automation and agents may stage changes and propose a
-message, but never run `git commit` / `push` / `merge` / `rebase` / `reset`.

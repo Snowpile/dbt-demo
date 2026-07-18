@@ -7,8 +7,7 @@ sources:
     tables:
       - name: raw_orders
         description: One row per order. Money columns in cents.
-        # Source freshness: thresholds are tuned for the static jafgen sample
-        # (newest order ~2025-08). Run with: dbt source freshness
+        # Thresholds tuned for the static jafgen sample (newest order ~2025-08).
         loaded_at_field: "cast(ordered_at as timestamp)"
         freshness:
           warn_after: {count: 365, period: day}

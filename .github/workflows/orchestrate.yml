@@ -1,0 +1,75 @@
+# Pseudo-runnable orchestration pipeline (NOT the PR CI gate).
+#
+# Purpose: show GitHub Actions as a non-Airflow orchestrator — scheduled or manual
+# full pipeline — distinct from pre-commit.yml (lint) and ci.yml (PR build).
+#
+# Status: stub for demo / pre-review cleanup #16. Jobs are structured like a real
+# pipeline but may be disabled or no-op until you enable the schedule.
+
+name: Orchestrate (stub)
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "dbt target to build"
+        required: true
+        default: prod
+        type: choice
+        options: [dev, staging, prod]
+  # Uncomment to run on a schedule (UTC):
+  # schedule:
+  #   - cron: "0 6 * * *"
+
+concurrency:
+  group: orchestrate-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # --- Stage 1: integrity-check seeds ---
+  scan_seeds:
+    name: Scan seed CSVs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Setup env
+        run: ./setup.sh
+      - name: Scan downloads
+        run: ./scripts/scan_downloads.sh
+
+  # --- Stage 2: load raw + dbt build (depends on scan) ---
+  dbt_pipeline:
+    name: Load raw + dbt build
+    needs: scan_seeds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Setup env
+        run: ./setup.sh
+      - name: Bootstrap (scan + load + build)
+        # Same entrypoint as ci.yml — orchestration reuses scripts, not a second path.
+        run: ./scripts/bootstrap.sh
+        # To honor workflow_dispatch target only:
+        # run: |
+        #   ./scripts/load_raw.sh
+        #   for p in mart_finance mart_marketing mart_operations; do
+        #     (cd "$p" && dbt deps && dbt build --target ${{ inputs.target || 'prod' }})
+        #   done
+
+  # --- Stage 3: optional notify (stub) ---
+  notify:
+    name: Notify (stub)
+    needs: dbt_pipeline
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Placeholder notification
+        run: |
+          echo "Orchestration finished with dbt_pipeline=${{ needs.dbt_pipeline.result }}"
+          echo "Wire Slack/email here in a real deployment."

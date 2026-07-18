@@ -10,30 +10,62 @@ test-paths: ["tests"]
 seed-paths: ["seeds"]
 macro-paths: ["macros"]
 snapshot-paths: ["snapshots"]
+docs-paths: ["models/docs"]
 
 clean-targets:
   - target
   - dbt_packages
 
-# Project vars: overridable at runtime with `dbt run --vars '{revenue_start_date: "2025-01-01"}'`.
+# Project vars (override at runtime: dbt run --vars '{"dev_schema":"dev"}').
+# `dev_schema` is REQUIRED pattern in every project — see macros/generate_schema_name.sql.
 vars:
-  # Earliest order date to include in revenue models. Default predates the sample
-  # data, so nothing is filtered out unless a tighter value is supplied.
   revenue_start_date: "2000-01-01"
-  # Sandbox schema override (see macros/generate_schema_name.sql). Empty = off;
-  # set via `--vars '{"dev_schema":"dev"}'` to build a --defer run into one schema.
+  # Empty = off. Set via --vars for --defer sandbox builds (see demo C7).
   dev_schema: ""
+  # Retention window used by finance_fct_order_revenue pre_hook DELETE (demo DML).
+  order_retention_years: 50
 
-# Layered schemas via generate_schema_name: on prod/staging these are the bare
-# names (source_data / transform / mart); on dev they're prefixed (main_source_data ...).
+# Project-level run hooks (also show model-level pre/post on finance_fct_order_revenue).
+on-run-start:
+  - "{{ log('mart_finance on-run-start target=' ~ target.name, info=True) }}"
+  - |
+    create schema if not exists audit;
+    create table if not exists audit.dbt_model_hooks (
+      event_at timestamp,
+      invocation_id varchar,
+      model_name varchar,
+      event_type varchar,
+      row_count bigint,
+      note varchar
+    );
+on-run-end:
+  - "{{ log('mart_finance on-run-end target=' ~ target.name, info=True) }}"
+
+# Layer defaults. Node-level config() / schema.yml can override.
+# DuckDB N/A (document only): grants, partition_by, cluster_by — warehouse-native elsewhere.
 models:
   mart_finance:
+    +persist_docs:
+      relation: true
+      columns: true
+    +meta:
+      domain: finance
+      owner: data-finance
     staging:
       +materialized: view
       +schema: source_data
+      +tags: ["finance", "staging"]
+      +docs:
+        node_color: "#8FBC8F"
     intermediate:
       +materialized: view
       +schema: transform
+      +tags: ["finance", "intermediate"]
+      +docs:
+        node_color: "#F0E68C"
     marts:
       +materialized: table
       +schema: mart
+      +tags: ["finance", "marts"]
+      +docs:
+        node_color: "#87CEEB"

@@ -1,0 +1,43 @@
+---
+description: End-of-session handoff — log state so the next chat resumes exactly where you left off
+alwaysApply: true
+---
+
+# Session handoff
+
+**Before ending a working session** (or when the user says they're opening a new chat), update the handoff files so the next agent needs no conversation history.
+
+## Required: `docs/STATUS.md`
+
+Update **every** session. Set `Last updated` to today. Keep these sections current:
+
+| Section | What to write |
+|---------|----------------|
+| **Snapshot** | Repo facts that changed (paths, scripts, build status, CI) |
+| **Last session** | What we did this chat (bullets); decisions made |
+| **Resume here** | Single explicit next action (file + section, e.g. `DEMO_CHECKLIST.md` §4) |
+| **Next session** | Ordered steps if more than one thing remains |
+| **Open items** | Blockers, unanswered questions, uncommitted work worth noting |
+| **Resume quickly** | Commands to run first in a fresh terminal |
+
+Do not rely on chat memory — if it is not in `STATUS.md`, the next chat does not know it.
+
+## Also update when relevant
+
+| File | When |
+|------|------|
+| `DEMO_CHECKLIST.md` | Demo prep — progress table, `[x]`/`[↻]` checkboxes, "Resume here" |
+| `docs/remaining-work.md` | Backlog items completed or reprioritized |
+| `docs/demo-agenda.md` | Runbook commands or flow changed |
+
+## New chat startup (agent)
+
+1. Read `docs/STATUS.md` first — especially **Resume here** and **Last session**.
+2. Read `docs/remaining-work.md` or `DEMO_CHECKLIST.md` only if the task needs them.
+3. Continue from **Resume here** without re-asking what was already decided.
+
+## User prompt for a fresh chat
+
+> Read `docs/STATUS.md` and continue.
+
+Optional: `@docs/STATUS.md` `@DEMO_CHECKLIST.md` for demo prep.

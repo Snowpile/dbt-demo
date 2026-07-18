@@ -6,7 +6,16 @@ models:
     description: Cleaned order financials (money converted cents -> USD).
     columns:
       - name: order_id
+        description: '{{ doc("order_id") }}'
         tests: [unique, not_null]
+      - name: customer_id
+        description: '{{ doc("customer_id") }}'
+      - name: store_id
+        description: '{{ doc("store_id") }}'
+      - name: ordered_at
+        description: '{{ doc("ordered_at") }}'
+      - name: order_date
+        description: '{{ doc("order_date") }}'
       - name: order_total_usd
         tests: [not_negative]
   - name: finance_stg_order_items
@@ -14,6 +23,10 @@ models:
     columns:
       - name: order_item_id
         tests: [unique, not_null]
+      - name: order_id
+        description: '{{ doc("order_id") }}'
+      - name: sku
+        description: '{{ doc("sku") }}'
   - name: finance_stg_products
     description: Product catalog with USD price.
     columns:
@@ -79,9 +92,51 @@ models:
       - name: order_count
         tests: [not_negative]
 
+  # --- incremental parents + changed-id union (demo: incr-of-incr) ---
+  - name: finance_int_orders_delta
+    description: Incremental order-grain delta parent (feeds changed_order_ids).
+    config:
+      meta:
+        role: incremental_parent
+    columns:
+      - name: order_id
+        description: '{{ doc("order_id") }}'
+        tests: [unique, not_null]
+      - name: ordered_at
+        description: '{{ doc("ordered_at") }}'
+  - name: finance_int_order_items_delta
+    description: Incremental item-grain delta parent (feeds changed_order_ids).
+    config:
+      meta:
+        role: incremental_parent
+    columns:
+      - name: order_item_id
+        tests: [unique, not_null]
+      - name: order_id
+        description: '{{ doc("order_id") }}'
+      - name: sku
+        description: '{{ doc("sku") }}'
+  - name: finance_int_changed_order_ids
+    description: >
+      Unions order_ids from both incremental delta parents so downstream
+      incrementals can filter to keys that need work.
+    config:
+      tags: ['finance', 'intermediate', 'changed_ids']
+      meta:
+        role: changed_id_union
+    columns:
+      - name: order_id
+        description: '{{ doc("order_id") }}'
+        tests: [unique, not_null]
+
   # --- marts ---
   - name: finance_fct_order_revenue
-    description: '{{ doc("finance_fct_order_revenue__doc") }}'
+    description: '{{ doc("finance_fct_order_revenue") }}'
+    config:
+      # schema.yml-level config override example (tags merge with model/project).
+      meta:
+        grain: order
+        demo_features: [incremental_of_incrementals, hooks, shared_docs]
     tests:
       # dbt_utils package test: order total can never be below its subtotal.
       - dbt_utils.expression_is_true:
@@ -89,16 +144,27 @@ models:
             expression: "order_total_usd >= subtotal_usd"
     columns:
       - name: order_id
+        description: '{{ doc("order_id") }}'
         tests: [unique, not_null]
+      - name: customer_id
+        description: '{{ doc("customer_id") }}'
+      - name: store_id
+        description: '{{ doc("store_id") }}'
+      - name: ordered_at
+        description: '{{ doc("ordered_at") }}'
+      - name: order_date
+        description: '{{ doc("order_date") }}'
       - name: order_total_usd
         tests: [not_null, not_negative]
       - name: gross_margin_pct
-        description: '{{ doc("gross_margin_pct__doc") }}'
+        description: '{{ doc("gross_margin_pct") }}'
         tests:
           - accepted_range:
               arguments:
                 min_value: 0
                 max_value: 1
+      - name: loaded_at
+        description: Stamped by post_hook after each run (null in SELECT, set via UPDATE).
   - name: finance_fct_daily_revenue
     description: Daily revenue / profit per store.
     tests:

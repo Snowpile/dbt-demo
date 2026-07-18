@@ -1,7 +1,7 @@
 # dbt_demo — Current Status (AI handoff)
 
 *Living "where are we / pick up here" file. **Update at the end of every working session.***
-*Protocol: `.cursor/rules/session-handoff.mdc` · Backlog: `docs/remaining-work.md` · Demo script: `docs/demo-agenda.md`*
+*Protocol: `.cursor/rules/session-handoff.mdc` · Tracker: `DEMO_CHECKLIST.md` · Demo script: `docs/demo-agenda.md`*
 
 **Last updated:** 2026-07-17
 
@@ -11,9 +11,14 @@
 
 ## Resume here
 
-**`DEMO_CHECKLIST.md` §4 — repo layout & architecture** (human self-review; not started yet).
+### Left for you (human)
 
-Then §5 → §6 (Part C) → §7–§9 → §10 dry run.
+| # | Item | Where |
+|---|------|-------|
+| 1 | Re-walk / finalize demo agenda (#11) | `docs/demo-agenda.md` (esp. C2–C3) |
+| 2 | Checklist §4 → §10 self-review | `DEMO_CHECKLIST.md` |
+| 3 | Optional: `ai-practices.md` → `.agents/skills/` (#6) | noted in `AGENTS.md` |
+| 4 | Timed dry run (§10) — do last | `DEMO_CHECKLIST.md` §10 |
 
 **New chat prompt:** `Read docs/STATUS.md and continue.`
 
@@ -21,44 +26,33 @@ Then §5 → §6 (Part C) → §7–§9 → §10 dry run.
 
 ## Last session
 
-- Demo-prep walkthrough of `DEMO_CHECKLIST.md`. User reviewing personally (not agent auto-checking).
-- **§1 done** (`setup.sh`). **§2 N/A** (all deps in git — show in Part A). **§3 done** (CI/GitHub).
-- Clarified Part B: `pre-commit.yml` (changed-files lint, no uv) vs `ci.yml` (setup → bootstrap → dbt-checkpoint). Ruff fails dirty Python; SQLFluff on `mart_*/models/**/*.sql` via same pre-commit hooks — noted in `docs/demo-agenda.md` Part B + checklist §3.
-- Cleaned confusing progress-table / re-review notes at top of checklist.
-- Listed §4 review items for user; paused before walking them.
+- Implemented Pre-review cleanup (decisions locked: shared docs all projects; rich configs + on-run hooks; DELETE+UPDATE hooks + audit; finance incr-of-incr; GHA orchestrate stub; Prefect docs stub; architecture/github rolled into AGENTS/README).
+- Verified builds: finance 73 pass / 1 warn; marketing 56; operations 54; incremental + hooks write `audit.dbt_model_hooks` and stamp `loaded_at`.
+- Still open for human: finalize agenda walk (#11), §4–§10 checklist, #6 skills migration, dry run.
 
 ---
 
 ## Snapshot
 
-- **Repo:** `dbt_demo` — root `README.md`, scripts, docs, CI.
-- **Projects:** `mart_finance`, `mart_marketing`, `mart_operations` at **repo root** (not under `projects/`).
-- **Setup:** `. ./setup.sh` — venv + config only (~1 min). No dbt builds in setup.
-- **Bootstrap:** `./scripts/bootstrap.sh` — scan + load raw + dbt build dev + prod. **CI only** / optional pre-warm for C7 defer — **not** shown live in the demo room.
-- **Demo flow:** Part C runs dbt commands **one at a time** from `cd mart_finance` (after `load_raw.sh` as needed).
-- **Lint:** Ruff (Python) + SQLFluff (model SQL) via `.pre-commit-config.yaml` → local commit + `pre-commit.yml`.
-- **CI:** `pre-commit.yml` (changed files) + `ci.yml` (`setup.sh` → `bootstrap.sh` → dbt-checkpoint).
-- **Build:** last known green via `bootstrap.sh` (mart_finance 61/1 warn, mart_marketing 54, mart_operations 52).
+- **Projects:** `mart_*` at repo root; each has `dev_schema` + `generate_schema_name`, layered schemas, tags/colors/persist_docs, shared `models/docs/*.md`, freshness on `raw_orders`.
+- **Finance headline patterns:** incr-of-incr (`*_delta` → `changed_order_ids` → `fct_order_revenue`), model hooks + `audit.dbt_model_hooks`, alias `fct_order_revenue`.
+- **Docs:** `architecture.md` / `github.md` removed (content in AGENTS + README). `remaining-work.md` → checklist pointer.
+- **Orchestration:** `.github/workflows/orchestrate.yml` (pseudo-runnable); `prefect/README.md` (docs-only).
+- **Build:** greened on dev as above (after `--full-refresh`).
 
 ---
 
-## Next session (finish demo prep)
+## Next session
 
-**Primary doc:** `DEMO_CHECKLIST.md`
-
-1. **§4** — layout: tree, `README.md`, `docs/architecture.md`, `docs/conventions.md`, each `mart_*/dbt_project.yml` + C1 framing
-2. **§5** — seeds, `sources.yml`, freshness
-3. **§6** — Part C live demo (C1–C9), one command at a time
-4. **§7–§9** — Part F, D, wrap
-5. **§10** — timed dry run (~50–55 min)
+1. Re-walk / finalize demo-agenda (#11).
+2. Checklist §4 → §10 self-review with updated content.
+3. #6 skills (if time) → dry run.
 
 ---
 
 ## Open items
 
-1. Complete `DEMO_CHECKLIST.md` §4–§10.
-2. End-to-end dry run before the meeting.
-3. Phase 2+ backlog: `docs/remaining-work.md` (Slim CI in Actions, `mart_showcase/`, spread finance features).
+Same as **Left for you** above, plus Phase 2+ backlog under `DEMO_CHECKLIST.md` Pre-review cleanup.
 
 ---
 
@@ -66,8 +60,8 @@ Then §5 → §6 (Part C) → §7–§9 → §10 dry run.
 
 ```bash
 . ./setup.sh
-# Then open DEMO_CHECKLIST.md §4 — or for Part C:
-# ./scripts/load_raw.sh && cd mart_finance
+# Demo Part C:
+./scripts/load_raw.sh && cd mart_finance
 ```
 
 ---
@@ -76,14 +70,9 @@ Then §5 → §6 (Part C) → §7–§9 → §10 dry run.
 
 | Topic | Path |
 |-------|------|
-| **Demo walkthrough checklist** | **`DEMO_CHECKLIST.md`** |
-| Session handoff protocol | `.cursor/rules/session-handoff.mdc` |
+| **Demo + pre-review checklist** | **`DEMO_CHECKLIST.md`** |
 | Meeting / demo script | `docs/demo-agenda.md` |
-| Repo overview (humans) | `README.md` |
-| dbt mechanics (deep-dive) | `docs/dbt-feature-guide.md` |
-| AI token patterns | `docs/ai-practices.md` |
-| Architecture | `docs/architecture.md` |
-| GitHub / PRs | `docs/github.md` |
-| Naming | `docs/conventions.md` |
-| Full dbt feature matrix | `docs/dbt-master-checklist.md` |
-| Backlog | `docs/remaining-work.md` |
+| Exhaustive dbt feature matrix | `docs/dbt-master-checklist.md` |
+| Repo overview | `README.md` |
+| AI instructions | `AGENTS.md` |
+| Backlog pointer | `docs/remaining-work.md` |
