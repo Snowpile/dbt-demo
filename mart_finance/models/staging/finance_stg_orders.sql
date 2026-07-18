@@ -1,3 +1,9 @@
+{{
+    config(
+        event_time='ordered_at'
+    )
+}}
+
 with source as (
     select * from {{ source('raw', 'raw_orders') }}
 ),

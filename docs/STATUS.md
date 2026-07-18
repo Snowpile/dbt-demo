@@ -11,6 +11,12 @@
 
 ## Resume here
 
+### Feature work
+
+`docs/dbt-master-checklist.md` **deleted**. Durable map is `docs/dbt-feature-guide.md` (+ `_showcase/`, `docs/defer.md`).
+
+**Next:** human demo prep — `DEMO_CHECKLIST.md` §4 layout review (then #16 orchestrate, agenda, dry run).
+
 ### Left for you (human)
 
 | # | Item | Where |
@@ -28,31 +34,30 @@
 
 ## Last session
 
-- README: Airflow + Prefect + GHA links; fixed misleading pre-mart `dbt test`; removed master-checklist blurb.
-- Added `orchestration/airflow/` stub (with Prefect under `orchestration/`); optional `.[prefect]` / `.[airflow]` extras + `_commented_out_orchestration_note` in `requirements.json`.
-- Agenda/checklist/AGENTS aligned (build includes tests; Airflow in orchestration story).
+- Folded master-checklist into `docs/dbt-feature-guide.md` / README / conventions; **deleted** `docs/dbt-master-checklist.md`.
+- Closed remaining gaps: `selectors.yml`, `adapter.dispatch` on `cents_to_dollars`, `generate_alias_name`, `query-comment` + `dispatch` in finance `dbt_project.yml`, `docs.show` on tests, CLI examples in README.
+- Fixed showcase KPI version aliases (`finance_showcase_kpi_v1` / `_v2`).
+- Earlier: defer scripts, relationships, unit-test overrides, `_showcase/` config catalog.
 
 ---
 
 ## Snapshot
 
-- Docs: one `mart_*/models/docs.md` each (not per-field files).
-- Hooks: **pre** on `finance_fct_order_revenue`, **post** on `finance_fct_daily_revenue`.
-- `docs.node_color` = dbt Docs DAG color config (under `docs:` key), distinct from `{% docs %}` blocks.
-- README includes sustainable deployment + orchestration stubs under `orchestration/{prefect,airflow}/` + GHA.
-- `dbt build` includes attached tests; standalone `dbt test` reserved for selective/custom (C4).
+- Feature map: `docs/dbt-feature-guide.md` (not a status checklist).
+- Showcase: `mart_finance/models/_showcase/`; microbatch needs `concurrent_batches=false`.
+- Docs: local only via `./dbt_docs.sh`.
 
 ---
 
 ## Next session
 
-Continue human §4 → #16 orchestrate → agenda finalize → §5–§10 → dry run.
+Human §4 → #16 → agenda finalize → dry run. Large uncommitted batch — human commits when ready.
 
 ---
 
 ## Open items
 
-Same as **Left for you** above.
+Uncommitted work from this multi-session feature push. Human commits when ready.
 
 ---
 
@@ -61,6 +66,7 @@ Same as **Left for you** above.
 ```bash
 . ./setup.sh
 ./scripts/load_raw.sh && cd mart_finance
+dbt list --select selector:finance_showcase
 ```
 
 ---
@@ -71,6 +77,7 @@ Same as **Left for you** above.
 |-------|------|
 | **Demo + pre-review checklist** | **`DEMO_CHECKLIST.md`** |
 | Meeting / demo script | `docs/demo-agenda.md` |
-| Exhaustive dbt feature matrix | `docs/dbt-master-checklist.md` |
+| dbt feature map / CLI | `docs/dbt-feature-guide.md` |
+| Defer / slim / clone | `docs/defer.md` |
 | Repo overview | `README.md` |
 | AI instructions | `AGENTS.md` |

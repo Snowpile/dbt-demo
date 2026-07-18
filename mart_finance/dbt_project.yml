@@ -24,6 +24,14 @@ vars:
   # Retention window used by finance_fct_order_revenue pre_hook DELETE (demo DML).
   order_retention_years: 50
 
+# Appears in warehouse query history / DuckDB logs when supported.
+query-comment: "mart_finance target={{ target.name }} node={{ node.name if node is defined else 'n/a' }}"
+
+# Prefer project macros over package macros of the same name when dispatching.
+dispatch:
+  - macro_namespace: dbt
+    search_order: ["mart_finance", "dbt"]
+
 # Project-level run hooks. Model-level: pre_hook on finance_fct_order_revenue,
 # post_hook on finance_fct_daily_revenue (separate models for the demo).
 on-run-start:
@@ -43,6 +51,7 @@ on-run-end:
 
 # Layer defaults. Node-level config() / schema.yml can override.
 # DuckDB N/A (document only): grants, partition_by, cluster_by — warehouse-native elsewhere.
+# Config catalog demos: models/_showcase/ (merge, append, microbatch, contract, versions, …).
 models:
   mart_finance:
     +persist_docs:
@@ -69,3 +78,8 @@ models:
       +tags: ["finance", "marts"]
       +docs:
         node_color: "#87CEEB"
+    _showcase:
+      +schema: showcase
+      +tags: ["finance", "showcase"]
+      +docs:
+        node_color: "#DDA0DD"

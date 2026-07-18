@@ -21,8 +21,18 @@ models:
         tests: [unique, not_null]
       - name: order_id
         description: '{{ doc("order_id") }}'
+        tests:
+          - relationships:
+              arguments:
+                to: ref('operations_stg_orders')
+                field: order_id
       - name: sku
         description: '{{ doc("sku") }}'
+        tests:
+          - relationships:
+              arguments:
+                to: ref('operations_stg_products')
+                field: sku
   - name: operations_stg_products
     description: Product catalog (name + type).
     columns:

@@ -95,6 +95,11 @@ models:
         tests: [unique, not_null]
       - name: customer_id
         description: '{{ doc("customer_id") }}'
+        tests:
+          - relationships:
+              arguments:
+                to: ref('marketing_stg_customers')
+                field: customer_id
       - name: ordered_at
         description: '{{ doc("ordered_at") }}'
       - name: order_total_usd

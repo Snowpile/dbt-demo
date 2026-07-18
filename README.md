@@ -13,7 +13,8 @@ Show a realistic, opinionated dbt setup end to end:
 - A shared **raw** layer loaded from vendored CSVs into DuckDB
 - Three independent dbt projects, one per business domain, sharing that raw data
 - Full dbt feature surface (stg → int → marts, tests, macros, snapshots, sources/freshness,
-incremental / incr-of-incr, hooks, shared `{% docs %}`, exposures, `--defer`/`--state`)
+  incremental / incr-of-incr, hooks, shared `{% docs %}`, exposures, `--defer`/`--state`,
+  config catalog under `mart_finance/models/_showcase/`)
 - CI that mirrors local work, plus **orchestration stubs**: GitHub Actions, Prefect, and Airflow
 
 It doubles as a live demo script (`docs/demo-agenda.md`, `DEMO_CHECKLIST.md`) and an
@@ -24,7 +25,7 @@ AI-agent-friendly repo (`AGENTS.md`, `.cursor/rules/`).
 ```
 dbt-demo/
 ├── setup.sh                 # venv + deps + local config (fast, no builds)
-├── scripts/                 # env, scan, load_raw, dbt_build_all, bootstrap
+├── scripts/                 # env, scan, load_raw, dbt_build_all, bootstrap, pull_state, slim_build, clone_state
 ├── dbt_docs.sh              # docs server for one project
 ├── data/seeds/              # vendored jaffle-shop CSVs
 ├── mart_finance/            # revenue, margin, tax (+ headline dbt patterns)
@@ -32,8 +33,8 @@ dbt-demo/
 ├── mart_operations/         # orders, stores, supplies
 ├── orchestration/           # Prefect + Airflow stubs (docs only)
 ├── profiles.yml.example
-├── .github/workflows/       # pre-commit, ci, orchestrate (stub)
-└── docs/                    # STATUS, demo-agenda, conventions, feature checklists
+├── .github/workflows/       # pre-commit, ci, slim-ci (dispatch), orchestrate (stub)
+└── docs/                    # STATUS, demo-agenda, conventions, feature-guide, defer
 ```
 
 Each `mart_*` is a **separate dbt project** (`dbt_project.yml`, `models/`, `macros/`, …).
@@ -59,6 +60,9 @@ All three read the same `raw.`* tables. **Every project** includes `dev_schema` 
 ```bash
 cd mart_finance
 dbt build --target dev
+dbt list --select tag:showcase
+dbt show --select finance_stg_stores --limit 5
+dbt source freshness
 ```
 
 `dbt build` already **runs + tests** every selected node (models, seeds, snapshots, and the
@@ -102,6 +106,7 @@ swap the profile to Snowflake/BigQuery/etc.; project layout stays the same.
 | ----------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `pre-commit.yml`  | Lint changed files (Ruff, SQLFluff, …)                 | [GitHub Actions](https://docs.github.com/en/actions)                                                                                                            |
 | `ci.yml`          | `setup.sh` → `bootstrap.sh` → dbt-checkpoint (PR gate) | same                                                                                                                                                            |
+| `slim-ci.yml`     | Optional `state:modified+ --defer` demo (`workflow_dispatch`) | `docs/defer.md`                                                                                                                                                 |
 | `orchestrate.yml` | **Stub** scheduled/manual pipeline                     | [GitHub Actions](https://docs.github.com/en/actions) · [workflow syntax](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions) |
 | `orchestration/prefect/` | **Stub** Python flows (Cloud or self-host) | [Prefect](https://docs.prefect.io/) · [self-host](https://docs.prefect.io/v3/manage/self-host) |
 | `orchestration/airflow/` | **Stub** DAG scheduler (industry default) | [Airflow](https://airflow.apache.org/docs/) · [quick start](https://airflow.apache.org/docs/apache-airflow/stable/start.html) |
@@ -132,7 +137,7 @@ This repo stays DuckDB + scripts on purpose. A durable production shape would ad
 | **Orchestration**                        | GitHub Actions, Prefect, and/or Airflow — stubs + links above                              |
 | **Warehouse profile**                    | Swap DuckDB for Snowflake/BigQuery/Postgres; keep `mart_`* projects unchanged              |
 | **Artifacts**                            | Persist `manifest.json` from `main` for Slim CI (`--defer --state`)                        |
-| **Docs hosting**                         | `dbt docs generate` → GitHub Pages / S3 / internal static host                             |
+| **Docs hosting**                         | Local: `./dbt_docs.sh` (branch vs `main`). Prod may host `main` on Pages/S3 — not this repo |
 
 
 None of those are required to run the demo locally; they are the path when you graduate the
@@ -146,7 +151,7 @@ patterns off a laptop.
 | Session handoff / status   | `docs/STATUS.md`               |
 | Demo walkthrough checklist | `DEMO_CHECKLIST.md`            |
 | Live demo runbook          | `docs/demo-agenda.md`          |
-| dbt feature matrix         | `docs/dbt-master-checklist.md` |
-| dbt mechanics              | `docs/dbt-feature-guide.md`    |
+| dbt feature map / CLI      | `docs/dbt-feature-guide.md`    |
+| Defer / slim / clone       | `docs/defer.md`                |
 | Naming / SQL style         | `docs/conventions.md`          |
 | AI agent instructions      | `AGENTS.md`                    |

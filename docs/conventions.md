@@ -44,7 +44,20 @@ for identical semantics only; divergent meanings stay inline in YAML.
 
 On every PK: `unique`, `not_null`.
 
-Add relationship tests when FKs are stable.
+Add `relationships` when FKs are stable (see finance/ops/marketing `schema.yml`).
+
+Custom generics live in `tests/generic/` (e.g. `not_negative`). Singular SQL tests in `tests/`.
+Unit tests: `models/unit_tests.yml` (finance).
+
+## Tags & selection
+
+Layer tags come from `dbt_project.yml` (`staging`, `marts`, …). Model tags add demo markers
+(`pre_hook_demo`, `showcase`). Prefer:
+
+```bash
+dbt build --select tag:marts
+dbt list --select selector:finance_showcase   # mart_finance/selectors.yml
+```
 
 ## SQL style
 

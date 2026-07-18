@@ -25,8 +25,18 @@ models:
         tests: [unique, not_null]
       - name: order_id
         description: '{{ doc("order_id") }}'
+        tests:
+          - relationships:
+              arguments:
+                to: ref('finance_stg_orders')
+                field: order_id
       - name: sku
         description: '{{ doc("sku") }}'
+        tests:
+          - relationships:
+              arguments:
+                to: ref('finance_stg_products')
+                field: sku
   - name: finance_stg_products
     description: Product catalog with USD price.
     columns:
@@ -40,6 +50,9 @@ models:
           - accepted_values:
               arguments:
                 values: ['jaffle', 'beverage']
+              config:
+                docs:
+                  show: true
   - name: finance_stg_supplies
     description: Bill-of-materials rows (supply per product).
     columns:
@@ -150,6 +163,11 @@ models:
         description: '{{ doc("customer_id") }}'
       - name: store_id
         description: '{{ doc("store_id") }}'
+        tests:
+          - relationships:
+              arguments:
+                to: ref('finance_stg_stores')
+                field: store_id
       - name: ordered_at
         description: '{{ doc("ordered_at") }}'
       - name: order_date

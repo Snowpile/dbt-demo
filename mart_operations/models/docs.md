@@ -38,5 +38,5 @@ Store / location identifier. Joins to store attributes (tax rate, targets).
 
 {% docs operations_fct_orders %}
 Incremental order-grain operations fact. Uses `delete+insert` on `order_id`.
-Shared column descriptions live in this file (`{{ doc() }}` in schema.yml).
+Shared column descriptions live in this file (`doc()` references in schema.yml).
 {% enddocs %}

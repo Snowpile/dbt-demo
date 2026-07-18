@@ -89,8 +89,8 @@ CI on PR/push to `main`: `pre-commit.yml` (changed-files lint) + `ci.yml` (setup
 | Current status / handoff | `docs/STATUS.md` |
 | Demo + pre-review checklist | `DEMO_CHECKLIST.md` |
 | Meeting / demo script | `docs/demo-agenda.md` |
-| Exhaustive dbt feature matrix | `docs/dbt-master-checklist.md` |
-| dbt mechanics (deep-dive) | `docs/dbt-feature-guide.md` |
+| dbt feature map / CLI / mechanics | `docs/dbt-feature-guide.md` |
+| Defer / slim / clone | `docs/defer.md` |
 | Naming | `docs/conventions.md` |
 | AI practices (interim) | `docs/ai-practices.md` |
 | Seed provenance | `data/seeds/PROVENANCE.md` |

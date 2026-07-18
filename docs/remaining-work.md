@@ -14,5 +14,5 @@ Do not maintain a parallel checkbox list here. Update `DEMO_CHECKLIST.md` and `d
 |------|-------|
 | What to do next | `docs/STATUS.md` → **Resume here** |
 | Pre-review + demo walkthrough | `DEMO_CHECKLIST.md` |
-| Exhaustive dbt feature matrix | `docs/dbt-master-checklist.md` |
+| dbt feature map / CLI | `docs/dbt-feature-guide.md` |
 | Live meeting script | `docs/demo-agenda.md` |

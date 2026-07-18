@@ -13,3 +13,20 @@ unit_tests:
       rows:
         - {order_id: 'o1', subtotal_usd: 7.00, tax_paid_usd: 0.42, order_total_usd: 7.42}
         - {order_id: 'o2', subtotal_usd: 10.50, tax_paid_usd: 0.63, order_total_usd: 11.13}
+
+  # Demo: overrides.macros replaces the macro *return value* (static string), not the body.
+  - name: test_stg_orders_cents_to_dollars_override
+    description: >
+      Same model with cents_to_dollars overridden to a constant so every money
+      column becomes 1.23 — exercises the unit-test macro-override path.
+    model: finance_stg_orders
+    overrides:
+      macros:
+        cents_to_dollars: "1.23"
+    given:
+      - input: source('raw', 'raw_orders')
+        rows:
+          - {id: 'o1', customer: 'c1', store_id: 's1', ordered_at: '2024-01-01 10:00:00', subtotal: 700, tax_paid: 42, order_total: 742}
+    expect:
+      rows:
+        - {order_id: 'o1', subtotal_usd: 1.23, tax_paid_usd: 1.23, order_total_usd: 1.23}

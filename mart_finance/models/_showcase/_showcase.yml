@@ -1,0 +1,85 @@
+version: 2
+
+models:
+  - name: finance_showcase_disabled
+    description: >
+      Config demo — enabled=false. Present in the project DAG metadata but skipped
+      by dbt build / dbt run.
+    config:
+      enabled: false
+
+  - name: finance_showcase_store_scd
+    description: >
+      Config demo — merge incremental, incremental_predicates, full_refresh=false,
+      model contract, group/access, and a DuckDB index via post_hook.
+    config:
+      contract:
+        enforced: true
+      group: finance_core
+      access: protected
+    columns:
+      - name: store_id
+        data_type: varchar
+        constraints:
+          - type: not_null
+        tests: [unique, not_null]
+      - name: store_name
+        data_type: varchar
+      - name: opened_at
+        data_type: date
+      - name: tax_rate
+        data_type: double
+      - name: merged_at
+        data_type: timestamp
+
+  - name: finance_showcase_order_log
+    description: "Config demo — incremental_strategy=append + full_refresh=true."
+    columns:
+      - name: order_id
+        tests: [not_null]
+
+  - name: finance_showcase_orders_mb
+    description: >
+      Config demo — microbatch (event_time, begin, batch_size, lookback).
+      Uses monthly batches from 2026-01-01 with concurrent_batches=false (DuckDB single-writer).
+    columns:
+      - name: order_id
+        tests: [not_null]
+      - name: ordered_at
+        tests: [not_null]
+
+  - name: finance_showcase_quoted
+    description: "Config demo — column with spaces requires quote=true in YAML."
+    columns:
+      - name: store_id
+        tests: [unique, not_null]
+      - name: Store Name
+        quote: true
+        description: Display name; quoted identifier in the relation.
+      - name: tax_rate
+
+  - name: finance_showcase_custom_incr
+    description: "Config demo — incremental_strategy=custom via get_incremental_custom_sql macro."
+    columns:
+      - name: store_id
+        tests: [unique, not_null]
+
+  - name: finance_showcase_kpi
+    description: "Config demo — model versions (latest_version=2)."
+    latest_version: 2
+    versions:
+      - v: 1
+        config:
+          alias: finance_showcase_kpi_v1
+        columns:
+          - name: store_id
+          - name: store_name
+          - name: kpi_version
+      - v: 2
+        config:
+          alias: finance_showcase_kpi_v2
+        columns:
+          - name: store_id
+          - name: store_name
+          - name: tax_rate
+          - name: kpi_version

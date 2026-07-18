@@ -1,0 +1,17 @@
+# Named selectors (finance)
+
+selectors:
+  - name: finance_marts
+    description: Mart-layer models only (facts + dims).
+    definition:
+      union:
+        - method: path
+          value: models/marts
+        - method: tag
+          value: marts
+
+  - name: finance_showcase
+    description: Config-catalog models under models/_showcase/.
+    definition:
+      method: path
+      value: models/_showcase

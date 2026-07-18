@@ -1,0 +1,6 @@
+# dbt Mesh-style ownership group (demo). Pair with model `group:` + `access:`.
+groups:
+  - name: finance_core
+    owner:
+      name: Finance Analytics
+      email: finance-analytics@example.com

@@ -224,7 +224,8 @@ dbt run-operation audit_relations
 ```
 
 **Show:** `macros/audit_relations.sql` (`run_query()`), `macros/cents_to_dollars.sql`,
-`macros/generate_schema_name.sql`.
+`macros/generate_schema_name.sql`, package macro `dbt_utils.generate_surrogate_key`
+on `finance_fct_daily_revenue`.
 
 ---
 
@@ -248,28 +249,29 @@ structure ports to Snowflake/BigQuery with warehouse-native permissions."
 
 ### C7. `--defer` + `--state` + `dev_schema` (3 min) — headline
 
-**Prerequisite:** prod fully built (pre-warm).
+**Prerequisite:** prod fully built (pre-warm). Scripts: `docs/defer.md`.
 
 ```bash
 git checkout main
-dbt compile --target-path /tmp/dbt --target prod
+./scripts/pull_state.sh mart_finance          # or: dbt compile --target-path /tmp/dbt --target prod
 
 git checkout <your-branch>
 printf '\n-- demo change\n' >> models/marts/finance_fct_daily_revenue.sql
 
-dbt build --select state:modified+ --defer --state /tmp/dbt \
-  --vars '{"dev_schema":"dev"}' --target prod
+./scripts/slim_build.sh mart_finance          # or manual flags below
+# dbt build --select state:modified+ --defer --state /tmp/dbt \
+#   --vars '{"dev_schema":"dev"}' --target prod
 
 git checkout -- models/marts/finance_fct_daily_revenue.sql
 ```
 
-**Say:** On `main`, capture prod manifest to `/tmp/dbt`. On your branch, build only
+**Say:** On `main`, capture prod manifest (`state/mart_finance/` or `/tmp/dbt`). On your branch, build only
 `state:modified+`; defer unchanged refs to prod; `dev_schema` flattens your builds into one
 sandbox schema. Both steps use `--target prod` so DuckDB catalog names match (`prod.duckdb` →
-catalog `prod`). Detail: `docs/dbt-feature-guide.md`.
+catalog `prod`). Detail: `docs/defer.md`.
 
-**Say:** "This is the local proof for **Slim CI** (see B4). In Actions you'd persist this manifest
-from `main` and run the same selector on every PR."
+**Say:** "This is the local proof for **Slim CI** (see B4). Optional Actions demo:
+`.github/workflows/slim-ci.yml` (`workflow_dispatch`). PR gate stays a full build."
 
 ---
 

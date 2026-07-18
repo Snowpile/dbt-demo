@@ -62,7 +62,7 @@ Slim CI in Actions · GitHub Pages docs · `mart_showcase/` · Docker / observab
 | 7 | Pre-mart gate (build stg+int before marts) | `[x]` | `dbt build` includes attached tests; separate `dbt test` only for selective/custom (C4). |
 | 8 | Roll `docs/architecture.md` into `AGENTS.md` + `README.md`, remove | `[x]` | Done; file deleted. |
 | 9 | Incremental-of-incrementals (union changed IDs) | `[x]` | Agenda C3 “why this pattern” — single key list for multi-parent child. |
-| 10 | Explain `docs/dbt-master-checklist.md` usage | `[ ]` | Blurb removed from README/AGENTS — walk the doc itself later. |
+| 10 | Feature map / where patterns live | `[x]` | Was master-checklist; now `docs/dbt-feature-guide.md` (+ `_showcase/`). |
 | 11 | Re-finalize `docs/demo-agenda.md` | `[~]` | Human re-walk before dry run. |
 | 12 | Roll `docs/github.md` into `AGENTS.md` + `README.md`, remove | `[x]` | Done; file deleted. |
 | 13 | Roll `docs/remaining-work.md` into this checklist | `[x]` | **Why:** one execution tracker — avoid parallel checklists. |
@@ -73,11 +73,12 @@ Slim CI in Actions · GitHub Pages docs · `mart_showcase/` · Docker / observab
 
 ### Phase 2+ backlog (after pre-review or mention-only)
 
-- [ ] Slim CI in Actions (`--defer --state`)
+- [x] Slim CI pattern (`docs/defer.md`, `slim_build.sh`, optional `slim-ci.yml` dispatch) — PR gate stays full bootstrap
 - [ ] `mart_showcase/` / spread more features across domains
 - [ ] Snapshots / analyses / metrics beyond current finance examples
 - [ ] Packages expansion (`dbt_expectations`, etc.) if demo needs them
 - [ ] Optional: `pre-commit run --all-files` formatting churn
+- [ ] Optional: upload `manifest.json` from `main` as a CI artifact for PR slim builds
 
 ### Clarifications still open
 
@@ -154,7 +155,7 @@ Show these in **Part A** per `docs/demo-agenda.md` — not a standalone review s
 
 - `.pre-commit-config.yaml`, `.sqlfluff`, `ruff.toml`
 - Branch → PR gloss: `AGENTS.md` (GitHub section)
-- **B4 talk:** CI does a full build; Slim CI (`--defer --state`) is local in C7 / backlog — not in Actions yet
+- **B4 talk:** CI does a full build; Slim CI (`--defer --state`) is local in C7 (`docs/defer.md`) + optional `slim-ci.yml` dispatch — not the PR gate yet
 - Orchestration stubs: `orchestrate.yml` + `orchestration/prefect/` + `orchestration/airflow/` (Part C9 / F)
 
 ---

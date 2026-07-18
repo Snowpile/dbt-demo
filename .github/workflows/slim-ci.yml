@@ -1,0 +1,55 @@
+# Slim CI (defer + state) — optional demo of state:modified+ --defer.
+# PR gate stays full bootstrap in ci.yml. See docs/defer.md.
+name: Slim CI
+
+on:
+  workflow_dispatch:
+    inputs:
+      domain:
+        description: dbt project to slim-build
+        required: true
+        default: mart_finance
+        type: choice
+        options:
+          - mart_finance
+          - mart_marketing
+          - mart_operations
+
+jobs:
+  slim:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Setup
+        run: ./setup.sh
+
+      - name: Load raw + build domain on prod
+        env:
+          DBT_TARGET: prod
+        run: |
+          ./scripts/load_raw.sh
+          cd "${{ inputs.domain }}"
+          ../.venv/bin/dbt deps
+          ../.venv/bin/dbt build --target prod
+
+      - name: Capture state manifest
+        run: ./scripts/pull_state.sh "${{ inputs.domain }}"
+
+      - name: Touch a model so state:modified+ is non-empty
+        run: |
+          if [[ "${{ inputs.domain }}" == "mart_finance" ]]; then
+            printf '\n-- slim-ci touch\n' >> mart_finance/models/marts/finance_fct_daily_revenue.sql
+          else
+            target=$(find "${{ inputs.domain }}/models/marts" -name '*.sql' | head -1)
+            printf '\n-- slim-ci touch\n' >> "$target"
+          fi
+
+      - name: Slim build (defer)
+        env:
+          DBT_STATE_TARGET: prod
+        run: ./scripts/slim_build.sh "${{ inputs.domain }}"

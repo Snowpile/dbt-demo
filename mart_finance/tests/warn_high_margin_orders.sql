@@ -1,7 +1,8 @@
-{{ config(severity='warn', store_failures=true) }}
+{{ config(severity='warn', store_failures=true, docs={'show': true}) }}
 -- Intentionally a WARN-level test (not an error): flags unusually high-margin
 -- orders for analyst review without breaking the build. store_failures=true keeps
 -- the offending rows in a table so you can query them after the run.
+-- docs.show=true: appears in the dbt Docs project tests list.
 select
     order_id,
     gross_margin_pct
