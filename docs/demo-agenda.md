@@ -296,9 +296,10 @@ cd ../mart_operations && dbt build
 
 **Discuss — orchestration options (~30 sec):**
 
-**Say:** "Three stubs: GitHub Actions `orchestrate.yml`, `prefect/`, and `airflow/` (Airflow is
-still the industry default). CI remains the PR gate; orchestration schedules the same scripts.
-Docs links and optional extras are in the README / stub READMEs."
+**Say:** "Three stubs: GitHub Actions `orchestrate.yml`, `orchestration/prefect/`, and
+`orchestration/airflow/` (Airflow is still the industry default). CI remains the PR gate;
+orchestration schedules the same scripts. Docs links and optional extras are in the README /
+stub READMEs."
 
 ---
 
@@ -315,7 +316,7 @@ real platform — same repo shape, different runtime."
 | **Environments** | dev + prod built in setup; **staging** in profile but not demo'd | dev → staging → prod promote; CI secrets per target |
 | **Ingestion** | `load_raw.py` + vendored CSVs | Fivetran, Airbyte, streaming, API loads |
 | **CI — PR checks** | `pre-commit.yml` + full `ci.yml` build | Same, plus **Slim CI** manifest defer (B4, C7) |
-| **CI — schedule** | `orchestrate.yml` + `prefect/` + `airflow/` stubs | Cron Action, Prefect, Airflow, Dagster, dbt Cloud |
+| **CI — schedule** | `orchestrate.yml` + `orchestration/{prefect,airflow}/` stubs | Cron Action, Prefect, Airflow, Dagster, dbt Cloud |
 | **Observability** | dbt tests + `store_failures` | Elementary, Monte Carlo, custom alerting |
 | **Governance** | Descriptions + tests enforced in CI | Grants, RLS, model contracts |
 | **Feature lab** | Finance-heavy | `mart_showcase/` then roll out to domains |

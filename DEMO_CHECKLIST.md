@@ -30,7 +30,7 @@ Portable checklist for preparing and delivering the demo. Check items off as you
 **Resume here (human):**
 
 1. Continue **§4** layout review (README / AGENTS / `dbt_project.yml` / `models/docs.md`)
-2. **After §4:** review `#16` — `orchestrate.yml` + `airflow/README.md` (+ skim `prefect/README.md`)
+2. **After §4:** review `#16` — `orchestrate.yml` + `orchestration/airflow/` (+ skim `orchestration/prefect/`)
 3. Re-check cleanup #1/#4/#9/#14 (docs consolidate, split hooks, incr explain, deploy section)
 4. Finalize `docs/demo-agenda.md` (#11) — C2/C3
 5. Checklist §5 → §10, then timed dry run
@@ -67,8 +67,8 @@ Slim CI in Actions · GitHub Pages docs · `mart_showcase/` · Docker / observab
 | 12 | Roll `docs/github.md` into `AGENTS.md` + `README.md`, remove | `[x]` | Done; file deleted. |
 | 13 | Roll `docs/remaining-work.md` into this checklist | `[x]` | **Why:** one execution tracker — avoid parallel checklists. |
 | 14 | Cleanup `README.md` + sustainable deploy notes | `[~]` / `[↻]` | Orchestration + Airflow + build/test note — skim. |
-| 15 | Stub orchestration — **Prefect** | `[x]` | `prefect/README.md` + `.[prefect]` extra (not in setup). |
-| 16 | Stub orchestration — **GitHub Actions** + **Airflow** | `[x]` | `orchestrate.yml` + `airflow/README.md` — **review after §4**. |
+| 15 | Stub orchestration — **Prefect** | `[x]` | `orchestration/prefect/README.md` + `.[prefect]` extra (not in setup). |
+| 16 | Stub orchestration — **GitHub Actions** + **Airflow** | `[x]` | `orchestrate.yml` + `orchestration/airflow/` — **review after §4**. |
 | — | Remove unnecessary `.gitkeep` files | `[x]` | Done. |
 
 ### Phase 2+ backlog (after pre-review or mention-only)
@@ -155,7 +155,7 @@ Show these in **Part A** per `docs/demo-agenda.md` — not a standalone review s
 - `.pre-commit-config.yaml`, `.sqlfluff`, `ruff.toml`
 - Branch → PR gloss: `AGENTS.md` (GitHub section)
 - **B4 talk:** CI does a full build; Slim CI (`--defer --state`) is local in C7 / backlog — not in Actions yet
-- Orchestration stubs: `orchestrate.yml` + `prefect/` + `airflow/` (Part C9 / F)
+- Orchestration stubs: `orchestrate.yml` + `orchestration/prefect/` + `orchestration/airflow/` (Part C9 / F)
 
 ---
 

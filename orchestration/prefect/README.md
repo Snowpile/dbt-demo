@@ -14,7 +14,7 @@ One of three orchestration options in this demo (alongside GitHub Actions and Ai
 
 1. **GitHub Actions** — `.github/workflows/orchestrate.yml`
 2. **Prefect** — Python flows (Cloud or self-host) that shell `./scripts/bootstrap.sh` / `dbt build`
-3. **Airflow** — `airflow/` stub (industry-standard DAG scheduler)
+3. **Airflow** — `orchestration/airflow/` stub (industry-standard DAG scheduler)
 
 ## Dependencies (not installed by default)
 
@@ -29,7 +29,7 @@ One of three orchestration options in this demo (alongside GitHub Actions and Ai
 ## Intended shape (when implemented)
 
 ```text
-prefect/
+orchestration/prefect/
   README.md          ← you are here
   flows/
     dbt_pipeline.py  ← @flow: scan → load_raw → dbt_build_all (not committed yet)
@@ -62,6 +62,6 @@ def dbt_demo_daily():
 ## Related
 
 - GitHub Actions: `.github/workflows/orchestrate.yml`
-- Airflow stub: `airflow/README.md`
+- Airflow stub: `orchestration/airflow/README.md`
 - CI (PR gate): `.github/workflows/ci.yml`, `pre-commit.yml`
 - Demo Part F: `docs/demo-agenda.md`

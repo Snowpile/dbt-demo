@@ -33,7 +33,7 @@ Airflow installs are heavy; use a dedicated venv or containers in real deploymen
 ## Intended shape (when implemented)
 
 ```text
-airflow/
+orchestration/airflow/
   README.md           ← you are here
   dags/
     dbt_demo_daily.py ← DAG: scan → load_raw → dbt_build_all (not committed yet)
@@ -70,6 +70,6 @@ with DAG(
 ## Related
 
 - GitHub Actions: `.github/workflows/orchestrate.yml`
-- Prefect stub: `prefect/README.md`
+- Prefect stub: `orchestration/prefect/README.md`
 - CI (PR gate): `.github/workflows/ci.yml`, `pre-commit.yml`
 - Demo Part F: `docs/demo-agenda.md`

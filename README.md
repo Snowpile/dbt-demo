@@ -30,8 +30,7 @@ dbt-demo/
 ├── mart_finance/            # revenue, margin, tax (+ headline dbt patterns)
 ├── mart_marketing/          # customers, CLV, segments
 ├── mart_operations/         # orders, stores, supplies
-├── prefect/                 # Prefect orchestration stub (docs only)
-├── airflow/                 # Airflow orchestration stub (docs only)
+├── orchestration/           # Prefect + Airflow stubs (docs only)
 ├── profiles.yml.example
 ├── .github/workflows/       # pre-commit, ci, orchestrate (stub)
 └── docs/                    # STATUS, demo-agenda, conventions, feature checklists
@@ -104,8 +103,8 @@ swap the profile to Snowflake/BigQuery/etc.; project layout stays the same.
 | `pre-commit.yml`  | Lint changed files (Ruff, SQLFluff, …)                 | [GitHub Actions](https://docs.github.com/en/actions)                                                                                                            |
 | `ci.yml`          | `setup.sh` → `bootstrap.sh` → dbt-checkpoint (PR gate) | same                                                                                                                                                            |
 | `orchestrate.yml` | **Stub** scheduled/manual pipeline                     | [GitHub Actions](https://docs.github.com/en/actions) · [workflow syntax](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions) |
-| `prefect/`        | **Stub** Python flows (Cloud or self-host)             | [Prefect](https://docs.prefect.io/) · [self-host](https://docs.prefect.io/v3/manage/self-host)                                                                  |
-| `airflow/`        | **Stub** DAG scheduler (industry default)              | [Airflow](https://airflow.apache.org/docs/) · [quick start](https://airflow.apache.org/docs/apache-airflow/stable/start.html)                                   |
+| `orchestration/prefect/` | **Stub** Python flows (Cloud or self-host) | [Prefect](https://docs.prefect.io/) · [self-host](https://docs.prefect.io/v3/manage/self-host) |
+| `orchestration/airflow/` | **Stub** DAG scheduler (industry default) | [Airflow](https://airflow.apache.org/docs/) · [quick start](https://airflow.apache.org/docs/apache-airflow/stable/start.html) |
 
 
 Optional Python deps for Prefect/Airflow are listed under `extras_require` in `requirements.json`
