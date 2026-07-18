@@ -1,4 +1,4 @@
-{# Model-level overrides: alias, tags, meta, pre/post hooks (vs project + schema.yml). #}
+{# Model-level overrides: alias, tags, meta, pre_hook (post_hook is on finance_fct_daily_revenue). #}
 {{
     config(
         materialized='incremental',
@@ -6,8 +6,8 @@
         incremental_strategy='delete+insert',
         on_schema_change='append_new_columns',
         alias='fct_order_revenue',
-        tags=['finance', 'marts', 'incremental', 'hooks_demo'],
-        meta={'hooks': 'pre_delete_retention_and_audit + post_update_loaded_at_and_audit'},
+        tags=['finance', 'marts', 'incremental', 'pre_hook_demo'],
+        meta={'hooks': 'pre_delete_retention_and_audit'},
         pre_hook=[
             """
             insert into audit.dbt_model_hooks (
@@ -33,26 +33,6 @@
             {% else %}
             select 1
             {% endif %}
-            """
-        ],
-        post_hook=[
-            """
-            update {{ this }}
-            set loaded_at = current_timestamp
-            where loaded_at is null
-            """,
-            """
-            insert into audit.dbt_model_hooks (
-                event_at, invocation_id, model_name, event_type, row_count, note
-            )
-            select
-                current_timestamp,
-                '{{ invocation_id }}',
-                'finance_fct_order_revenue',
-                'post',
-                count(*),
-                'loaded_at stamped'
-            from {{ this }}
             """
         ]
     )
@@ -88,8 +68,7 @@ select
     case
         when f.subtotal_usd > 0 then round(f.gross_profit_usd / f.subtotal_usd, 4)
         else 0
-    end as gross_margin_pct,
-    cast(null as timestamp) as loaded_at
+    end as gross_margin_pct
 from financials as f
 {% if is_incremental() %}
     inner join changed as c

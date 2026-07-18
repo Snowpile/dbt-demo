@@ -52,7 +52,7 @@ data/seeds/*.csv  →  scripts/load_raw.py  →  raw.* (DuckDB)
 | marketing | customers, CLV | `marketing_fct_customer_orders`, `marketing_dim_customers` |
 | operations | orders, stores | `operations_fct_orders`, `operations_dim_stores` |
 
-**Required in every project:** `vars.dev_schema` + `macros/generate_schema_name.sql` (defer sandbox). Shared field docs: `models/docs/*.md` + `{{ doc() }}`.
+**Required in every project:** `vars.dev_schema` + `macros/generate_schema_name.sql` (defer sandbox). Shared field docs: `models/docs.md` + `{{ doc() }}`.
 
 ## GitHub / PR workflow
 
@@ -97,6 +97,6 @@ CI on PR/push to `main`: `pre-commit.yml` (changed-files lint) + `ci.yml` (setup
 
 ### How we use `docs/dbt-master-checklist.md`
 
-Exhaustive **coverage catalog** of dbt features (✅ / 🔶 / ⬜).
-`DEMO_CHECKLIST.md` + `docs/demo-agenda.md` are the **execution path** for the meeting.
-Tick the master checklist as patterns land; do not treat it as the day-of runbook.
+Exhaustive **repo feature-coverage catalog** (✅ / 🔶 / ⬜) — “have we demonstrated this dbt capability yet?”
+`DEMO_CHECKLIST.md` + `docs/demo-agenda.md` are the **meeting** execution path.
+Different jobs: finish the reference vs deliver the talk.

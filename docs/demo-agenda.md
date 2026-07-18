@@ -147,9 +147,10 @@ dbt build --select marts
 dbt build --select +finance_fct_order_revenue
 ```
 
-**Show:** `models/` tree, `dbt_project.yml` (`+tags`, `+meta`, `+docs.node_color`, `+persist_docs`,
-`+schema`, `vars.dev_schema`, `on-run-start`/`on-run-end`). Contrast project vs `schema.yml`
-`config:` vs model `config()` (alias/hooks on `finance_fct_order_revenue`).
+**Show:** `models/` tree, `dbt_project.yml` (`+tags`, `+meta`, `+docs.node_color` for DAG
+colors in dbt Docs, `+persist_docs`, `+schema`, `vars.dev_schema`, `on-run-start`/`on-run-end`).
+Contrast project vs `schema.yml` `config:` vs model `config()` (alias + **pre_hook** on
+`finance_fct_order_revenue`; **post_hook** on `finance_fct_daily_revenue`).
 
 ---
 
@@ -167,11 +168,20 @@ dbt run --select finance_fct_order_revenue --full-refresh
 3. **Child**: `finance_fct_order_revenue` — on incremental runs joins to that ID set
 4. `is_incremental()`, `unique_key`, `delete+insert`, `on_schema_change`
 
-**Say:** "When a child incremental depends on more than one incremental parent, materialize a
-union of IDs first so the child only rebuilds keys that need work."
+**Say — why this pattern:** "If a child incremental has *two* incremental parents, each parent
+can introduce different keys that need reprocessing. Without a union step, the child either
+(a) over-scans both parents with independent watermarks, or (b) misses keys that only one
+parent saw. Building `changed_order_ids` first gives the child a single, cheap key list —
+rebuild only those IDs."
 
-**Also show hooks on the child:** `pre_hook` retention `DELETE` + audit insert;
-`post_hook` `UPDATE loaded_at` + audit insert → `audit.dbt_model_hooks`.
+**Hooks (separate models):**
+
+- **pre_hook** on `finance_fct_order_revenue` — retention `DELETE` + audit insert
+- **post_hook** on `finance_fct_daily_revenue` — `UPDATE loaded_at` + audit insert → `audit.dbt_model_hooks`
+
+```bash
+dbt run --select finance_fct_daily_revenue
+```
 
 Mechanics: `docs/dbt-feature-guide.md`.
 
@@ -266,8 +276,8 @@ from `main` and run the same selector on every PR."
 ./dbt_docs.sh mart_finance    # second terminal (repo root) — serves :8011
 ```
 
-**Show:** DAG graph, shared `{% docs %}` in `models/docs/*.md` (e.g. `order_id` reused across
-tables), `revenue_dashboard` exposure.
+**Show:** DAG graph, shared `{% docs %}` in `models/docs.md` (e.g. `order_id` reused across
+tables via `{{ doc() }}`), `revenue_dashboard` exposure.
 
 ---
 

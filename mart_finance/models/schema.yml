@@ -136,7 +136,7 @@ models:
       # schema.yml-level config override example (tags merge with model/project).
       meta:
         grain: order
-        demo_features: [incremental_of_incrementals, hooks, shared_docs]
+        demo_features: [incremental_of_incrementals, pre_hook, shared_docs]
     tests:
       # dbt_utils package test: order total can never be below its subtotal.
       - dbt_utils.expression_is_true:
@@ -163,10 +163,11 @@ models:
               arguments:
                 min_value: 0
                 max_value: 1
-      - name: loaded_at
-        description: Stamped by post_hook after each run (null in SELECT, set via UPDATE).
   - name: finance_fct_daily_revenue
     description: Daily revenue / profit per store.
+    config:
+      meta:
+        demo_features: [post_hook]
     tests:
       # dbt_utils package test: one row per store per day.
       - dbt_utils.unique_combination_of_columns:
@@ -177,6 +178,8 @@ models:
         tests: [unique, not_null]
       - name: revenue_usd
         tests: [not_negative]
+      - name: loaded_at
+        description: Stamped by post_hook after each run (null in SELECT, set via UPDATE).
   - name: finance_dim_product
     description: Product dimension with cost, margin, and target flag.
     columns:

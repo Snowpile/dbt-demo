@@ -10,7 +10,6 @@ test-paths: ["tests"]
 seed-paths: ["seeds"]
 macro-paths: ["macros"]
 snapshot-paths: ["snapshots"]
-docs-paths: ["models/docs"]
 
 clean-targets:
   - target
@@ -25,7 +24,8 @@ vars:
   # Retention window used by finance_fct_order_revenue pre_hook DELETE (demo DML).
   order_retention_years: 50
 
-# Project-level run hooks (also show model-level pre/post on finance_fct_order_revenue).
+# Project-level run hooks. Model-level: pre_hook on finance_fct_order_revenue,
+# post_hook on finance_fct_daily_revenue (separate models for the demo).
 on-run-start:
   - "{{ log('mart_finance on-run-start target=' ~ target.name, info=True) }}"
   - |

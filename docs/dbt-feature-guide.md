@@ -34,10 +34,13 @@ When a child incremental depends on **more than one** incremental parent:
 
 That keeps the child from re-scanning wide joins just to discover what changed.
 
-### Hooks (finance fact)
+### Hooks (finance — split across models)
 
 - **Project:** `on-run-start` creates `audit.dbt_model_hooks`; `on-run-end` logs.
-- **Model:** `pre_hook` retention `DELETE` + audit insert; `post_hook` `UPDATE loaded_at` + audit insert.
+- **pre_hook** on `finance_fct_order_revenue` — retention `DELETE` + audit insert.
+- **post_hook** on `finance_fct_daily_revenue` — `UPDATE loaded_at` + audit insert.
+
+Separate models so the demo can show each hook type without stacking both on one node.
 
 ---
 

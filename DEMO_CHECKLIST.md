@@ -29,10 +29,12 @@ Portable checklist for preparing and delivering the demo. Check items off as you
 
 **Resume here (human):**
 
-1. Finalize `docs/demo-agenda.md` (#11) — re-walk C2/C3
-2. Checklist §4 → §10 self-review
-3. Optional #6: `ai-practices.md` → `.agents/skills/`
-4. Timed dry run (§10) last
+1. Continue **§4** layout review (README / AGENTS / `dbt_project.yml` / `models/docs.md`)
+2. **After §4:** review `#16` `.github/workflows/orchestrate.yml` (+ skim `prefect/README.md`)
+3. Re-check cleanup #1/#4/#9/#14 (docs consolidate, split hooks, incr explain, deploy section)
+4. Finalize `docs/demo-agenda.md` (#11) — C2/C3
+5. Checklist §5 → §10, then timed dry run
+6. Optional #6: `ai-practices.md` → `.agents/skills/`
 
 Also listed in `docs/STATUS.md` → **Left for you**.
 
@@ -51,22 +53,22 @@ Slim CI in Actions · GitHub Pages docs · `mart_showcase/` · Docker / observab
 
 | # | Item | Status | Notes / current state |
 |---|------|--------|------------------------|
-| 1 | Shared `{% docs %}` / `*.md` field docs across tables | `[x]` | All three projects: `models/docs/*.md` + `{{ doc() }}`. |
-| 2 | Richer configs at project / schema.yml / model layers | `[x]` | tags, meta, node_color, persist_docs, schema, vars, on-run hooks; model alias/hooks; schema.yml meta. DuckDB N/A noted in yml. |
+| 1 | Shared `{% docs %}` in combined `docs.md` | `[x]` / `[↻]` | One `models/docs.md` per project (blocks + applicability comments). |
+| 2 | Richer configs at project / schema.yml / model layers | `[x]` | tags, meta, **`docs.node_color`** (DAG color — not `{% docs %}`), persist_docs, schema, vars, on-run; alias. |
 | 3 | Source freshness on sources | `[x]` | `raw_orders` freshness in all three projects. |
-| 4 | Pre/post hook (UPDATE/DELETE) + audit table, in demo | `[x]` | finance_fct_order_revenue hooks + `audit.dbt_model_hooks`; in agenda C3. |
+| 4 | Pre/post hooks on **separate** models + audit | `[x]` / `[↻]` | **pre** → `finance_fct_order_revenue`; **post** → `finance_fct_daily_revenue`. |
 | 5 | `dev_schema` + `generate_schema_name` in **all** projects | `[x]` | Copied to marketing + operations. |
-| 6 | Convert `ai-practices.md` → `.agents/skills`; rest → `AGENTS.md` / `README.md` | `[📝]` | Noted in AGENTS; do after remaining review polish. |
-| 7 | Build/test up to mart, gate, then marts | `[x]` | Documented in agenda C2 + checklist + README. |
+| 6 | Convert `ai-practices.md` → `.agents/skills`; rest → `AGENTS.md` / `README.md` | `[📝]` | After remaining review polish. |
+| 7 | Pre-mart gate (build/test stg+int before marts) | `[x]` | Catch bad mid-layer data before facts. Agenda C2. |
 | 8 | Roll `docs/architecture.md` into `AGENTS.md` + `README.md`, remove | `[x]` | Done; file deleted. |
-| 9 | Incremental-of-incrementals (union changed IDs) | `[x]` | finance delta parents + `changed_order_ids` + child; agenda C3 discuss. |
-| 10 | Explain `docs/dbt-master-checklist.md` usage | `[x]` | Blurb in README + AGENTS. |
-| 11 | Re-finalize `docs/demo-agenda.md` (include **all** new patterns) | `[~]` | Updated for new patterns; human re-walk before dry run. |
+| 9 | Incremental-of-incrementals (union changed IDs) | `[x]` | Agenda C3 “why this pattern” — single key list for multi-parent child. |
+| 10 | Explain `docs/dbt-master-checklist.md` usage | `[x]` | **Repo feature-coverage catalog** (finish the reference), not the meeting runbook. |
+| 11 | Re-finalize `docs/demo-agenda.md` | `[~]` | Human re-walk before dry run. |
 | 12 | Roll `docs/github.md` into `AGENTS.md` + `README.md`, remove | `[x]` | Done; file deleted. |
-| 13 | Roll `docs/remaining-work.md` into this checklist | `[x]` | Pointer file only. |
-| 14 | Cleanup `README.md` last | `[~]` | Rewritten with rolls; skim once more after build verify. |
+| 13 | Roll `docs/remaining-work.md` into this checklist | `[x]` | **Why:** one execution tracker — avoid parallel checklists. |
+| 14 | Cleanup `README.md` + sustainable deploy notes | `[~]` / `[↻]` | Dockerfile / deployment.yml / orchestrate path — skim. |
 | 15 | Stub orchestration — **Prefect** | `[x]` | `prefect/README.md` docs-only. |
-| 16 | Stub orchestration — **GitHub Actions** | `[x]` | `.github/workflows/orchestrate.yml` pseudo-runnable. |
+| 16 | Stub orchestration — **GitHub Actions** | `[x]` | `orchestrate.yml` — **review after §4**. |
 | — | Remove unnecessary `.gitkeep` files | `[x]` | Done. |
 
 ### Phase 2+ backlog (after pre-review or mention-only)
@@ -188,15 +190,17 @@ Load raw when needed: `./scripts/load_raw.sh` (from repo root) before first dbt 
 - [ ] `dbt ls --select staging` / `marts`
 - [ ] `dbt build --select staging intermediate` then `dbt test --select staging intermediate`
 - [ ] `dbt build --select marts`
-- [ ] Show `dbt_project.yml` configs (tags, colors, persist_docs, vars, on-run hooks)
+- [ ] Show `dbt_project.yml` configs (tags, **docs.node_color**, persist_docs, vars, on-run hooks)
 - [ ] Show project vs schema.yml vs model `config()` layers
+- [ ] Show `models/docs.md` (combined `{% docs %}` + `{{ doc() }}`)
 
-### C3 — Incremental (+ incr-of-incr) + hooks
+### C3 — Incremental (+ incr-of-incr) + hooks on separate models
 - [ ] Show `finance_int_orders_delta`, `finance_int_order_items_delta`
-- [ ] Show `finance_int_changed_order_ids` (union of IDs) — **discuss why**
+- [ ] Show `finance_int_changed_order_ids` — **discuss why** (multi-parent key union)
 - [ ] `dbt run --select finance_fct_order_revenue` (+ full-refresh)
 - [ ] Show child filter to changed IDs; `delete+insert`
-- [ ] Show `pre_hook` DELETE + audit, `post_hook` UPDATE `loaded_at` + audit
+- [ ] Show **pre_hook** on `finance_fct_order_revenue` (DELETE + audit)
+- [ ] Show **post_hook** on `finance_fct_daily_revenue` (UPDATE loaded_at + audit)
 
 ### C4 — Tests
 - [ ] `dbt test --select test_type:generic`

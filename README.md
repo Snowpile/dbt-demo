@@ -38,7 +38,7 @@ dbt-demo/
 
 Each `mart_*` is a **separate dbt project** (`dbt_project.yml`, `models/`, `macros/`, …).
 All three read the same `raw.*` tables. **Every project** includes `dev_schema` +
-`generate_schema_name` and shared field docs under `models/docs/*.md`.
+`generate_schema_name` and shared docs in `models/docs.md` (`{{ doc() }}` in schema.yml).
 
 ## Requirements
 
@@ -98,14 +98,31 @@ Remote: [`Snowpile/dbt-demo`](https://github.com/Snowpile/dbt-demo). Branch → 
 
 - Model names: `{domain}_{layer}_{entity}`
 - PK tests: `unique` + `not_null` on every mart PK
-- Shared column docs: `models/docs/<field>.md` → `{{ doc('field') }}` in `schema.yml`
+- Shared column docs: one `models/docs.md` per project → `{{ doc('field') }}` in `schema.yml`
 - Details: `docs/conventions.md`
 
 ## How we use `docs/dbt-master-checklist.md`
 
-It is the exhaustive **dbt feature coverage catalog** (✅ / 🔶 / ⬜).
-Day-of execution lives in `DEMO_CHECKLIST.md` and `docs/demo-agenda.md`.
-Update the master checklist as patterns are added; do not present it as the live runbook.
+It is the exhaustive **dbt feature coverage catalog** for finishing this *repo as a reference*
+(✅ / 🔶 / ⬜) — “have we demonstrated X in dbt yet?”
+Day-of **meeting** execution lives in `DEMO_CHECKLIST.md` and `docs/demo-agenda.md`.
+Those are different: master checklist = product coverage; demo checklist = talk track.
+
+## Sustainable deployment (beyond this local demo)
+
+This repo stays DuckDB + scripts on purpose. A durable production shape would add:
+
+| Piece | Role |
+|-------|------|
+| **`Dockerfile` / compose** | Same `uv` + `requirements.json` runtime CI and laptops use; no “works on my machine” drift |
+| **`deployment.yml` (or Helm/Terraform)** | Env-specific warehouse profiles, secrets, schedules — not committed credentials |
+| **Orchestration** | Prefer the stubs here: GitHub Actions `orchestrate.yml` and/or Prefect — not Airflow-first |
+| **Warehouse profile** | Swap DuckDB for Snowflake/BigQuery/Postgres; keep `mart_*` projects unchanged |
+| **Artifacts** | Persist `manifest.json` from `main` for Slim CI (`--defer --state`) |
+| **Docs hosting** | `dbt docs generate` → GitHub Pages / S3 / internal static host |
+
+None of those are required to run the demo locally; they are the path when you graduate the
+patterns off a laptop.
 
 ## More docs
 
