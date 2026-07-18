@@ -64,3 +64,10 @@ dbt list --select selector:finance_showcase   # mart_finance/selectors.yml
 - CTEs over nested subqueries.
 - Explicit column lists in final select.
 - `{{ ref('finance_stg_orders') }}` — use full model name including domain prefix.
+
+## Warehouse one-offs (DDL / grants)
+
+Durable architectural SQL (create audit schemas/tables, grants, role setup) lives in
+`scripts/sql/architectural_ddl.sql` — run once per environment, not on every dbt
+invocation. `on-run-start` / `on-run-end` in `dbt_project.yml` are demo cold-start
+only; remove them after the warehouse is initialized.

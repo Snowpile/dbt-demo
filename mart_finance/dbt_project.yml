@@ -32,8 +32,11 @@ dispatch:
   - macro_namespace: dbt
     search_order: ["mart_finance", "dbt"]
 
-# Project-level run hooks. Model-level: pre_hook on finance_fct_order_revenue,
-# post_hook on finance_fct_daily_revenue (separate models for the demo).
+# Project-level run hooks (demo cold-start). After the warehouse is initialized,
+# remove on-run-start / on-run-end — durable DDL/grants live in
+# scripts/sql/architectural_ddl.sql (run once per env, not every dbt invocation).
+# Model-level: pre_hook on finance_fct_order_revenue, post_hook on
+# finance_fct_daily_revenue (separate models for the demo).
 on-run-start:
   - "{{ log('mart_finance on-run-start target=' ~ target.name, info=True) }}"
   - |

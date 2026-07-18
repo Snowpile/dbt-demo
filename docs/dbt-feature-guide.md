@@ -98,6 +98,8 @@ Selection examples: `--select model_name`, `tag:finance`, `path:models/_showcase
 ### Hooks (finance — split across models)
 
 - **Project:** `on-run-start` creates `audit.dbt_model_hooks`; `on-run-end` logs.
+  Demo cold-start only — **after init, remove** `on-run-start` / `on-run-end`.
+  One-off DDL/grants: `scripts/sql/architectural_ddl.sql` (not every invocation).
 - **pre_hook** on `finance_fct_order_revenue` — retention `DELETE` + audit insert.
 - **post_hook** on `finance_fct_daily_revenue` — `UPDATE loaded_at` + audit insert.
 
