@@ -27,6 +27,7 @@ export DBT_PROJECT="${DBT_PROJECT:-mart_finance}"
 export DBT_DOCS_PORT_FINANCE="${DBT_DOCS_PORT_FINANCE:-8011}"
 export DBT_DOCS_PORT_MARKETING="${DBT_DOCS_PORT_MARKETING:-8012}"
 export DBT_DOCS_PORT_OPERATIONS="${DBT_DOCS_PORT_OPERATIONS:-8013}"
+export DBT_DOCS_PORT_COMBINED="${DBT_DOCS_PORT_COMBINED:-8010}"
 
 # uv/venv layout differs by OS: POSIX uses .venv/bin, Windows uses .venv/Scripts.
 if [[ -d "$DBT_DEMO_ROOT/.venv/Scripts" ]]; then

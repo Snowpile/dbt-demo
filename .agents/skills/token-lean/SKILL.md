@@ -1,6 +1,14 @@
-# AI practices (token-lean)
+---
+name: token-lean
+description: >-
+  Token-lean workflows for this dbt repo in Cursor or Claude Code. Use when
+  starting a session, drafting prompts, choosing what to @-reference, deciding
+  whether to spawn subagents, or when the user asks how to keep context small.
+---
 
-How to work on this repo with Cursor or Claude Code using the fewest tokens.
+# Token-lean practices
+
+How to work on this repo with the fewest tokens.
 **Meeting walkthrough:** Part D of `docs/demo-agenda.md`.
 
 ## Shared (both tools)
@@ -29,12 +37,11 @@ How to work on this repo with Cursor or Claude Code using the fewest tokens.
 - **No MCP in this repo** — terminal + repo files only.
 - **Batch independent tool calls in parallel** instead of one-at-a-time.
 
-## Skills (Cursor only)
+## Repo vs personal skills
 
-Skills are **not vendored in this repo**. They live user-level at
-`~/.cursor/skills-cursor/<name>/SKILL.md`. Cursor reads a skill when the task matches
-(e.g. create-rule, create-skill, babysit PR, split-to-prs). Author new skills with the
-create-skill skill; keep repo-specific conventions in `AGENTS.md` / `.cursor/rules/`.
+- **This skill** is vendored under `.agents/skills/token-lean/` (repo-specific).
+- Cursor built-ins live user-level at `~/.cursor/skills-cursor/<name>/SKILL.md`.
+- Keep durable repo conventions in `AGENTS.md` / `.cursor/rules/`; use skills for workflows that should load only when the task matches.
 
 ## Don't
 

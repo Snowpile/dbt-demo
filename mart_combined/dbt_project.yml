@@ -1,0 +1,33 @@
+# mart_combined — docs-only umbrella project
+#
+# Purpose: one dbt Docs DAG with finance + marketing + operations together.
+# Does NOT participate in CI, bootstrap, or slim builds.
+#
+# Usage (repo root):
+#   ./dbt_docs.sh mart_combined
+#
+name: mart_combined
+version: 1.0.0
+config-version: 2
+
+profile: dbt_demo
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+docs-paths: ["models"]
+
+clean-targets:
+  - target
+  - dbt_packages
+
+vars:
+  # Required by package macros (generate_schema_name); unused for docs-only.
+  dev_schema: ""
+  revenue_start_date: "2000-01-01"
+  order_retention_years: 50
+
+# No root models — lineage comes entirely from local packages (see packages.yml).

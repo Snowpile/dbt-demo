@@ -1,12 +1,12 @@
 name: CI
 
 # =============================================================================
-# Slim CI workflow
+# CI workflow
 #
 #   main  → full warehouse build, then persist a baseline for later PRs
-#   PR    → rebuild only what changed vs that baseline (--defer --state)
+#   PR    → Slim CI: rebuild only what changed vs that baseline (--defer --state)
 #
-# Detail: docs/defer.md
+# Detail: docs/defer.md · Manual Slim re-run: slim-ci.yml
 # =============================================================================
 
 on:

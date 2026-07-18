@@ -13,7 +13,7 @@
 
 ### Demo prep (human)
 
-Slim CI is now the **PR gate** (manifest + `prod.duckdb` artifact from `main`). Agenda/docs updated.
+Pre-review cleanup is **complete** (including #6 token-lean skill). Slim CI is the **PR gate**.
 
 **Next:** presenter pass on `docs/demo-agenda.md` (esp. B4 / C9), then checklist **§5 → §10** + dry run.
 
@@ -24,10 +24,9 @@ Slim CI is now the **PR gate** (manifest + `prod.duckdb` artifact from `main`). 
 | # | Item | Where |
 |---|------|-------|
 | 1 | Presenter pass (B4 Slim CI + C9 defer) | `docs/demo-agenda.md` |
-| 2 | Walk checklist **§5** → §9 | `DEMO_CHECKLIST.md` |
+| 2 | Walk checklist **§5** → §10 | `DEMO_CHECKLIST.md` |
 | 3 | Timed dry run (§10) | `DEMO_CHECKLIST.md` |
-| 4 | Push/merge so `main` publishes `dbt-state` | human commit |
-| 5 | Optional: ai-practices → `.agents/skills/` (#6) | `AGENTS.md` note |
+| 4 | Commit + push/merge so `main` publishes `dbt-state` | human commit |
 
 **New chat prompt:** `Read docs/STATUS.md and continue.`
 
@@ -35,16 +34,17 @@ Slim CI is now the **PR gate** (manifest + `prod.duckdb` artifact from `main`). 
 
 ## Last session
 
-- Implemented **persisted Slim CI**: `ci.yml` on `main` uploads `dbt-state` (`state/*/manifest.json` + `data/prod.duckdb`); PRs download and run `state:modified+ --defer`.
-- Scripts: `publish_state.sh`, `slim_build_all.sh`. `slim-ci.yml` = manual re-run.
-- Docs: `defer.md`, README, AGENTS, agenda B4/C9, checklist.
+- Repo cleanup: deleted `docs/remaining-work.md`, `docs/ai-practices.md`, orphan `summary.md`, tracked `.user.yml`.
+- Folded token practices → `.agents/skills/token-lean/SKILL.md`; essentials in `AGENTS.md`; retargeted checklist / agenda / rules / README.
+- Fixed stale script/CI comments; dropped dead `data/.gitkeep` ignore exceptions; gitignore `.user.yml`.
 
 ---
 
 ## Snapshot
 
-- PR gate = Slim CI; main = full bootstrap + artifact.
-- Defer local demo = C9 after marts; setup = Part A in-room.
+- Pre-review cleanup: all items `[x]`.
+- PR gate = Slim CI; main = full bootstrap + `dbt-state` artifact.
+- Defer local demo = C9 after marts; Part A = `. ./setup.sh` only (no bootstrap on screen).
 - Large uncommitted batch — human commits when ready.
 
 ---
@@ -53,14 +53,15 @@ Slim CI is now the **PR gate** (manifest + `prod.duckdb` artifact from `main`). 
 
 1. Presenter re-read agenda B4/C9
 2. Checklist §5 → §10 + dry run
-3. Human push so main artifact exists
-4. Optional #6 ai-practices fold
+3. Human commit + push so main artifact exists
 
 ---
 
 ## Open items
 
-Uncommitted work. First `main` CI after merge must succeed before PRs get a real slim baseline (fallback = full bootstrap until then).
+Uncommitted cleanup (this session + prior). First `main` CI after merge must succeed before PRs get a real slim baseline (fallback = full bootstrap until then).
+
+Phase 2+ (mention-only / later): `mart_showcase/`, more snapshots/analyses, package expansion — see `DEMO_CHECKLIST.md`.
 
 ---
 
@@ -84,3 +85,4 @@ dbt list --select selector:finance_showcase
 | Defer / slim / clone | `docs/defer.md` |
 | Repo overview | `README.md` |
 | AI instructions | `AGENTS.md` |
+| Token-lean skill | `.agents/skills/token-lean/SKILL.md` |

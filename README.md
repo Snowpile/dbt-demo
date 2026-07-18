@@ -31,6 +31,7 @@ dbt-demo/
 ├── mart_finance/            # revenue, margin, tax (+ headline dbt patterns)
 ├── mart_marketing/          # customers, CLV, segments
 ├── mart_operations/         # orders, stores, supplies
+├── mart_combined/           # docs-only: all three domains in one DAG
 ├── orchestration/           # Prefect + Airflow stubs (docs only)
 ├── profiles.yml.example
 ├── .github/workflows/       # pre-commit, ci, slim-ci (dispatch), orchestrate (stub)
@@ -53,6 +54,8 @@ All three read the same `raw.`* tables. **Every project** includes `dev_schema` 
 . ./setup.sh                 # env only (~1 min); installs .[dev] only
 ./scripts/bootstrap.sh       # optional full build (same as CI)
 ./dbt_docs.sh mart_finance   # optional docs → http://127.0.0.1:8011
+./dbt_docs.sh mart_combined  # optional: all domains in one DAG → :8010
+./scripts/sql.sh "select 1"  # optional ad-hoc SQL vs data/dev.duckdb
 ```
 
 ### Single project
@@ -154,3 +157,4 @@ patterns off a laptop.
 | Defer / slim / clone       | `docs/defer.md`                |
 | Naming / SQL style         | `docs/conventions.md`          |
 | AI agent instructions      | `AGENTS.md`                    |
+| Token-lean skill           | `.agents/skills/token-lean/`   |

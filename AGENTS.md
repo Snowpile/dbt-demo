@@ -9,10 +9,12 @@ Data engineering repo. **Read this file first.** Prefer repo files over pretrain
 - Minimize tokens: short replies, small diffs, no drive-by refactors or unsolicited docs.
 - Be self-sufficient: run commands, read errors, fix and retry before asking.
 - Load `docs/` only when the task needs depth — do not paste long specs into chat.
+- **`@`-reference paths** — don't paste logs, whole files, or specs into chat.
+- Scoped asks beat "review everything"; subagents for broad exploration (parent synthesizes).
 - **Only the human commits/pushes.** Never run `git commit`/`push`/`merge`/`rebase`/`reset` (even if asked); you may stage and propose a message, then hand off. See `.cursor/rules/core.mdc`.
 - Multi-project dbt: always `cd mart_<domain>` before dbt commands.
 - Fresh chat when context is long; resume via `docs/STATUS.md`.
-- **Note (pre-review #6):** fold `docs/ai-practices.md` into `.agents/skills/` + this file / `README.md`, then remove the standalone file.
+- Token-lean detail: `.agents/skills/token-lean/SKILL.md` (Part D of `docs/demo-agenda.md`).
 
 ### Autonomy matrix
 
@@ -75,7 +77,9 @@ Detail: `docs/defer.md`.
 . ./setup.sh                         # venv + config (~1 min)
 ./scripts/bootstrap.sh               # scan + load raw + dbt build dev + prod
 ./scripts/dbt_build_all.sh           # re-build only
+./scripts/sql.sh "select 1"          # ad-hoc SQL (dev DuckDB; REPL if no args)
 ./dbt_docs.sh mart_finance           # docs :8011
+./dbt_docs.sh mart_combined          # all-domain DAG :8010 (docs only)
 ```
 
 ## dbt conventions
@@ -95,5 +99,5 @@ Detail: `docs/defer.md`.
 | dbt feature map / CLI / mechanics | `docs/dbt-feature-guide.md` |
 | Defer / slim / clone | `docs/defer.md` |
 | Naming | `docs/conventions.md` |
-| AI practices (interim) | `docs/ai-practices.md` |
+| Token-lean skill | `.agents/skills/token-lean/SKILL.md` |
 | Seed provenance | `data/seeds/PROVENANCE.md` |

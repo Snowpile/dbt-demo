@@ -4,7 +4,8 @@ logs/
 .venv/
 venv/
 data/*
-!data/.gitkeep
+!data/seeds/
+!data/seeds/**
 *.parquet
 *.csv
 *.duckdb

@@ -1,0 +1,6 @@
+# Local packages only — pulls each domain project into one parse graph for Docs.
+# Shared hub deps (dbt_utils) are declared inside each domain's packages.yml.
+packages:
+  - local: ../mart_finance
+  - local: ../mart_marketing
+  - local: ../mart_operations

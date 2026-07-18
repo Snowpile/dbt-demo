@@ -7,8 +7,8 @@ alwaysApply: true
 
 ## On every new chat, read these first
 1. `docs/STATUS.md` — current state / where we left off (**Resume here** section)
-2. `docs/remaining-work.md` — backlog / checklist
-3. `docs/ai-practices.md` — token-lean working patterns
+2. `DEMO_CHECKLIST.md` — demo / backlog checklist (when the task needs it)
+3. `.agents/skills/token-lean/SKILL.md` — only when prompting / token discipline is the task
 
 ## End of every session
 - Follow `.cursor/rules/session-handoff.mdc` — update `docs/STATUS.md` (and checklist/backlog if touched) so the next chat resumes with zero context from this one.

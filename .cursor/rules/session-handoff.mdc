@@ -26,14 +26,13 @@ Do not rely on chat memory — if it is not in `STATUS.md`, the next chat does n
 
 | File | When |
 |------|------|
-| `DEMO_CHECKLIST.md` | Demo prep — progress table, `[x]`/`[↻]` checkboxes, "Resume here" |
-| `docs/remaining-work.md` | Backlog items completed or reprioritized |
+| `DEMO_CHECKLIST.md` | Demo prep — progress table, `[x]`/`[↻]` checkboxes, "Resume here", Phase 2+ backlog |
 | `docs/demo-agenda.md` | Runbook commands or flow changed |
 
 ## New chat startup (agent)
 
 1. Read `docs/STATUS.md` first — especially **Resume here** and **Last session**.
-2. Read `docs/remaining-work.md` or `DEMO_CHECKLIST.md` only if the task needs them.
+2. Read `DEMO_CHECKLIST.md` only if the task needs demo/backlog detail.
 3. Continue from **Resume here** without re-asking what was already decided.
 
 ## User prompt for a fresh chat

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Warehouse bootstrap: validate seeds, load raw, dbt build all domains (dev + prod).
-# Run after setup.sh — or live during the demo (Part A / pre-warm).
+# Run after setup.sh — CI and local pre-warm. Demo Part A only runs `. ./setup.sh` live.
 set -euo pipefail
 
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/env.sh"

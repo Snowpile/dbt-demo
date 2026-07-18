@@ -1,0 +1,11 @@
+packages:
+  - local: ../mart_finance
+    name: mart_finance
+  - local: ../mart_marketing
+    name: mart_marketing
+  - local: ../mart_operations
+    name: mart_operations
+  - name: dbt_utils
+    package: dbt-labs/dbt_utils
+    version: 1.4.1
+sha1_hash: 58ba0a7881359f91d483d362d6205876eaa065b7

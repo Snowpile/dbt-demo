@@ -1,18 +1,34 @@
 #!/usr/bin/env bash
 # Python environment + local config for dbt_demo (fast — no dbt builds).
 # Source for an interactive shell: `. ./setup.sh`
-# Warehouse builds: `./scripts/bootstrap.sh` (pre-warm or live in demo Part A).
+# Warehouse builds: `./scripts/bootstrap.sh` (CI / local pre-warm — not on-screen in the demo).
+#
+# When sourced, restore the caller's shell options on finish — otherwise `set -e`
+# stays on and the next failing command kills the Cursor/VS Code terminal.
+
+_DBT_DEMO_SETUP_SOURCED=0
+if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
+	_DBT_DEMO_SETUP_SOURCED=1
+	_DBT_DEMO_SETUP_OPTS="$(set +o)"
+	_dbt_demo_restore_opts() {
+		trap - RETURN ERR
+		eval "${_DBT_DEMO_SETUP_OPTS:-}" 2>/dev/null || true
+		unset _DBT_DEMO_SETUP_OPTS _DBT_DEMO_SETUP_SOURCED
+	}
+	trap '_dbt_demo_restore_opts' RETURN ERR
+fi
+
 set -euo pipefail
 
 # Set the root directory of the project and enter
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"
 
-# If uv is not installed, print an error message, how to install, and exit
+# If uv is not installed, print an error message, how to install, and stop
 if ! command -v uv >/dev/null 2>&1; then
 	echo "error: uv is required." >&2
 	echo "Install: https://docs.astral.sh/uv/getting-started/installation/" >&2
-	exit 1
+	false
 fi
 
 echo "==> Creating virtualenv (.venv) with uv (Python 3.11)"
@@ -20,9 +36,11 @@ uv venv --python=python3.11
 
 case "$(uname -s)" in
 Darwin* | Linux*)
+	# shellcheck disable=SC1091
 	source .venv/bin/activate
 	;;
 CYGWIN* | MINGW32* | MSYS* | MINGW*)
+	# shellcheck disable=SC1091
 	source .venv/Scripts/activate
 	;;
 *)
@@ -61,6 +79,7 @@ fi
 mkdir -p data
 
 echo "==> Loading environment"
+# shellcheck disable=SC1091
 source "$ROOT/scripts/env.sh"
 
 echo "==> Verifying dbt"

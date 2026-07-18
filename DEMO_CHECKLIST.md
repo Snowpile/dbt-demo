@@ -15,12 +15,12 @@ Portable checklist for preparing and delivering the demo. Check items off as you
 
 | # | Section | Status | Notes |
 |---|---------|--------|-------|
-| — | **Pre-review cleanup** | **Done** (except optional #6) | #11 agenda rewritten; #16 reviewed |
+| — | **Pre-review cleanup** | **Done** | #6 folded; #11 agenda rewritten; #16 reviewed |
 | 1 | Bootstrap — `setup.sh` | **x Done** | Env only; no builds |
 | 2 | Setup subprocesses | **N/A** | Files are in git — show in Part A, not a separate review |
 | 3 | CI / GitHub (Part B) | **x Done** | Slim CI PR gate + main `dbt-state` artifact |
 | 4 | Repo layout & architecture | **x Done** | README/AGENTS/conventions + hooks/architectural_ddl |
-| 5 | Data & sources | **Re-review** | Freshness on all projects |
+| 5 | Data & sources | **x Done** | Freshness on all three projects |
 | 6 | dbt live demo (Part C) | **To do** | C3: merge preferred; strategies in feature guide |
 | 7 | Production path (Part F) | **To do** | Demo vs prod table |
 | 8 | AI workflow (Part D) | **To do** | |
@@ -29,22 +29,22 @@ Portable checklist for preparing and delivering the demo. Check items off as you
 
 **Resume here (human):**
 
-1. Re-read rewritten `docs/demo-agenda.md` once as presenter
-2. Checklist **§5** → §10, then timed dry run
-3. Optional #6: `ai-practices.md` → `.agents/skills/`
+1. Walk checklist **§6** (Part C) against `docs/demo-agenda.md` — run commands, confirm say/show
+2. Then §7–§10 + timed dry run
+3. Commit + push so `main` publishes `dbt-state`
 
 Also listed in `docs/STATUS.md` → **Left for you**.
 
 ### Deferred (mention in demo, not built yet)
 
-GitHub Pages docs · `mart_showcase/` · Docker / observability tooling
-*(Slim CI as PR gate — **done**: `ci.yml` publishes `dbt-state` on main, PRs run `state:modified+`. Orchestration stubs — GHA / Prefect / Airflow — are done; mention in Part B/F.)*
+GitHub Pages docs · Docker / observability tooling · `mart_showcase/` feature lab
+*(All-domain Docs DAG — **done**: `./dbt_docs.sh mart_combined` → :8010. Slim CI as PR gate — **done**. Orchestration stubs — done; mention in Part B/F.)*
 
 ---
 
 ## Pre-review cleanup
 
-*Absorbs `docs/remaining-work.md` for work that must land before final review. Check off as done. Ask/clarify before implementing ambiguous items.*
+*Pre-review cleanup + Phase 2+ backlog live in this file (former `docs/remaining-work.md`). Check off as done. Ask/clarify before implementing ambiguous items.*
 
 **Legend:** `[ ]` todo · `[~]` partial / exists thin · `[x]` done · `[!]` needs decision · `[📝]` note only (do later in sequence)
 
@@ -55,14 +55,14 @@ GitHub Pages docs · `mart_showcase/` · Docker / observability tooling
 | 3 | Source freshness on sources | `[x]` | `raw_orders` freshness in all three projects. |
 | 4 | Pre/post hooks on **separate** models + audit | `[x]` | **pre** → `finance_fct_order_revenue`; **post** → `finance_fct_daily_revenue`. |
 | 5 | `dev_schema` + `generate_schema_name` in **all** projects | `[x]` | Copied to marketing + operations. |
-| 6 | Convert `ai-practices.md` → `.agents/skills`; rest → `AGENTS.md` / `README.md` | `[📝]` | Optional; after agenda / dry-run polish. |
+| 6 | Convert `ai-practices.md` → `.agents/skills`; rest → `AGENTS.md` / `README.md` | `[x]` | `.agents/skills/token-lean/SKILL.md`; essentials in `AGENTS.md`. |
 | 7 | Pre-mart gate (build stg+int before marts) | `[x]` | `dbt build` includes attached tests; separate `dbt test` only for selective/custom (C4). |
 | 8 | Roll `docs/architecture.md` into `AGENTS.md` + `README.md`, remove | `[x]` | Done; file deleted. |
 | 9 | Incremental-of-incrementals (union changed IDs) | `[x]` | Agenda C3 + feature guide; domain uses **`merge`**. |
 | 10 | Feature map / where patterns live | `[x]` | `docs/dbt-feature-guide.md` (+ `_showcase/`). |
 | 11 | Re-finalize `docs/demo-agenda.md` | `[x]` | Setup in Part A; defer = **C9 last** after marts; leaner say/run/show. |
 | 12 | Roll `docs/github.md` into `AGENTS.md` + `README.md`, remove | `[x]` | Done; file deleted. |
-| 13 | Roll `docs/remaining-work.md` into this checklist | `[x]` | **Why:** one execution tracker — avoid parallel checklists. |
+| 13 | Roll `docs/remaining-work.md` into this checklist, remove file | `[x]` | Deleted; backlog = this file + `STATUS.md`. |
 | 14 | Cleanup `README.md` + sustainable deploy notes | `[x]` | Deploy table fixed; orchestration + `architectural_ddl` noted. |
 | 15 | Stub orchestration — **Prefect** | `[x]` | `orchestration/prefect/README.md` + `.[prefect]` extra (not in setup). |
 | 16 | Stub orchestration — **GitHub Actions** + **Airflow** | `[x]` | Human reviewed `orchestrate.yml` + Airflow/Prefect stubs. |
@@ -79,7 +79,7 @@ GitHub Pages docs · `mart_showcase/` · Docker / observability tooling
 
 ### Clarifications still open
 
-None — implement Pre-review cleanup.
+None — pre-review cleanup is complete. Remaining work is presenter walkthrough (§5–§10).
 
 ---
 
@@ -171,12 +171,12 @@ Show these in **Part A** per `docs/demo-agenda.md` — not a standalone review s
 
 ---
 
-## 5. Data & sources  [↻ re-review]
+## 5. Data & sources  [x reviewed]
 
-- [↻] `data/seeds/*.csv` — jaffle-shop vendored data
-- [↻] `sources.yml` per domain — `raw.*` declarations
-- [↻] Source freshness on `raw_orders` in **all three** projects — demo in C6
-- [↻] **Discuss:** real ingestion = Fivetran / Airbyte / API, not `load_raw.py`
+- [x] `data/seeds/*.csv` — jaffle-shop vendored data
+- [x] `sources.yml` per domain — `raw.*` declarations
+- [x] Source freshness on `raw_orders` in **all three** projects — demo in C6
+- [x] **Discuss:** real ingestion = Fivetran / Airbyte / API, not `load_raw.py`
 
 ---
 
@@ -207,6 +207,7 @@ Load raw when needed: `./scripts/load_raw.sh` (from repo root) before first dbt 
 - [ ] `dbt test --select test_type:unit`
 - [ ] Show custom generics: `not_empty_string`, `accepted_range`
 - [ ] Show `warn_high_margin_orders` — warn severity + `store_failures`
+- [ ] Peek failures: `./scripts/sql.sh "select * from dev_dbt_test__audit.warn_high_margin_orders limit 10"`
 - [ ] **Discuss:** observability at scale (Elementary, Monte Carlo, etc.)
 
 ### C5 — Macros
@@ -238,7 +239,7 @@ Load raw when needed: `./scripts/load_raw.sh` (from repo root) before first dbt 
 ### Per-project structure (review as needed)
 - [ ] `dbt_project.yml` — profile, paths, materializations
 - [ ] `schema.yml` — descriptions, tests
-- [ ] Finance-only today: snapshots, exposures, unit tests (`docs/remaining-work.md`)
+- [ ] Finance-only today: snapshots, exposures, unit tests (Phase 2+ in this checklist)
 
 ---
 
@@ -265,8 +266,8 @@ Show `README.md` / `AGENTS.md` + table in `docs/demo-agenda.md` Part F. Mention 
 - [ ] `.cursor/rules/*.mdc` — auto-loaded Cursor rules
 - [ ] `CLAUDE.md` — Claude entry, no MCP
 - [ ] `docs/STATUS.md` — session handoff
-- [ ] `docs/ai-practices.md` — token patterns
-- [ ] `docs/remaining-work.md` — backlog
+- [ ] `.agents/skills/token-lean/SKILL.md` — token patterns
+- [ ] `DEMO_CHECKLIST.md` — Phase 2+ backlog
 - [ ] Demo prompt: *"Read `docs/STATUS.md` and continue."*
 - [ ] Human commits/pushes only
 
