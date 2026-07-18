@@ -105,8 +105,8 @@ swap the profile to Snowflake/BigQuery/etc.; project layout stays the same.
 | Path              | Role                                                   | Docs                                                                                                                                                            |
 | ----------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `pre-commit.yml`  | Lint changed files (Ruff, SQLFluff, …)                 | [GitHub Actions](https://docs.github.com/en/actions)                                                                                                            |
-| `ci.yml`          | `setup.sh` → `bootstrap.sh` → dbt-checkpoint (PR gate) | same                                                                                                                                                            |
-| `slim-ci.yml`     | Optional `state:modified+ --defer` demo (`workflow_dispatch`) | `docs/defer.md`                                                                                                                                                 |
+| `ci.yml`          | **main:** full bootstrap + upload `dbt-state` · **PR:** Slim CI (`state:modified+ --defer`) | `docs/defer.md` |
+| `slim-ci.yml`     | Manual re-run of Slim CI against main artifact | `docs/defer.md` |
 | `orchestrate.yml` | **Stub** scheduled/manual pipeline                     | [GitHub Actions](https://docs.github.com/en/actions) · [workflow syntax](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions) |
 | `orchestration/prefect/` | **Stub** Python flows (Cloud or self-host) | [Prefect](https://docs.prefect.io/) · [self-host](https://docs.prefect.io/v3/manage/self-host) |
 | `orchestration/airflow/` | **Stub** DAG scheduler (industry default) | [Airflow](https://airflow.apache.org/docs/) · [quick start](https://airflow.apache.org/docs/apache-airflow/stable/start.html) |
@@ -136,7 +136,7 @@ This repo stays DuckDB + scripts on purpose. A durable production shape would ad
 | **Orchestration** | Stubs in-repo: `orchestrate.yml` (GHA), `orchestration/prefect/`, `orchestration/airflow/` — pick one for prod schedules |
 | **Warehouse one-offs** | DDL/grants in `scripts/sql/architectural_ddl.sql` (run once per env; not `on-run-start`) |
 | **Warehouse profile** | Swap DuckDB for Snowflake/BigQuery/Postgres; keep `mart_*` projects unchanged |
-| **Artifacts** | Persist `manifest.json` from `main` for Slim CI (`--defer --state`) — see `docs/defer.md` |
+| **Artifacts** | CI uploads `manifest.json` (+ `prod.duckdb` for DuckDB defer) from `main`; PRs Slim CI — `docs/defer.md` |
 | **Docs hosting** | Local: `./dbt_docs.sh`. Prod may host `main` on Pages/S3 — not built here |
 
 None of those are required to run the demo locally; they are the path when you graduate the

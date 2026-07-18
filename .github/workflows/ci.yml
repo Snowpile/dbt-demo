@@ -1,26 +1,173 @@
 name: CI
 
+# =============================================================================
+# Slim CI workflow
+#
+#   main  → full warehouse build, then persist a baseline for later PRs
+#   PR    → rebuild only what changed vs that baseline (--defer --state)
+#
+# Detail: docs/defer.md
+# =============================================================================
+
 on:
-  pull_request:
+  pull_request: # → job slim-pr
   push:
-    branches: [main]
-  workflow_dispatch:
+    branches: [main] # → job publish-state
+  workflow_dispatch: # manual re-publish from main
+
+permissions:
+  contents: read
+  actions: write # upload artifact on main; PRs download it
+
+# One run per PR / branch; cancel superseded runs
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  dbt-build:
+  # ===========================================================================
+  # publish-state  (main only)
+  #
+  # 1. Install toolchain
+  # 2. Full bootstrap (scan seeds → load raw → dbt build all domains, dev+prod)
+  # 3. Structural dbt-checkpoint hooks (need manifests from the build)
+  # 4. Capture per-domain manifest.json into state/
+  # 5. Upload artifact "dbt-state" for PRs:
+  #      - state/*/manifest.json  → what "main" looked like (for state: selectors)
+  #      - data/prod.duckdb       → tables deferred refs must resolve to
+  # ===========================================================================
+  publish-state:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - uses: astral-sh/setup-uv@v5
+      # Fast Python package manager; cache speeds repeat runs
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
         with:
           enable-cache: true
 
-      - run: ./setup.sh
+      # venv + deps + .env / profiles.yml + pre-commit + dbt --version
+      - name: Setup project environment
+        run: ./setup.sh
 
-      - run: ./scripts/bootstrap.sh
+      # Same path CI always used for a full trust build (not Slim CI)
+      - name: Bootstrap warehouse (scan → load → dbt build dev + prod)
+        run: ./scripts/bootstrap.sh
 
-      # Manifest-based dbt-checkpoint structural checks (need compiled manifests from bootstrap).
+      # Manifest-based checks — require the compile/build artifacts from bootstrap
+      - name: dbt structural checks (dbt-checkpoint)
+        run: |
+          for hook in check-script-has-no-table-name \
+            check-model-has-description check-model-has-tests; do
+            uv run pre-commit run "$hook" --hook-stage manual --all-files
+          done
+
+      # pull_state.sh for each mart_* → state/<project>/manifest.json (prod target)
+      - name: Capture state manifests from prod
+        run: ./scripts/publish_state.sh
+
+      # PRs download this blob; retention covers typical open-PR windows
+      - name: Upload Slim CI baseline artifact (dbt-state)
+        uses: actions/upload-artifact@v4
+        with:
+          name: dbt-state
+          path: |
+            state/
+            data/prod.duckdb
+          retention-days: 30
+          if-no-files-found: error
+
+  # ===========================================================================
+  # slim-pr  (pull requests only)
+  #
+  # 1. Install toolchain
+  # 2. Find latest successful main CI run → download artifact "dbt-state"
+  # 3. If no artifact yet (cold start) → full bootstrap fallback
+  # 4. Else Slim CI:
+  #      - refresh raw seeds into prod.duckdb
+  #      - dbt deps per domain
+  #      - slim_build_all: only state:modified+ with --defer --state
+  # 5. Full compile (cheap) + dbt-checkpoint on all projects
+  # ===========================================================================
+  slim-pr:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Setup project environment
+        run: ./setup.sh
+
+      # Locates the newest successful "CI" run on main, then pulls artifact dbt-state.
+      # Sets output fallback=true when there is no usable baseline yet.
+      - name: Download Slim CI baseline from main
+        id: download-state
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # Latest successful CI run on main (has publish-state + artifact)
+          RUN_ID=$(gh run list \
+            --repo "$GITHUB_REPOSITORY" \
+            --branch main \
+            --workflow CI \
+            --json databaseId,conclusion,name \
+            --limit 20 \
+            --jq '[.[] | select(.conclusion=="success")][0].databaseId // empty')
+          if [[ -z "$RUN_ID" ]]; then
+            echo "No successful main CI run found yet."
+            echo "fallback=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "Using main CI run id=$RUN_ID"
+          if ! gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" -n dbt-state -D .; then
+            echo "Artifact dbt-state missing on that run — falling back to full bootstrap."
+            echo "fallback=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # Sanity-check the two pieces Slim CI needs
+          test -f state/mart_finance/manifest.json
+          test -f data/prod.duckdb
+          echo "fallback=false" >> "$GITHUB_OUTPUT"
+
+      # First-time / pre-artifact: behave like the old full PR gate
+      - name: Fallback full bootstrap (no main artifact yet)
+        if: steps.download-state.outputs.fallback == 'true'
+        run: ./scripts/bootstrap.sh
+
+      # Happy path: only rebuild nodes that changed vs main's manifests
+      - name: Refresh raw on prod + slim build (state:modified+)
+        if: steps.download-state.outputs.fallback != 'true'
+        env:
+          DBT_STATE_TARGET: prod # must match target used when manifests were captured
+          DBT_TARGET: prod
+        run: |
+          set -euo pipefail
+          # Keep raw.* in sync with any seed changes on the PR
+          ./scripts/load_raw.sh prod
+          for project in mart_finance mart_marketing mart_operations; do
+            (cd "$project" && ../.venv/bin/dbt deps)
+          done
+          # --defer --state state/<project>/ for each domain that has a manifest
+          ./scripts/slim_build_all.sh 'state:modified+'
+
+      # Compile does not need a full rebuild; produces manifests for checkpoint hooks
+      - name: Compile all projects (for structural checks)
+        run: |
+          set -euo pipefail
+          for project in mart_finance mart_marketing mart_operations; do
+            (cd "$project" && ../.venv/bin/dbt deps && ../.venv/bin/dbt compile --target prod)
+          done
+
       - name: dbt structural checks (dbt-checkpoint)
         run: |
           for hook in check-script-has-no-table-name \

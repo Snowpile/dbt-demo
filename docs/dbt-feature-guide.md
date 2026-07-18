@@ -188,7 +188,7 @@ Project vars example: `revenue_start_date` on `finance_stg_orders` (override wit
 
 **Full runbook:** `docs/defer.md`.
 
-Optional Actions demo: `.github/workflows/slim-ci.yml` (`workflow_dispatch`). PR gate stays full bootstrap.
+Optional Actions: `.github/workflows/slim-ci.yml` (`workflow_dispatch`). PR gate: Slim CI in `ci.yml` (`docs/defer.md`).
 
 ---
 
@@ -223,7 +223,7 @@ File DuckDB is **single-writer** — run domains/targets sequentially; microbatc
 - Extra packages (`dbt_expectations`, `audit_helper`, `codegen`) — `dbt_utils` is enough
 - MetricFlow / semantic layer YAML (MetricFlow may be installed transitively; no models here)
 - Private package pattern, IDE extension notes, `dbt-jsonschema`
-- Uploading `manifest.json` from `main` as a CI artifact (local `pull_state.sh` covers the lesson)
+- Uploading `manifest.json` from `main` — **done** in `ci.yml` (`dbt-state` artifact)
 - Deployed docs sites
 
 ---

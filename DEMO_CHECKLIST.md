@@ -18,7 +18,7 @@ Portable checklist for preparing and delivering the demo. Check items off as you
 | — | **Pre-review cleanup** | **Done** (except optional #6) | #11 agenda rewritten; #16 reviewed |
 | 1 | Bootstrap — `setup.sh` | **x Done** | Env only; no builds |
 | 2 | Setup subprocesses | **N/A** | Files are in git — show in Part A, not a separate review |
-| 3 | CI / GitHub (Part B) | **x Done** | + orchestrate.yml stub |
+| 3 | CI / GitHub (Part B) | **x Done** | Slim CI PR gate + main `dbt-state` artifact |
 | 4 | Repo layout & architecture | **x Done** | README/AGENTS/conventions + hooks/architectural_ddl |
 | 5 | Data & sources | **Re-review** | Freshness on all projects |
 | 6 | dbt live demo (Part C) | **To do** | C3: merge preferred; strategies in feature guide |
@@ -37,8 +37,8 @@ Also listed in `docs/STATUS.md` → **Left for you**.
 
 ### Deferred (mention in demo, not built yet)
 
-Slim CI as PR gate · GitHub Pages docs · `mart_showcase/` · Docker / observability tooling
-*(Orchestration stubs — GHA / Prefect / Airflow — are done; mention in Part B/F.)*
+GitHub Pages docs · `mart_showcase/` · Docker / observability tooling
+*(Slim CI as PR gate — **done**: `ci.yml` publishes `dbt-state` on main, PRs run `state:modified+`. Orchestration stubs — GHA / Prefect / Airflow — are done; mention in Part B/F.)*
 
 ---
 
@@ -70,12 +70,12 @@ Slim CI as PR gate · GitHub Pages docs · `mart_showcase/` · Docker / observab
 
 ### Phase 2+ backlog (after pre-review or mention-only)
 
-- [x] Slim CI pattern (`docs/defer.md`, `slim_build.sh`, optional `slim-ci.yml` dispatch) — PR gate stays full bootstrap
+- [x] Slim CI as PR gate (`ci.yml` upload `dbt-state` on main; PR `state:modified+ --defer`) — `docs/defer.md`
+- [x] Upload `manifest.json` (+ `prod.duckdb`) from `main` as CI artifact
 - [ ] `mart_showcase/` / spread more features across domains
 - [ ] Snapshots / analyses / metrics beyond current finance examples
 - [ ] Packages expansion (`dbt_expectations`, etc.) if demo needs them
 - [ ] Optional: `pre-commit run --all-files` formatting churn
-- [ ] Optional: upload `manifest.json` from `main` as a CI artifact for PR slim builds
 
 ### Clarifications still open
 
@@ -92,7 +92,8 @@ In room: Part A (. ./setup.sh live) → Part B → Part C (defer **last**, after
 
 Second terminal (C7 docs): `./dbt_docs.sh mart_finance` → http://127.0.0.1:8011
 
-No offline bootstrap required for defer — capture manifest after C2+ builds, then C9.
+No offline bootstrap required for defer locally — capture manifest after C2+ builds, then C9.
+CI: push to `main` once after merge so `dbt-state` exists for PR Slim CI.
 
 ---
 
@@ -143,15 +144,16 @@ Show these in **Part A** per `docs/demo-agenda.md` — not a standalone review s
    - `changed-files` → `pre-commit/action` runs `pre-commit run --files …`
    - **Ruff** = Python · **SQLFluff** = `mart_*/models/**/*.sql` (see `.pre-commit-config.yaml` + `.sqlfluff`)
    - Local commit + this workflow; dirty Python or model SQL fails the job
-2. **`ci.yml`** — full pipeline: `setup-uv` → `./setup.sh` → `./scripts/bootstrap.sh` → dbt-checkpoint
-   - Bootstrap builds all three `mart_*` on **dev then prod** (not shown live in the demo)
-   - Checkpoint hooks need manifests from that build (descriptions, tests, no raw table names)
+2. **`ci.yml`** — **main:** full bootstrap + publish `dbt-state` · **PR:** Slim CI (`state:modified+ --defer`)
+   - Artifact: `state/*/manifest.json` + `data/prod.duckdb` (DuckDB needs relations for defer)
+   - Cold start: PR falls back to full bootstrap if no main artifact yet
+   - Checkpoint hooks run after compile on PR / after bootstrap on main
 
 ### Optional backup (open only if asked)
 
 - `.pre-commit-config.yaml`, `.sqlfluff`, `ruff.toml`
 - Branch → PR gloss: `AGENTS.md` (GitHub section)
-- **B4 talk:** CI does a full build; Slim CI (`--defer --state`) is local in **C9** after marts (`docs/defer.md`) + optional `slim-ci.yml` — not the PR gate yet
+- **B4 talk:** PR gate is Slim CI vs main `dbt-state`; local proof in **C9**; `slim-ci.yml` = manual re-run
 - Orchestration stubs: `orchestrate.yml` + `orchestration/prefect/` + `orchestration/airflow/` (Part C8 / F)
 
 ---
@@ -231,7 +233,7 @@ Load raw when needed: `./scripts/load_raw.sh` (from repo root) before first dbt 
 ### C9 — Defer + state (headline, **last**)
 - [ ] After C2+ marts exist — `dbt compile --target-path /tmp/dbt`
 - [ ] Touch a mart + `dbt build --select state:modified+ --defer --state /tmp/dbt --vars '{"dev_schema":"dev"}'`
-- [ ] Tie back to B4 Slim CI; mention prod baseline via `pull_state.sh` / `slim_build.sh`
+- [ ] Tie back to B4: same as PR Slim CI vs main `dbt-state` artifact (`publish_state.sh` / `slim_build_all.sh`)
 
 ### Per-project structure (review as needed)
 - [ ] `dbt_project.yml` — profile, paths, materializations
@@ -249,7 +251,7 @@ Show `README.md` / `AGENTS.md` + table in `docs/demo-agenda.md` Part F. Mention 
 - [ ] **Warehouse:** DuckDB files vs Snowflake / BigQuery / Postgres
 - [ ] **Environments:** dev + prod in setup; staging in profile but not demo'd
 - [ ] **Ingestion:** `load_raw.py` vs Fivetran / Airbyte
-- [ ] **CI PR checks:** pre-commit.yml + full ci.yml vs + Slim CI defer
+- [ ] **CI PR checks:** pre-commit.yml + Slim CI (`state:modified+`) vs main full publish
 - [ ] **CI schedule:** `orchestrate.yml` / Prefect / Airflow stubs vs production schedulers
 - [ ] **Observability:** dbt tests vs Elementary / Monte Carlo
 - [ ] **Governance:** CI descriptions/tests vs grants / RLS / contracts
@@ -273,7 +275,7 @@ Show `README.md` / `AGENTS.md` + table in `docs/demo-agenda.md` Part F. Mention 
 ## 9. Wrap — Part E (~3 min)
 
 - [ ] Recap: uv → CI → dbt surface → production path → AI config
-- [ ] Point to backlog: Slim CI in Actions, GitHub Pages, `_showcase/`
+- [ ] Point to backlog: GitHub Pages, `_showcase/`
 
 ---
 

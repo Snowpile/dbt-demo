@@ -13,18 +13,21 @@
 
 ### Demo prep (human)
 
-Agenda rewritten (#11). Pre-review cleanup done except optional #6.
+Slim CI is now the **PR gate** (manifest + `prod.duckdb` artifact from `main`). Agenda/docs updated.
 
-**Next:** re-read `docs/demo-agenda.md` once as presenter (defer is **C9**, after marts), then checklist **§5 → §10** + timed dry run.
+**Next:** presenter pass on `docs/demo-agenda.md` (esp. B4 / C9), then checklist **§5 → §10** + dry run.
+
+**After you push to `main`:** first successful `publish-state` job creates the `dbt-state` artifact; later PRs slim-build against it.
 
 ### Left for you (human)
 
 | # | Item | Where |
 |---|------|-------|
-| 1 | Presenter pass on rewritten agenda | `docs/demo-agenda.md` |
-| 2 | Walk checklist **§5** (data & sources) → §9 | `DEMO_CHECKLIST.md` |
-| 3 | Timed end-to-end dry run (§10) | `DEMO_CHECKLIST.md` |
-| 4 | Optional: ai-practices → `.agents/skills/` (#6) | `AGENTS.md` note |
+| 1 | Presenter pass (B4 Slim CI + C9 defer) | `docs/demo-agenda.md` |
+| 2 | Walk checklist **§5** → §9 | `DEMO_CHECKLIST.md` |
+| 3 | Timed dry run (§10) | `DEMO_CHECKLIST.md` |
+| 4 | Push/merge so `main` publishes `dbt-state` | human commit |
+| 5 | Optional: ai-practices → `.agents/skills/` (#6) | `AGENTS.md` note |
 
 **New chat prompt:** `Read docs/STATUS.md and continue.`
 
@@ -32,31 +35,32 @@ Agenda rewritten (#11). Pre-review cleanup done except optional #6.
 
 ## Last session
 
-- Agenda: **defer moved to C9 (end of Part C)** — build marts first, `dbt compile` for manifest, then `--defer`. No offline bootstrap for defer.
-- Earlier: `. ./setup.sh` in Part A (in-room); leaner say/run/show rewrite.
+- Implemented **persisted Slim CI**: `ci.yml` on `main` uploads `dbt-state` (`state/*/manifest.json` + `data/prod.duckdb`); PRs download and run `state:modified+ --defer`.
+- Scripts: `publish_state.sh`, `slim_build_all.sh`. `slim-ci.yml` = manual re-run.
+- Docs: `defer.md`, README, AGENTS, agenda B4/C9, checklist.
 
 ---
 
 ## Snapshot
 
-- Feature map: `docs/dbt-feature-guide.md` (+ `_showcase/`).
-- Domain incrementals: `merge`. Demo setup live in Part A; defer last after marts.
-- Orchestration stubs reviewed.
+- PR gate = Slim CI; main = full bootstrap + artifact.
+- Defer local demo = C9 after marts; setup = Part A in-room.
 - Large uncommitted batch — human commits when ready.
 
 ---
 
 ## Next session
 
-1. Presenter re-read of agenda (esp. C9 defer flow)
+1. Presenter re-read agenda B4/C9
 2. Checklist §5 → §10 + dry run
-3. Optional #6 ai-practices fold
+3. Human push so main artifact exists
+4. Optional #6 ai-practices fold
 
 ---
 
 ## Open items
 
-Uncommitted work from multi-session feature push. Human commits when ready.
+Uncommitted work. First `main` CI after merge must succeed before PRs get a real slim baseline (fallback = full bootstrap until then).
 
 ---
 

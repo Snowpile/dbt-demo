@@ -1,12 +1,21 @@
 # dbt_demo — meeting agenda
 
-~50–55 min. Present from this file: **Say** → **Run** → **Show**.
+~50–55 min. Each section: **Say** → **Run** → **Show**.
 
-Deep-dives: `docs/dbt-feature-guide.md` · `docs/defer.md` · `docs/ai-practices.md`
-OS: macOS / Linux / Windows (Git Bash or WSL for `./*.sh`).
+## Overview (open with this)
 
-**Meeting order:** A → B → C → F → D → E
-**Part C order:** C1–C6 → docs → multi-project → **defer last** (after marts are built).
+**Say:** "Here's the whole meeting — then we go section by section."
+
+| Part | Time | What we cover |
+|------|------|----------------|
+| **A** Environment | ~5 min | `uv` + `setup.sh` live — reproducible local runtime (same entry CI uses) |
+| **B** CI / GitHub | ~5 min | Lint on changed files; **main** full build + persist manifests; **PR** Slim CI (`state:modified+`) |
+| **C** dbt live | ~20–25 min | Full dbt surface in `mart_finance` — DAG → incrementals → tests → macros → sources → docs → multi-project → **defer last** |
+| **F** Production path | ~5 min | What stays / what swaps for a real warehouse (Docker, Snowflake, grants, schedulers…) |
+| **D** AI workflow | ~10 min | Repo files as durable context; token-lean agent habits |
+| **E** Wrap | ~3 min | Recap + backlog |
+
+**Arc in one line:** install → CI mirrors local → show dbt end-to-end → map to production → how AI works in this repo → close.
 
 ---
 
@@ -53,24 +62,26 @@ data/seeds/*.csv  →  load_raw  →  raw.*  →  mart_*  →  stg → int → f
 
 **Optional show:** `.pre-commit-config.yaml` (Ruff + SQLFluff blocks).
 
-### B2. Full CI
+### B2. Full CI on `main`
 
-**Say:** "Second workflow: install, bootstrap the warehouse, then structural dbt checks."
+**Say:** "On `main`: install, full bootstrap, structural checks, then **persist** Slim CI baseline."
 
 1. `setup-uv` → `./setup.sh`
 2. `./scripts/bootstrap.sh` — scan + load + build **dev + prod**
-3. **dbt-checkpoint** — descriptions, tests, no raw table names in models
+3. **dbt-checkpoint** — descriptions, tests, no raw table names
+4. `publish_state.sh` → upload artifact **`dbt-state`** (`state/*/manifest.json` + `data/prod.duckdb`)
 
 **Say:** "Lint runs even without local `pre-commit install`. Structural checks need a real build."
 
 ### B3. Branch → PR (~30 sec)
 
-**Say:** "Branch, push, open PR — both workflows run. Details in `AGENTS.md`."
+**Say:** "Branch, push, open PR — lint + Slim CI run on the PR."
 
-### B4. Slim CI talk (~1 min)
+### B4. Slim CI on PRs (~1 min)
 
-**Say:** "PR gate today is a **full** build. End of Part C shows **Slim CI** locally (`--defer --state`) after the marts are built. Prod pattern: save `manifest.json` from `main`, PR builds only `state:modified+`. Optional Actions demo: `slim-ci.yml`."
+**Say:** "PRs download main's **`dbt-state`**, then build only `state:modified+` with `--defer`. Unchanged models resolve from the baseline. That's the point of CI at scale. We prove the same flags live in C9. Manual re-run: `slim-ci.yml`."
 
+**Show:** `ci.yml` jobs `publish-state` vs `slim-pr` — contrast full build on main vs deferred PR build.
 ---
 
 ## Part C — dbt live (~20–25 min)
@@ -195,7 +206,7 @@ dbt build --select state:modified+ --defer --state /tmp/dbt \
 git checkout -- models/marts/finance_fct_daily_revenue.sql
 ```
 
-**Say:** "In production Slim CI the baseline is prod/`main` (`pull_state.sh` / `slim_build.sh` default to `--target prod`). Here we use the marts we just built so the lesson is clear without a separate pre-warm. PR gate stays a full build; optional Actions demo: `slim-ci.yml`."
+**Say:** "Same flags Actions uses on PRs. In GitHub, the baseline is the **`dbt-state`** artifact from `main` (`publish_state.sh` + `prod.duckdb`). Here we use the marts we just built so the lesson is clear in one terminal."
 
 ---
 
@@ -210,7 +221,7 @@ git checkout -- models/marts/finance_fct_daily_revenue.sql
 | Warehouse | DuckDB per env | Snowflake, BigQuery, Postgres |
 | Envs | Profile has staging; CI builds dev + prod | Promote path + secrets per target |
 | Ingestion | Vendored CSV + `load_raw` | Fivetran / Airbyte / APIs |
-| PR CI | Full bootstrap | + Slim CI (`--defer`) |
+| PR CI | Slim CI vs main `dbt-state` artifact | Same pattern (manifest from `main`; warehouse already has prod) |
 | Schedule | GHA / Prefect / Airflow stubs | Same tools, real schedules |
 | Observability | dbt tests + `store_failures` | Elementary / Monte Carlo |
 | Governance | Descriptions + tests in CI; contract in `_showcase/` | Grants, RLS, contracts on warehouse |
@@ -256,7 +267,7 @@ git checkout -- models/marts/finance_fct_daily_revenue.sql
 
 **Recap:** env from `setup.sh` → CI mirrors local → full dbt surface → prod path → AI keeps tokens low.
 
-**Backlog:** Slim CI as PR gate · GitHub Pages docs · expand `_showcase/` — see `DEMO_CHECKLIST.md`.
+**Backlog:** GitHub Pages docs · expand `_showcase/` — see `DEMO_CHECKLIST.md`.
 
 ---
 

@@ -64,7 +64,10 @@ git push -u origin HEAD
 gh pr create --title "..." --body "..."
 ```
 
-CI on PR/push to `main`: `pre-commit.yml` (changed-files lint) + `ci.yml` (setup → bootstrap → dbt-checkpoint). Orchestration stubs (not the PR gate): `.github/workflows/orchestrate.yml`, `orchestration/prefect/`, `orchestration/airflow/`.
+CI on push to `main`: full bootstrap + upload **`dbt-state`** artifact (manifests + `prod.duckdb`).
+CI on PR: download that artifact → `state:modified+ --defer` (Slim CI). Lint: `pre-commit.yml`.
+Orchestration stubs (not the PR gate): `orchestrate.yml`, `orchestration/prefect/`, `orchestration/airflow/`.
+Detail: `docs/defer.md`.
 
 ## Quick commands
 

@@ -1,15 +1,14 @@
 # Defer, state selectors, and slim builds
 
-Local proof of **Slim CI**: build only what changed on your branch; resolve other `ref()`s
-from a baseline `manifest.json` (usually prod / `main`).
+**Slim CI:** build only what changed vs a baseline `manifest.json` (usually `main` /
+prod); resolve other `ref()`s with `--defer --state`.
 
-Day-of demo commands: `docs/demo-agenda.md` §C7. Scripts below wrap the same flags.
+Day-of demo: `docs/demo-agenda.md` §C9. Scripts below wrap the same flags.
 
 ## Prerequisites
 
-1. Prod (or staging) warehouse already built for the domain:
-   `DBT_TARGET=prod ./scripts/dbt_build_all.sh` (or build one project).
-2. Both capture and slim steps use the **same** `--target` so DuckDB catalog names match
+1. Baseline warehouse already built for the domain (prod locally, or CI artifact).
+2. Capture and slim use the **same** `--target` so DuckDB catalog names match
    (`prod.duckdb` → catalog `prod`).
 
 ## Scripts
@@ -17,7 +16,9 @@ Day-of demo commands: `docs/demo-agenda.md` §C7. Scripts below wrap the same fl
 | Script | Role |
 |--------|------|
 | `./scripts/pull_state.sh [mart_*]` | `dbt compile --target prod --target-path state/<project>/` |
+| `./scripts/publish_state.sh` | `pull_state` for all three domains |
 | `./scripts/slim_build.sh [mart_*] [selector]` | `dbt build --select … --defer --state state/<project>/` |
+| `./scripts/slim_build_all.sh [selector]` | Slim-build every domain that has a manifest |
 | `./scripts/clone_state.sh [mart_*] [selector]` | `dbt clone --state …` into the `dev_schema` sandbox |
 
 `state/` is gitignored (see `.gitignore`).
@@ -27,7 +28,7 @@ Day-of demo commands: `docs/demo-agenda.md` §C7. Scripts below wrap the same fl
 ```bash
 . ./setup.sh
 DBT_TARGET=prod ./scripts/dbt_build_all.sh   # once / when prod is stale
-./scripts/pull_state.sh mart_finance
+./scripts/publish_state.sh                   # or: ./scripts/pull_state.sh mart_finance
 
 # on a branch with model edits:
 ./scripts/slim_build.sh mart_finance
@@ -41,7 +42,7 @@ Manual (matches agenda `/tmp/dbt`):
 
 ```bash
 cd mart_finance
-dbt compile --target-path /tmp/dbt --target prod
+dbt compile --target-path /tmp/dbt --target prod   # or omit --target after a live build
 dbt build --select state:modified+ --defer --state /tmp/dbt \
   --vars '{"dev_schema":"dev"}' --target prod
 ```
@@ -92,13 +93,20 @@ so deferred parents exist without a full rebuild:
 
 Then slim-build only the models you edited.
 
-## CI
+## CI (GitHub Actions)
 
-- **PR gate** stays a full `./scripts/bootstrap.sh` (`.github/workflows/ci.yml`) — trust model for the demo.
-- **Slim CI pattern** (optional): `.github/workflows/slim-ci.yml` (`workflow_dispatch`) captures state after a prod build and runs `state:modified+ --defer`. Wire artifact upload from `main` when you want PRs to download a real `main` manifest instead of capturing in-job.
+| Event | Job | Behavior |
+|-------|-----|----------|
+| Push to `main` | `publish-state` | Full `bootstrap.sh` → dbt-checkpoint → `publish_state.sh` → upload artifact **`dbt-state`** (`state/*/manifest.json` + `data/prod.duckdb`) |
+| Pull request | `slim-pr` | Download latest successful main **`dbt-state`** → `load_raw.sh prod` → `slim_build_all.sh state:modified+` → compile + checkpoint |
+| Manual | `slim-ci.yml` | Same download + slim (optional selector) |
+
+If no main artifact exists yet (first clone / cold start), the PR job **falls back** to a full bootstrap.
+
+DuckDB has no shared cloud warehouse, so the artifact includes **`prod.duckdb`** so deferred `ref()`s resolve to real relations. On Snowflake/BQ you'd persist manifests only and point at the live prod database.
 
 ## Related
 
 - `macros/generate_schema_name.sql` + `vars.dev_schema` — sandbox naming
 - `docs/dbt-feature-guide.md` — short flag table
-- `DEMO_CHECKLIST.md` Phase 2 — “Slim CI in Actions” as a future PR-gate swap
+- `docs/demo-agenda.md` §B4 / §C9 — talk track
