@@ -10,4 +10,4 @@
 | AI rules | `AGENTS.md` |
 
 **Quick start (full build):** `. ./setup.sh` then `./scripts/bootstrap.sh`
-**Demo prep:** see `DEMO_CHECKLIST.md` — pre-warm with `setup.sh` only; Part C runs dbt one command at a time.
+**Demo prep:** see `DEMO_CHECKLIST.md` — run `. ./setup.sh` in Part A (in room); Part C runs dbt one command at a time.

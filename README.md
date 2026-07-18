@@ -25,7 +25,7 @@ AI-agent-friendly repo (`AGENTS.md`, `.cursor/rules/`).
 ```
 dbt-demo/
 ├── setup.sh                 # venv + deps + local config (fast, no builds)
-├── scripts/                 # env, scan, load_raw, dbt_build_all, bootstrap, pull_state, slim_build, clone_state
+├── scripts/                 # env, scan, load_raw, bootstrap, slim/defer helpers, sql/architectural_ddl.sql
 ├── dbt_docs.sh              # docs server for one project
 ├── data/seeds/              # vendored jaffle-shop CSVs
 ├── mart_finance/            # revenue, margin, tax (+ headline dbt patterns)
@@ -129,16 +129,15 @@ Remote: `[Snowpile/dbt-demo](https://github.com/Snowpile/dbt-demo)`. Branch → 
 
 This repo stays DuckDB + scripts on purpose. A durable production shape would add:
 
-
-| Piece                                    | Role                                                                                       |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `**Dockerfile` / compose**               | Same `uv` + `requirements.json` runtime CI and laptops use; no “works on my machine” drift |
-| `**deployment.yml` (or Helm/Terraform)** | Env-specific warehouse profiles, secrets, schedules — not committed credentials            |
-| **Orchestration**                        | GitHub Actions, Prefect, and/or Airflow — stubs + links above                              |
-| **Warehouse profile**                    | Swap DuckDB for Snowflake/BigQuery/Postgres; keep `mart_`* projects unchanged              |
-| **Artifacts**                            | Persist `manifest.json` from `main` for Slim CI (`--defer --state`)                        |
-| **Docs hosting**                         | Local: `./dbt_docs.sh` (branch vs `main`). Prod may host `main` on Pages/S3 — not this repo |
-
+| Piece | Role |
+|-------|------|
+| **Dockerfile / compose** | Same `uv` + `requirements.json` runtime CI and laptops use; no “works on my machine” drift |
+| **deployment.yml (or Helm/Terraform)** | Env-specific warehouse profiles, secrets, schedules — not committed credentials |
+| **Orchestration** | Stubs in-repo: `orchestrate.yml` (GHA), `orchestration/prefect/`, `orchestration/airflow/` — pick one for prod schedules |
+| **Warehouse one-offs** | DDL/grants in `scripts/sql/architectural_ddl.sql` (run once per env; not `on-run-start`) |
+| **Warehouse profile** | Swap DuckDB for Snowflake/BigQuery/Postgres; keep `mart_*` projects unchanged |
+| **Artifacts** | Persist `manifest.json` from `main` for Slim CI (`--defer --state`) — see `docs/defer.md` |
+| **Docs hosting** | Local: `./dbt_docs.sh`. Prod may host `main` on Pages/S3 — not built here |
 
 None of those are required to run the demo locally; they are the path when you graduate the
 patterns off a laptop.

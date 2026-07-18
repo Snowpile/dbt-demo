@@ -3,7 +3,7 @@
     config(
         materialized='incremental',
         unique_key='order_id',
-        incremental_strategy='delete+insert',
+        incremental_strategy='merge',
         on_schema_change='append_new_columns',
         alias='fct_order_revenue',
         tags=['finance', 'marts', 'incremental', 'pre_hook_demo'],

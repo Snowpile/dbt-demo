@@ -2,7 +2,7 @@
     config(
         materialized='incremental',
         unique_key='order_item_id',
-        incremental_strategy='delete+insert',
+        incremental_strategy='merge',
         on_schema_change='append_new_columns',
         tags=['finance', 'intermediate', 'incremental', 'delta']
     )

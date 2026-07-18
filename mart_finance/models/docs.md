@@ -48,8 +48,9 @@ Gross profit divided by subtotal, rounded to 4 decimals. Ratio in `[0, 1]`
 {% docs finance_fct_order_revenue %}
 Incremental order-grain revenue fact.
 
-**Incremental strategy:** `unique_key='order_id'`, `delete+insert`,
-`on_schema_change='append_new_columns'`.
+**Incremental strategy:** `unique_key='order_id'`, `merge`,
+`on_schema_change='append_new_columns'`. Prefer `merge` / `append` over `delete+insert`
+(see `docs/dbt-feature-guide.md` and `models/_showcase/`).
 
 **Incremental-of-incrementals:** On incremental runs, filters to `order_id`s from
 `finance_int_changed_order_ids` (union of keys from two upstream incremental parents).

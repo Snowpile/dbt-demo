@@ -11,22 +11,20 @@
 
 ## Resume here
 
-### Feature work
+### Demo prep (human)
 
-`docs/dbt-master-checklist.md` **deleted**. Durable map is `docs/dbt-feature-guide.md` (+ `_showcase/`, `docs/defer.md`).
+Agenda rewritten (#11). Pre-review cleanup done except optional #6.
 
-**Next:** human demo prep — `DEMO_CHECKLIST.md` §4 layout review (then #16 orchestrate, agenda, dry run).
+**Next:** re-read `docs/demo-agenda.md` once as presenter (defer is **C9**, after marts), then checklist **§5 → §10** + timed dry run.
 
 ### Left for you (human)
 
 | # | Item | Where |
 |---|------|-------|
-| 1 | Finish **§4** layout review | `DEMO_CHECKLIST.md` §4 |
-| 2 | **After §4:** review orchestrate + Airflow (#16) | `.github/workflows/orchestrate.yml`, `orchestration/airflow/`, skim `orchestration/prefect/` |
-| 3 | Re-check #1 docs.md consolidate, #4 split hooks, #9 incr explain, #14 deploy section | files below |
-| 4 | Finalize demo agenda (#11) | `docs/demo-agenda.md` C2–C3 |
-| 5 | Checklist §5 → §10 + timed dry run | `DEMO_CHECKLIST.md` |
-| 6 | Optional: ai-practices → `.agents/skills/` (#6) | `AGENTS.md` note |
+| 1 | Presenter pass on rewritten agenda | `docs/demo-agenda.md` |
+| 2 | Walk checklist **§5** (data & sources) → §9 | `DEMO_CHECKLIST.md` |
+| 3 | Timed end-to-end dry run (§10) | `DEMO_CHECKLIST.md` |
+| 4 | Optional: ai-practices → `.agents/skills/` (#6) | `AGENTS.md` note |
 
 **New chat prompt:** `Read docs/STATUS.md and continue.`
 
@@ -34,30 +32,31 @@
 
 ## Last session
 
-- Folded master-checklist into `docs/dbt-feature-guide.md` / README / conventions; **deleted** `docs/dbt-master-checklist.md`.
-- Closed remaining gaps: `selectors.yml`, `adapter.dispatch` on `cents_to_dollars`, `generate_alias_name`, `query-comment` + `dispatch` in finance `dbt_project.yml`, `docs.show` on tests, CLI examples in README.
-- Fixed showcase KPI version aliases (`finance_showcase_kpi_v1` / `_v2`).
-- Earlier: defer scripts, relationships, unit-test overrides, `_showcase/` config catalog.
+- Agenda: **defer moved to C9 (end of Part C)** — build marts first, `dbt compile` for manifest, then `--defer`. No offline bootstrap for defer.
+- Earlier: `. ./setup.sh` in Part A (in-room); leaner say/run/show rewrite.
 
 ---
 
 ## Snapshot
 
-- Feature map: `docs/dbt-feature-guide.md` (not a status checklist).
-- Showcase: `mart_finance/models/_showcase/`; microbatch needs `concurrent_batches=false`.
-- Docs: local only via `./dbt_docs.sh`.
+- Feature map: `docs/dbt-feature-guide.md` (+ `_showcase/`).
+- Domain incrementals: `merge`. Demo setup live in Part A; defer last after marts.
+- Orchestration stubs reviewed.
+- Large uncommitted batch — human commits when ready.
 
 ---
 
 ## Next session
 
-Human §4 → #16 → agenda finalize → dry run. Large uncommitted batch — human commits when ready.
+1. Presenter re-read of agenda (esp. C9 defer flow)
+2. Checklist §5 → §10 + dry run
+3. Optional #6 ai-practices fold
 
 ---
 
 ## Open items
 
-Uncommitted work from this multi-session feature push. Human commits when ready.
+Uncommitted work from multi-session feature push. Human commits when ready.
 
 ---
 

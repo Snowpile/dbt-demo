@@ -38,6 +38,6 @@ Store / location identifier.
 {% enddocs %}
 
 {% docs marketing_fct_customer_orders %}
-Incremental order-grain fact for marketing (customer × order). Uses `delete+insert`
+Incremental order-grain fact for marketing (customer × order). Uses `merge`
 on `order_id`. Shared column descriptions live in this file (`doc()` references in schema.yml).
 {% enddocs %}

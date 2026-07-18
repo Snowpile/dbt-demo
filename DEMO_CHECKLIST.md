@@ -11,17 +11,17 @@ Portable checklist for preparing and delivering the demo. Check items off as you
 
 ## Progress summary
 
-*Update this table when you finish a section. Last updated: 2026-07-17.*
+*Update this table when you finish a section. Last updated: 2026-07-18.*
 
 | # | Section | Status | Notes |
 |---|---------|--------|-------|
-| — | **Pre-review cleanup** | **Mostly done** | #6/#11/#14 polish + human agenda walk left |
+| — | **Pre-review cleanup** | **Done** (except optional #6) | #11 agenda rewritten; #16 reviewed |
 | 1 | Bootstrap — `setup.sh` | **x Done** | Env only; no builds |
 | 2 | Setup subprocesses | **N/A** | Files are in git — show in Part A, not a separate review |
 | 3 | CI / GitHub (Part B) | **x Done** | + orchestrate.yml stub |
-| 4 | Repo layout & architecture | **Re-review** | architecture/github now in README/AGENTS |
+| 4 | Repo layout & architecture | **x Done** | README/AGENTS/conventions + hooks/architectural_ddl |
 | 5 | Data & sources | **Re-review** | Freshness on all projects |
-| 6 | dbt live demo (Part C) | **To do** | Updated C2/C3 (gate, incr-of-incr, hooks) |
+| 6 | dbt live demo (Part C) | **To do** | C3: merge preferred; strategies in feature guide |
 | 7 | Production path (Part F) | **To do** | Demo vs prod table |
 | 8 | AI workflow (Part D) | **To do** | |
 | 9 | Wrap (Part E) | **To do** | |
@@ -29,19 +29,16 @@ Portable checklist for preparing and delivering the demo. Check items off as you
 
 **Resume here (human):**
 
-1. Continue **§4** layout review (README / AGENTS / `dbt_project.yml` / `models/docs.md`)
-2. **After §4:** review `#16` — `orchestrate.yml` + `orchestration/airflow/` (+ skim `orchestration/prefect/`)
-3. Re-check cleanup #1/#4/#9/#14 (docs consolidate, split hooks, incr explain, deploy section)
-4. Finalize `docs/demo-agenda.md` (#11) — C2/C3
-5. Checklist §5 → §10, then timed dry run
-6. Optional #6: `ai-practices.md` → `.agents/skills/`
+1. Re-read rewritten `docs/demo-agenda.md` once as presenter
+2. Checklist **§5** → §10, then timed dry run
+3. Optional #6: `ai-practices.md` → `.agents/skills/`
 
 Also listed in `docs/STATUS.md` → **Left for you**.
 
 ### Deferred (mention in demo, not built yet)
 
-Slim CI in Actions · GitHub Pages docs · `mart_showcase/` · Docker / observability tooling
-*(Prefect + Airflow + GHA orchestration stubs are tracked in Pre-review cleanup.)*
+Slim CI as PR gate · GitHub Pages docs · `mart_showcase/` · Docker / observability tooling
+*(Orchestration stubs — GHA / Prefect / Airflow — are done; mention in Part B/F.)*
 
 ---
 
@@ -53,22 +50,22 @@ Slim CI in Actions · GitHub Pages docs · `mart_showcase/` · Docker / observab
 
 | # | Item | Status | Notes / current state |
 |---|------|--------|------------------------|
-| 1 | Shared `{% docs %}` in combined `docs.md` | `[x]` / `[↻]` | One `models/docs.md` per project (blocks + applicability comments). |
+| 1 | Shared `{% docs %}` in combined `docs.md` | `[x]` | One `models/docs.md` per project (blocks + applicability comments). |
 | 2 | Richer configs at project / schema.yml / model layers | `[x]` | tags, meta, **`docs.node_color`** (DAG color — not `{% docs %}`), persist_docs, schema, vars, on-run; alias. |
 | 3 | Source freshness on sources | `[x]` | `raw_orders` freshness in all three projects. |
-| 4 | Pre/post hooks on **separate** models + audit | `[x]` / `[↻]` | **pre** → `finance_fct_order_revenue`; **post** → `finance_fct_daily_revenue`. |
+| 4 | Pre/post hooks on **separate** models + audit | `[x]` | **pre** → `finance_fct_order_revenue`; **post** → `finance_fct_daily_revenue`. |
 | 5 | `dev_schema` + `generate_schema_name` in **all** projects | `[x]` | Copied to marketing + operations. |
-| 6 | Convert `ai-practices.md` → `.agents/skills`; rest → `AGENTS.md` / `README.md` | `[📝]` | After remaining review polish. |
+| 6 | Convert `ai-practices.md` → `.agents/skills`; rest → `AGENTS.md` / `README.md` | `[📝]` | Optional; after agenda / dry-run polish. |
 | 7 | Pre-mart gate (build stg+int before marts) | `[x]` | `dbt build` includes attached tests; separate `dbt test` only for selective/custom (C4). |
 | 8 | Roll `docs/architecture.md` into `AGENTS.md` + `README.md`, remove | `[x]` | Done; file deleted. |
-| 9 | Incremental-of-incrementals (union changed IDs) | `[x]` | Agenda C3 “why this pattern” — single key list for multi-parent child. |
-| 10 | Feature map / where patterns live | `[x]` | Was master-checklist; now `docs/dbt-feature-guide.md` (+ `_showcase/`). |
-| 11 | Re-finalize `docs/demo-agenda.md` | `[~]` | Human re-walk before dry run. |
+| 9 | Incremental-of-incrementals (union changed IDs) | `[x]` | Agenda C3 + feature guide; domain uses **`merge`**. |
+| 10 | Feature map / where patterns live | `[x]` | `docs/dbt-feature-guide.md` (+ `_showcase/`). |
+| 11 | Re-finalize `docs/demo-agenda.md` | `[x]` | Setup in Part A; defer = **C9 last** after marts; leaner say/run/show. |
 | 12 | Roll `docs/github.md` into `AGENTS.md` + `README.md`, remove | `[x]` | Done; file deleted. |
 | 13 | Roll `docs/remaining-work.md` into this checklist | `[x]` | **Why:** one execution tracker — avoid parallel checklists. |
-| 14 | Cleanup `README.md` + sustainable deploy notes | `[~]` / `[↻]` | Orchestration + Airflow + build/test note — skim. |
+| 14 | Cleanup `README.md` + sustainable deploy notes | `[x]` | Deploy table fixed; orchestration + `architectural_ddl` noted. |
 | 15 | Stub orchestration — **Prefect** | `[x]` | `orchestration/prefect/README.md` + `.[prefect]` extra (not in setup). |
-| 16 | Stub orchestration — **GitHub Actions** + **Airflow** | `[x]` | `orchestrate.yml` + `orchestration/airflow/` — **review after §4**. |
+| 16 | Stub orchestration — **GitHub Actions** + **Airflow** | `[x]` | Human reviewed `orchestrate.yml` + Airflow/Prefect stubs. |
 | — | Remove unnecessary `.gitkeep` files | `[x]` | Done. |
 
 ### Phase 2+ backlog (after pre-review or mention-only)
@@ -89,14 +86,13 @@ None — implement Pre-review cleanup.
 ## Meeting order (~50–55 min)
 
 ```
-Pre-warm: . ./setup.sh only
-In room: Part A → Part B → cd mart_finance → Part C (one dbt command at a time)
-         → Part F → Part D → Part E → dry run (§10)
+In room: Part A (. ./setup.sh live) → Part B → Part C (defer **last**, after marts) → F → D → E
+         → dry run (§10)
 ```
 
-Second terminal (Part C8): `./dbt_docs.sh mart_finance` → http://127.0.0.1:8011
+Second terminal (C7 docs): `./dbt_docs.sh mart_finance` → http://127.0.0.1:8011
 
-**Optional off-line:** `./scripts/bootstrap.sh` before the meeting if you want prod manifest ready for C7 defer.
+No offline bootstrap required for defer — capture manifest after C2+ builds, then C9.
 
 ---
 
@@ -112,10 +108,10 @@ Second terminal (Part C8): `./dbt_docs.sh mart_finance` → http://127.0.0.1:801
 - [x] Line 61: `mkdir -p data`
 - [x] Lines 63–64: `source scripts/env.sh`
 - [x] Lines 66–67: `dbt --version` sanity check
-- [x] No dbt builds in `setup.sh` (builds in `scripts/bootstrap.sh` — CI / optional C7 pre-warm)
+- [x] No dbt builds in `setup.sh` (builds in `scripts/bootstrap.sh` — CI only for demo purposes)
 - [x] No interactive `exec` into a project dir (stay at repo root with `. ./setup.sh`)
 
-**Pre-warm (before the room):**
+**In room (Part A):**
 ```bash
 . ./setup.sh
 ```
@@ -155,19 +151,19 @@ Show these in **Part A** per `docs/demo-agenda.md` — not a standalone review s
 
 - `.pre-commit-config.yaml`, `.sqlfluff`, `ruff.toml`
 - Branch → PR gloss: `AGENTS.md` (GitHub section)
-- **B4 talk:** CI does a full build; Slim CI (`--defer --state`) is local in C7 (`docs/defer.md`) + optional `slim-ci.yml` dispatch — not the PR gate yet
-- Orchestration stubs: `orchestrate.yml` + `orchestration/prefect/` + `orchestration/airflow/` (Part C9 / F)
+- **B4 talk:** CI does a full build; Slim CI (`--defer --state`) is local in **C9** after marts (`docs/defer.md`) + optional `slim-ci.yml` — not the PR gate yet
+- Orchestration stubs: `orchestrate.yml` + `orchestration/prefect/` + `orchestration/airflow/` (Part C8 / F)
 
 ---
 
-## 4. Repo layout & architecture  [↻ re-review]
+## 4. Repo layout & architecture  [x reviewed]
 
-- [↻] Mono-repo: `mart_finance`, `mart_marketing`, `mart_operations` at **repo root** (not `projects/`)
-- [↻] Shared `raw.*` in DuckDB; domain-specific marts
-- [↻] Root `README.md` — purpose, contents, usage (+ architecture / GitHub rolled in)
-- [↻] `AGENTS.md` — architecture short + GitHub/PR workflow
-- [↻] `docs/conventions.md` — `{domain}_{layer}_{entity}` naming, PK tests
-- [↻] Each `mart_*/dbt_project.yml` — configs, `dev_schema`, tags/colors, on-run hooks
+- [x] Mono-repo: `mart_finance`, `mart_marketing`, `mart_operations` at **repo root** (not `projects/`)
+- [x] Shared `raw.*` in DuckDB; domain-specific marts
+- [x] Root `README.md` — purpose, contents, usage (+ architecture / GitHub rolled in)
+- [x] `AGENTS.md` — architecture short + GitHub/PR workflow
+- [x] `docs/conventions.md` — `{domain}_{layer}_{entity}` naming, PK tests
+- [x] Each `mart_*/dbt_project.yml` — configs, `dev_schema`, tags/colors, on-run hooks
 
 **Part C1 framing (~1 min):** 3 projects at repo root, DuckDB, ~62k orders, full dbt surface not just `dbt run`.
 
@@ -199,7 +195,7 @@ Load raw when needed: `./scripts/load_raw.sh` (from repo root) before first dbt 
 - [ ] Show `finance_int_orders_delta`, `finance_int_order_items_delta`
 - [ ] Show `finance_int_changed_order_ids` — **discuss why** (multi-parent key union)
 - [ ] `dbt run --select finance_fct_order_revenue` (+ full-refresh)
-- [ ] Show child filter to changed IDs; `delete+insert`
+- [ ] Show child filter to changed IDs; **`merge`** (preferred); show **append** + merge in `_showcase/`
 - [ ] Show **pre_hook** on `finance_fct_order_revenue` (DELETE + audit)
 - [ ] Show **post_hook** on `finance_fct_daily_revenue` (UPDATE loaded_at + audit)
 
@@ -221,22 +217,21 @@ Load raw when needed: `./scripts/load_raw.sh` (from repo root) before first dbt 
 - [ ] Show `finance_snapshot_products`, freshness on `raw_orders`
 - [ ] **Discuss:** grants, RLS, model contracts (N/A on DuckDB)
 
-### C7 — Defer + state (headline)
-- [ ] Prerequisite: prod manifest exists (optional off-line `./scripts/bootstrap.sh` or prod build before meeting)
-- [ ] Capture manifest on `main`: `dbt compile --target-path /tmp/dbt --target prod`
-- [ ] Branch change + `dbt build --select state:modified+ --defer --state /tmp/dbt --vars '{"dev_schema":"dev"}' --target prod`
-- [ ] Tie back to B4 Slim CI in Actions
-
-### C8 — Docs + exposure
+### C7 — Docs + exposure
 - [ ] Second terminal: `./dbt_docs.sh mart_finance` → http://127.0.0.1:8011
 - [ ] Show DAG, `{% docs %}`, `revenue_dashboard` exposure
 - [ ] **Discuss:** GitHub Pages deploy (`docs.yml`) — backlog
 
-### C9 — Packages + multi-project
+### C8 — Packages + multi-project
 - [ ] `packages.yml` / `dbt deps` / `dbt_utils`
-- [ ] `cd ../mart_marketing && dbt build`
-- [ ] `cd ../mart_operations && dbt build`
-- [ ] **Discuss:** `mart_showcase/` feature lab — backlog Phase 2
+- [ ] `cd ../mart_marketing && dbt build` (ops same pattern)
+- [ ] Return to `mart_finance` for C9
+- [ ] **Discuss:** orchestration stubs (GHA / Prefect / Airflow); `mart_showcase/` — backlog
+
+### C9 — Defer + state (headline, **last**)
+- [ ] After C2+ marts exist — `dbt compile --target-path /tmp/dbt`
+- [ ] Touch a mart + `dbt build --select state:modified+ --defer --state /tmp/dbt --vars '{"dev_schema":"dev"}'`
+- [ ] Tie back to B4 Slim CI; mention prod baseline via `pull_state.sh` / `slim_build.sh`
 
 ### Per-project structure (review as needed)
 - [ ] `dbt_project.yml` — profile, paths, materializations
@@ -285,10 +280,10 @@ Show `README.md` / `AGENTS.md` + table in `docs/demo-agenda.md` Part F. Mention 
 ## 10. End-to-end dry run
 
 - [ ] Fresh clone (or clean state)
-- [ ] `. ./setup.sh` from repo root (pre-warm only — no bootstrap on screen)
+- [ ] Part A: `. ./setup.sh` live from repo root (no bootstrap on screen)
 - [ ] Part A show-files; Part B in GitHub Actions tab (or explain from yaml)
-- [ ] `cd mart_finance` — `./scripts/load_raw.sh` if needed, then run C2–C7 commands one at a time
-- [ ] Second terminal `./dbt_docs.sh mart_finance` for C8
+- [ ] `./scripts/load_raw.sh` then `cd mart_finance` — C2–C8, then **C9 defer last**
+- [ ] Second terminal `./dbt_docs.sh mart_finance` for C7
 - [ ] Part F table (5 min)
 - [ ] Part D files (5–10 min)
 - [ ] Total time fits ~50–55 min
@@ -298,16 +293,13 @@ Show `README.md` / `AGENTS.md` + table in `docs/demo-agenda.md` Part F. Mention 
 ## Quick command reference
 
 ```bash
-# Pre-warm (repo root, before the room)
+# Part A (in room, repo root)
 . ./setup.sh
 
-# Optional off-line (C7 defer manifest)
-./scripts/bootstrap.sh
-
-# Load raw when starting Part C (repo root)
+# Part C start (repo root)
 ./scripts/load_raw.sh
 
-# Second terminal (repo root, Part C8)
+# Second terminal (repo root, C7 docs)
 ./dbt_docs.sh mart_finance
 
 # Part C (cd mart_finance)
@@ -322,13 +314,11 @@ dbt run-operation audit_relations
 dbt source freshness
 dbt snapshot
 
-# C7 defer demo
-git checkout main
-dbt compile --target-path /tmp/dbt --target prod
-git checkout <your-branch>
+# C9 defer (after marts built)
+dbt compile --target-path /tmp/dbt
 printf '\n-- demo change\n' >> models/marts/finance_fct_daily_revenue.sql
 dbt build --select state:modified+ --defer --state /tmp/dbt \
-  --vars '{"dev_schema":"dev"}' --target prod
+  --vars '{"dev_schema":"dev"}'
 git checkout -- models/marts/finance_fct_daily_revenue.sql
 ```
 
@@ -337,11 +327,5 @@ git checkout -- models/marts/finance_fct_daily_revenue.sql
 ## Changes made during prep (for reference)
 
 - `setup.sh`: env only; use `. ./setup.sh`; refreshes `.env` path lines on re-run
-- `scripts/bootstrap.sh`: scan + dbt build dev + prod — **CI** and optional off-line C7 pre-warm; **not** shown live in demo
-- Projects: `projects/{finance,marketing,operations}` → root `mart_finance`, `mart_marketing`, `mart_operations`
-- Root `README.md` added; `projects/README.md` removed
-- Python: Ruff only (`ruff.toml`, pre-commit `ruff-check` + `ruff-format`)
-- Added `.github/workflows/pre-commit.yml` (changed-files + official pre-commit action)
-- Removed `check-script-semicolon` from CI and pre-commit config
-- Part F (production path) and M-topics woven into `docs/demo-agenda.md`
-- Demo Part C: individual dbt commands on screen, not full bootstrap
+- `scripts/bootstrap.sh`: scan + dbt build dev + prod — **CI**; not shown live in demo
+- Demo Part C: individual dbt commands; **defer is C9 (last)** after marts + compile
