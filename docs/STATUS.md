@@ -11,14 +11,7 @@
 
 ## Resume here
 
-### Human
-
-Repo review / prep walkthrough **§1–§9 done**. Optional **§10** dry run, then ship.
-
-1. Commit leftover: `docs/defer.md` (clone slim-down) + `.gitignore` / `.cursorignore` cleanup
-2. Confirm Actions: `main` has **`dbt-state`** artifact
-3. Optional: timed dry run (`docs/demo-agenda.md` ~50–55 min) — `DEMO_CHECKLIST.md` §10
-4. After you’re satisfied: **delete `DEMO_CHECKLIST.md`** and retarget any remaining refs (STATUS / README / AGENTS)
+**Commit + push** the `dbt deps` script fixes so `main` CI can succeed and publish the `dbt-state` artifact.
 
 **New chat prompt:** `Read docs/STATUS.md and continue.`
 
@@ -26,16 +19,25 @@ Repo review / prep walkthrough **§1–§9 done**. Optional **§10** dry run, th
 
 ## Last session
 
-- Final cleanup: commented `.gitignore`, aligned `.cursorignore`, slimmed `dbt clone` in `docs/defer.md`.
-- Demo agenda Parts A–F reviewed; AI-agnostic (`AGENTS.md` + `.agents/skills/`; `CLAUDE.md` = `@AGENTS.md`).
+- Diagnosed `main` CI failure: `bootstrap` → `dbt_build_all` ran `dbt build` without `dbt deps`; `dbt_packages/` gitignored → exit 2 on clean Actions checkout.
+- Added `dbt deps` before dbt invokes in: `dbt_build_all.sh`, `slim_build.sh`, `pull_state.sh`, `clone_state.sh`, `dbt_docs.sh` (domain path). `mart_combined` path already had deps.
+- Dropped redundant deps loops from `ci.yml` / `slim-ci.yml` (scripts own deps now). Compile step in `ci.yml` still runs deps.
 
 ---
 
 ## Snapshot
 
-- Pre-review + presenter walk §1–§9 complete.
-- Slim CI + `mart_combined` docs DAG + `sql.sh` in place.
-- Uncommitted: `docs/defer.md`, `.gitignore`, `.cursorignore` (± STATUS).
+- CI/bootstrap path should install `dbt_utils` on fresh runners.
+- No `dbt-state` artifact on GitHub yet until a green `main` CI after push.
+- Checklist removed earlier; agenda A–F still the demo script.
+
+---
+
+## Next session
+
+1. Human: commit + push deps fixes (and any other staged checklist cleanup).
+2. Confirm Actions: green `CI` on `main` + **`dbt-state`** artifact.
+3. Optional: timed dry run of `docs/demo-agenda.md`.
 
 ---
 
@@ -43,11 +45,9 @@ Repo review / prep walkthrough **§1–§9 done**. Optional **§10** dry run, th
 
 | Item | Notes |
 |------|--------|
-| Commit / push cleanup | human |
-| `dbt-state` on `main` | Actions tab |
-| §10 dry run | optional but recommended once |
-| Remove `DEMO_CHECKLIST.md` | after dry run / when prep closed |
-| Phase 2+ | Pages, Docker, broader showcase — mention-only in agenda Part F |
+| Uncommitted / unpushed deps fix | Blocks green `main` + artifact |
+| Optional dry run | `docs/demo-agenda.md` |
+| Phase 2+ | Pages / Docker / broader showcase — agenda Part F |
 
 ---
 
@@ -55,7 +55,7 @@ Repo review / prep walkthrough **§1–§9 done**. Optional **§10** dry run, th
 
 ```bash
 . ./setup.sh
-./scripts/load_raw.sh && cd mart_finance
+git status   # commit/push deps + prior staged docs if ready
 ```
 
 ---
@@ -68,5 +68,4 @@ Repo review / prep walkthrough **§1–§9 done**. Optional **§10** dry run, th
 | Defer / slim | `docs/defer.md` |
 | AI instructions | `AGENTS.md` |
 | Skills | `.agents/skills/` |
-| Checklist (temp) | `DEMO_CHECKLIST.md` |
 | Combined Docs DAG | `mart_combined/README.md` |

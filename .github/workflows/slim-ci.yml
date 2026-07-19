@@ -50,7 +50,5 @@ jobs:
           DBT_TARGET: prod
         run: |
           ./scripts/load_raw.sh prod
-          for project in mart_finance mart_marketing mart_operations; do
-            (cd "$project" && ../.venv/bin/dbt deps)
-          done
+          # slim_build.sh runs dbt deps per domain before build
           ./scripts/slim_build_all.sh "${{ inputs.selector }}"

@@ -29,8 +29,8 @@ Do not rely on chat memory — if it is not in `STATUS.md`, the next chat does n
 
 | File | When |
 |------|------|
-| `DEMO_CHECKLIST.md` | While it exists — demo prep progress / Phase 2+ backlog *(planned removal after prep)* |
 | `docs/demo-agenda.md` | Runbook commands or flow changed |
+| `docs/defer.md` / feature guide | Defer/CI mechanics changed |
 
 ## New chat startup (agent)
 

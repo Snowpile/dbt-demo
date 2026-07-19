@@ -17,7 +17,7 @@ Show a realistic, opinionated dbt setup end to end:
   config catalog under `mart_finance/models/_showcase/`)
 - CI that mirrors local work, plus **orchestration stubs**: GitHub Actions, Prefect, and Airflow
 
-It doubles as a live demo script (`docs/demo-agenda.md`, `DEMO_CHECKLIST.md`) and an
+It doubles as a live demo script (`docs/demo-agenda.md`) and an
 AI-agent-friendly repo (`AGENTS.md`, `.agents/skills/`).
 
 ## What's in here
@@ -151,7 +151,6 @@ patterns off a laptop.
 | Topic                      | Path                           |
 | -------------------------- | ------------------------------ |
 | Session handoff / status   | `docs/STATUS.md`               |
-| Demo walkthrough checklist | `DEMO_CHECKLIST.md` *(temp)*   |
 | Live demo runbook          | `docs/demo-agenda.md`          |
 | dbt feature map / CLI      | `docs/dbt-feature-guide.md`    |
 | Defer / slim / clone       | `docs/defer.md`                |

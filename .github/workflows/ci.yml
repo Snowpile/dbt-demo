@@ -88,8 +88,7 @@ jobs:
   # 3. If no artifact yet (cold start) → full bootstrap fallback
   # 4. Else Slim CI:
   #      - refresh raw seeds into prod.duckdb
-  #      - dbt deps per domain
-  #      - slim_build_all: only state:modified+ with --defer --state
+  #      - slim_build_all: deps + state:modified+ with --defer --state
   # 5. Full compile (cheap) + dbt-checkpoint on all projects
   # ===========================================================================
   slim-pr:
@@ -154,10 +153,7 @@ jobs:
           set -euo pipefail
           # Keep raw.* in sync with any seed changes on the PR
           ./scripts/load_raw.sh prod
-          for project in mart_finance mart_marketing mart_operations; do
-            (cd "$project" && ../.venv/bin/dbt deps)
-          done
-          # --defer --state state/<project>/ for each domain that has a manifest
+          # slim_build.sh runs dbt deps per domain before build
           ./scripts/slim_build_all.sh 'state:modified+'
 
       # Compile does not need a full rebuild; produces manifests for checkpoint hooks

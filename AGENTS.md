@@ -9,10 +9,10 @@ Works with Cursor, Claude Code, and other agents — durable context lives here 
 
 **On every new chat:**
 1. Read `docs/STATUS.md` — especially **Resume here** and **Last session**.
-2. Load other docs only when the task needs them (`docs/demo-agenda.md`, `DEMO_CHECKLIST.md` while demo prep is active).
+2. Load other docs only when the task needs them (e.g. `docs/demo-agenda.md`, `docs/defer.md`).
 3. Continue from **Resume here** without re-asking what was already decided.
 
-**End of every session** (or when opening a fresh chat): update `docs/STATUS.md` so the next agent needs no conversation history. Full checklist: `.agents/skills/session-handoff/SKILL.md`.
+**End of every session** (or when opening a fresh chat): update `docs/STATUS.md` so the next agent needs no conversation history. Protocol: `.agents/skills/session-handoff/SKILL.md`.
 
 **Fresh-chat prompt:** `Read docs/STATUS.md and continue.`
 
@@ -118,7 +118,6 @@ Detail: `docs/defer.md`.
 |-------|------|
 | Current status / handoff | `docs/STATUS.md` |
 | Session handoff skill | `.agents/skills/session-handoff/SKILL.md` |
-| Demo + pre-review checklist | `DEMO_CHECKLIST.md` *(remove after demo prep)* |
 | Meeting / demo script | `docs/demo-agenda.md` |
 | dbt feature map / CLI / mechanics | `docs/dbt-feature-guide.md` |
 | Defer / slim / clone | `docs/defer.md` |

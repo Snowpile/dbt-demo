@@ -40,6 +40,7 @@ STATE_DIR="$STATE_ROOT/$DOMAIN"
 echo "==> dbt clone: $DOMAIN state=$STATE_DIR target=$BASELINE_TARGET dev_schema=$DEV_SCHEMA"
 (
 	cd "$DBT_DEMO_ROOT/$DOMAIN"
+	"$DBT_DEMO_DBT" deps
 	args=(clone --state "$STATE_DIR" --vars "{\"dev_schema\":\"$DEV_SCHEMA\"}" --target "$BASELINE_TARGET")
 	if [[ -n "$SELECTOR" ]]; then
 		args+=(--select "$SELECTOR")

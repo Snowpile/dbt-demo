@@ -43,6 +43,7 @@ STATE_DIR="$STATE_ROOT/$DOMAIN"
 echo "==> slim build: $DOMAIN select=$SELECTOR defer-state=$STATE_DIR target=$BASELINE_TARGET"
 (
 	cd "$DBT_DEMO_ROOT/$DOMAIN"
+	"$DBT_DEMO_DBT" deps
 	"$DBT_DEMO_DBT" build \
 		--select "$SELECTOR" \
 		--defer \

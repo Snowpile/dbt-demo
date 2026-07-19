@@ -49,8 +49,12 @@ if [[ "$COMBINED" -eq 1 ]]; then
 	(cd "$DBT_DEMO_ROOT/$DOMAIN" && "$DBT_DEMO_DBT" docs generate --empty-catalog --target "$DBT_TARGET")
 else
 	"$DBT_DEMO_ROOT/scripts/load_raw.sh"
-	echo "==> dbt build: $DOMAIN"
-	(cd "$DBT_DEMO_ROOT/$DOMAIN" && "$DBT_DEMO_DBT" build --target "$DBT_TARGET")
+	echo "==> dbt deps + build: $DOMAIN"
+	(
+		cd "$DBT_DEMO_ROOT/$DOMAIN"
+		"$DBT_DEMO_DBT" deps
+		"$DBT_DEMO_DBT" build --target "$DBT_TARGET"
+	)
 	echo "==> dbt docs generate: $DOMAIN"
 	(cd "$DBT_DEMO_ROOT/$DOMAIN" && "$DBT_DEMO_DBT" docs generate --target "$DBT_TARGET")
 fi

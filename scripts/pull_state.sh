@@ -37,6 +37,7 @@ mkdir -p "$STATE_DIR"
 echo "==> capture state: $DOMAIN (target=$BASELINE_TARGET) → $STATE_DIR"
 (
 	cd "$DBT_DEMO_ROOT/$DOMAIN"
+	"$DBT_DEMO_DBT" deps
 	# --target-path writes manifest.json into STATE_DIR (not the project's target/).
 	"$DBT_DEMO_DBT" compile --target "$BASELINE_TARGET" --target-path "$STATE_DIR"
 )
