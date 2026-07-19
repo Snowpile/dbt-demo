@@ -11,7 +11,7 @@
 
 ## Resume here
 
-**Commit + push** `unique`/`not_null` tests on `finance_showcase_kpi` v1/v2 (`_showcase.yml`), then confirm green `main` CI uploads **`dbt-state`**.
+`main` CI is green; **`dbt-state`** artifact exists. Optional: timed dry run of `docs/demo-agenda.md`.
 
 **New chat prompt:** `Read docs/STATUS.md and continue.`
 
@@ -19,24 +19,23 @@
 
 ## Last session
 
-- After re-enable, CI #20 (`a65c8ae`): **bootstrap succeeded** (deps fix worked); failed on **dbt-checkpoint** `check-model-has-tests` for `finance_showcase_kpi_v1` / `_v2` (0 tests).
-- Added `unique` + `not_null` on `store_id` per version in `_showcase.yml`; local checkpoint hooks pass.
+- CI #21 (`bce84a7`) **success** — bootstrap, checkpoint, publish_state, upload **`dbt-state`** (~27.8 MB).
+- Prior: deps fix + showcase KPI tests unblocked main.
 
 ---
 
 ## Snapshot
 
-- CI/bootstrap path should install `dbt_utils` on fresh runners.
-- No `dbt-state` artifact on GitHub yet until a green `main` CI after push.
+- `main` CI green (#21); artifact **`dbt-state`** (~27.8 MB) available for Slim CI / PRs.
+- Scripts run `dbt deps` before build/compile/clone/docs domain path.
 - Checklist removed earlier; agenda A–F still the demo script.
 
 ---
 
 ## Next session
 
-1. Human: commit + push deps fixes (and any other staged checklist cleanup).
-2. Confirm Actions: green `CI` on `main` + **`dbt-state`** artifact.
-3. Optional: timed dry run of `docs/demo-agenda.md`.
+1. Optional: timed dry run of `docs/demo-agenda.md`.
+2. Phase 2+ only if needed (Pages / Docker / showcase).
 
 ---
 
@@ -44,7 +43,6 @@
 
 | Item | Notes |
 |------|--------|
-| Uncommitted / unpushed deps fix | Blocks green `main` + artifact |
 | Optional dry run | `docs/demo-agenda.md` |
 | Phase 2+ | Pages / Docker / broader showcase — agenda Part F |
 
@@ -54,7 +52,7 @@
 
 ```bash
 . ./setup.sh
-git status   # commit/push deps + prior staged docs if ready
+./scripts/load_raw.sh && cd mart_finance
 ```
 
 ---
