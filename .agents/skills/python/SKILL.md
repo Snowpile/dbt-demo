@@ -1,7 +1,8 @@
 ---
-description: Python — uv, requirements.json, utilities
-globs: "**/*.py"
-alwaysApply: false
+name: python
+description: >-
+  Python conventions for this repo (uv, Ruff, scripts). Use when editing
+  *.py under scripts/, setup.py, or Python tooling/config.
 ---
 
 # Python

@@ -6,14 +6,16 @@
 
 Here's the whole meeting — then we go section by section.
 
+
 | Part                  | Time       | What we cover                                                                                                              |
 | --------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------- |
 | **A** Environment     | ~5 min     | `uv` + `setup.sh` live — reproducible local runtime (same entry CI uses)                                                   |
 | **B** CI / GitHub     | ~5 min     | Lint on changed files; **main** full build + persist manifests; **PR** Slim CI (`state:modified+`)                         |
 | **C** dbt live        | ~20–25 min | Full dbt surface in `mart_finance` — DAG → incrementals → tests → macros → sources → docs → multi-project → **defer last** |
-| **F** Production path | ~5 min     | What stays / what swaps for a real warehouse (Docker, Snowflake, grants, schedulers…)                                      |
-| **D** AI workflow     | ~10 min    | Repo files as durable context; token-lean agent habits                                                                     |
-| **E** Wrap            | ~3 min     | Recap + backlog                                                                                                            |
+| **D** Production path | ~5 min     | What stays / what swaps for a real warehouse (Docker, Snowflake, grants, schedulers…)                                      |
+| **E** AI workflow     | ~10 min    | Repo files as durable context; token-lean agent habits                                                                     |
+| **F** Wrap            | ~3 min     | Recap + backlog                                                                                                            |
+
 
 **Arc:** install → CI mirrors local → dbt end-to-end → map to production → AI in this repo → close.
 
@@ -29,11 +31,13 @@ No Docker in this demo — `uv` + one script installs the runtime. CI runs the s
 
 **View:** `requirements.json`, `setup.sh`, `profiles.yml.example` (dev / staging / prod).
 
+
 | Piece          | Role                                                   |
 | -------------- | ------------------------------------------------------ |
 | `setup.sh`     | Env only — no warehouse builds                         |
 | `bootstrap.sh` | What **CI** runs: scan → load → `dbt build` dev + prod |
-| `load_raw.sh`  | CSV → DuckDB `raw.*` (Part C, before first build)      |
+| `load_raw.sh`  | CSV → DuckDB `raw.`* (Part C, before first build)      |
+
 
 Seeds are integrity-checked, then loaded into `raw`. dbt never reads CSVs directly.
 
@@ -41,7 +45,7 @@ Seeds are integrity-checked, then loaded into `raw`. dbt never reads CSVs direct
 data/seeds/*.csv  →  load_raw  →  raw.*  →  mart_*  →  stg → int → fct/dim
 ```
 
-**Demo vs prod (preview F):** `uv` → Docker; DuckDB files → Snowflake/BQ; `load_raw.py` → Fivetran/Airbyte.
+**Demo vs prod (preview D):** `uv` → Docker; DuckDB files → Snowflake/BQ; `load_raw.py` → Fivetran/Airbyte.
 
 ---
 
@@ -67,7 +71,7 @@ On `main`: install, full bootstrap, structural checks, then **persist** Slim CI 
 1. `setup-uv` → `./setup.sh`
 2. `./scripts/bootstrap.sh` — scan + load + build **dev + prod**
 3. **dbt-checkpoint** — descriptions, tests, no raw table names
-4. `publish_state.sh` → upload artifact **`dbt-state`** (`state/*/manifest.json` + `data/prod.duckdb`)
+4. `publish_state.sh` → upload artifact `**dbt-state`** (`state/*/manifest.json` + `data/prod.duckdb`)
 
 Lint runs even without local `pre-commit install`. Structural checks need a real build.
 
@@ -77,7 +81,7 @@ Branch, push, open PR — lint + Slim CI run on the PR.
 
 ### B4. Slim CI on PRs (~1 min)
 
-PRs download main's **`dbt-state`**, then build only `state:modified+` with `--defer`. Unchanged models resolve from the baseline. That's the point of CI at scale. Same flags live in C9. Manual re-run: `slim-ci.yml`.
+PRs download main's `**dbt-state**`, then build only `state:modified+` with `--defer`. Unchanged models resolve from the baseline. That's the point of CI at scale. Same flags live in C9. Manual re-run: `slim-ci.yml`.
 
 **View:** `ci.yml` jobs `publish-state` vs `slim-pr` — full build on main vs deferred PR build.
 
@@ -129,7 +133,7 @@ dbt run --select finance_fct_daily_revenue    # post_hook
 
 1. Parents: `finance_int_orders_delta`, `finance_int_order_items_delta`
 2. Key union: `finance_int_changed_order_ids`
-3. Child: `finance_fct_order_revenue` — `is_incremental()`, `unique_key`, **`merge`**, `on_schema_change`
+3. Child: `finance_fct_order_revenue` — `is_incremental()`, `unique_key`, `**merge`**, `on_schema_change`
 4. `_showcase/`: **append** (`finance_showcase_order_log`) · **merge** + predicates (`finance_showcase_store_scd`) · optional microbatch / custom → `docs/dbt-feature-guide.md`
 
 Two incremental parents can each surface different keys. A union of changed IDs gives the child one cheap key list — rebuild only those rows.
@@ -180,7 +184,7 @@ Second terminal, repo root:
 
 **View:** DAG · shared `{% docs %}` in `models/docs.md` · `revenue_dashboard` exposure.
 
-**All-domain DAG (optional):** `./dbt_docs.sh mart_combined` → http://127.0.0.1:8010 — finance + marketing + operations in one graph (docs-only project; not in CI).
+**All-domain DAG (optional):** `./dbt_docs.sh mart_combined` → [http://127.0.0.1:8010](http://127.0.0.1:8010) — finance + marketing + operations in one graph (docs-only project; not in CI).
 
 ### C8. Packages + multi-project (1 min)
 
@@ -211,13 +215,14 @@ dbt build --select state:modified+ --defer --state /tmp/dbt \
 git checkout -- models/marts/finance_fct_daily_revenue.sql
 ```
 
-Same flags Actions uses on PRs. In GitHub, the baseline is the **`dbt-state`** artifact from `main` (`publish_state.sh` + `prod.duckdb`). Here we use the marts we just built so the lesson is clear in one terminal.
+Same flags Actions uses on PRs. In GitHub, the baseline is the `**dbt-state**` artifact from `main` (`publish_state.sh` + `prod.duckdb`). Here we use the marts we just built so the lesson is clear in one terminal.
 
 ---
 
-## Part F — Production path (~5 min)
+## Part D — Production path (~5 min)
 
 Local and small on purpose. Same repo shape; swap the runtime.
+
 
 | Topic         | This demo                                            | Typical production                                              |
 | ------------- | ---------------------------------------------------- | --------------------------------------------------------------- |
@@ -232,45 +237,46 @@ Local and small on purpose. Same repo shape; swap the runtime.
 | Governance    | Descriptions + tests in CI; contract in `_showcase/` | Grants, RLS, contracts on warehouse                             |
 | Feature lab   | Finance-heavy + `_showcase/`                         | Broader `mart_showcase/`                                        |
 
+
 DuckDB stays free and offline. Projects, tests, and CI patterns transfer — only the profile and scheduler change.
 
 ---
 
-## Part D — AI workflow (~10 min)
+## Part E — AI workflow (~10 min)
 
-Durable context lives in files, not chat history.
+Durable context lives in files, not chat history — **tool-agnostic**.
 
-| Layer           | File                                 |
-| --------------- | ------------------------------------ |
-| Source of truth | `AGENTS.md`                          |
-| Cursor rules    | `.cursor/rules/*.mdc`                |
-| Claude entry    | `CLAUDE.md` → `AGENTS.md` (no MCP)   |
-| Session handoff | `docs/STATUS.md`                     |
-| Token patterns  | `.agents/skills/token-lean/SKILL.md` |
-| Backlog         | `DEMO_CHECKLIST.md`                  |
+| Layer | File |
+|-------|------|
+| Source of truth | `AGENTS.md` |
+| Skills (workflows) | `.agents/skills/*/SKILL.md` |
+| Claude shim | `CLAUDE.md` → `@AGENTS.md` only (Claude Code does not read `AGENTS.md` natively) |
+| Session handoff | `docs/STATUS.md` (+ session-handoff skill) |
+| Demo script | `docs/demo-agenda.md` |
 
-- `@`-reference files — don't paste logs
+- `@`-reference / name paths — don't paste logs
 - Scoped asks — "fix X in `finance_fct_order_revenue`"
 - Fresh chat when stale — resume via `STATUS.md`
 - Don't re-explain the stack — `AGENTS.md` already loads it
 - Subagents for broad exploration; parent synthesizes
 - Human only commits / pushes
+- No MCP — terminal + repo files only
 
-|           | Cursor                 | Claude Code    |
-| --------- | ---------------------- | -------------- |
-| Config    | `.cursor/rules/`       | `CLAUDE.md`    |
-| File refs | `@path`                | path in prompt |
-| MCP       | optional (unused here) | disabled       |
+| | Cursor / most agents | Claude Code |
+|---|--------|-------------|
+| Entry | `AGENTS.md` + `.agents/skills/` | `CLAUDE.md` → `@AGENTS.md` |
+| File refs | `@path` | path in prompt |
+| MCP | unused here | disabled |
 
 **New-chat prompt:** `Read docs/STATUS.md and continue.`
 
 ---
 
-## Part E — Wrap (~3 min)
+## Part F — Wrap (~3 min)
 
 **Recap:** env from `setup.sh` → CI mirrors local → full dbt surface → prod path → AI keeps tokens low.
 
-**Backlog:** GitHub Pages docs · expand `_showcase/` — see `DEMO_CHECKLIST.md`.
+**Backlog (mention-only):** GitHub Pages docs · Docker / observability · broader `mart_showcase/` feature lab.
 
 ---
 

@@ -21,17 +21,17 @@ Portable checklist for preparing and delivering the demo. Check items off as you
 | 3 | CI / GitHub (Part B) | **x Done** | Slim CI PR gate + main `dbt-state` artifact |
 | 4 | Repo layout & architecture | **x Done** | README/AGENTS/conventions + hooks/architectural_ddl |
 | 5 | Data & sources | **x Done** | Freshness on all three projects |
-| 6 | dbt live demo (Part C) | **To do** | C3: merge preferred; strategies in feature guide |
-| 7 | Production path (Part F) | **To do** | Demo vs prod table |
-| 8 | AI workflow (Part D) | **To do** | |
-| 9 | Wrap (Part E) | **To do** | |
+| 6 | dbt live demo (Part C) | **x Done** | Walked; combined DAG + sql.sh available |
+| 7 | Production path (Part D) | **x Done** | Demo vs prod table |
+| 8 | AI workflow (Part E) | **x Done** | AGENTS.md + .agents/skills/; CLAUDE.md shim |
+| 9 | Wrap (Part F) | **x Done** | No DEMO_CHECKLIST pointer in agenda |
 | 10 | End-to-end dry run | **To do** | Do last |
 
 **Resume here (human):**
 
-1. Walk checklist **§6** (Part C) against `docs/demo-agenda.md` — run commands, confirm say/show
-2. Then §7–§10 + timed dry run
-3. Commit + push so `main` publishes `dbt-state`
+1. **§10** timed dry run (~50–55 min)
+2. Commit pending changes; confirm `dbt-state` on `main`
+3. After prep: delete `DEMO_CHECKLIST.md` + retarget refs
 
 Also listed in `docs/STATUS.md` → **Left for you**.
 
@@ -86,7 +86,7 @@ None — pre-review cleanup is complete. Remaining work is presenter walkthrough
 ## Meeting order (~50–55 min)
 
 ```
-In room: Part A (. ./setup.sh live) → Part B → Part C (defer **last**, after marts) → F → D → E
+In room: Part A (. ./setup.sh live) → Part B → Part C (defer **last**, after marts) → D → E → F
          → dry run (§10)
 ```
 
@@ -243,40 +243,39 @@ Load raw when needed: `./scripts/load_raw.sh` (from repo root) before first dbt 
 
 ---
 
-## 7. Production & platform path — Part F (~5 min)
+## 7. Production & platform path — Part D (~5 min)  [x reviewed]
 
-Show `README.md` / `AGENTS.md` + table in `docs/demo-agenda.md` Part F. Mention orchestration stubs.
+View `docs/demo-agenda.md` Part D (demo vs prod table). Mention orchestration stubs.
 
-- [ ] **Runtime:** `uv` + setup vs Docker / devcontainer
-- [ ] **Infrastructure:** none vs Terraform / cloud IAM
-- [ ] **Warehouse:** DuckDB files vs Snowflake / BigQuery / Postgres
-- [ ] **Environments:** dev + prod in setup; staging in profile but not demo'd
-- [ ] **Ingestion:** `load_raw.py` vs Fivetran / Airbyte
-- [ ] **CI PR checks:** pre-commit.yml + Slim CI (`state:modified+`) vs main full publish
-- [ ] **CI schedule:** `orchestrate.yml` / Prefect / Airflow stubs vs production schedulers
-- [ ] **Observability:** dbt tests vs Elementary / Monte Carlo
-- [ ] **Governance:** CI descriptions/tests vs grants / RLS / contracts
-- [ ] **Feature lab:** finance-heavy vs `_showcase/` roll-out
-
----
-
-## 8. AI workflow — Part D (~10 min)
-
-- [ ] `AGENTS.md` — stack, commands, autonomy matrix
-- [ ] `.cursor/rules/*.mdc` — auto-loaded Cursor rules
-- [ ] `CLAUDE.md` — Claude entry, no MCP
-- [ ] `docs/STATUS.md` — session handoff
-- [ ] `.agents/skills/token-lean/SKILL.md` — token patterns
-- [ ] `DEMO_CHECKLIST.md` — Phase 2+ backlog
-- [ ] Demo prompt: *"Read `docs/STATUS.md` and continue."*
-- [ ] Human commits/pushes only
+- [x] **Runtime:** `uv` + setup vs Docker / devcontainer
+- [x] **Infrastructure:** none vs Terraform / cloud IAM
+- [x] **Warehouse:** DuckDB files vs Snowflake / BigQuery / Postgres
+- [x] **Environments:** dev + prod in setup; staging in profile but not demo'd
+- [x] **Ingestion:** `load_raw.py` vs Fivetran / Airbyte
+- [x] **CI PR checks:** pre-commit.yml + Slim CI (`state:modified+`) vs main full publish
+- [x] **CI schedule:** `orchestrate.yml` / Prefect / Airflow stubs vs production schedulers
+- [x] **Observability:** dbt tests vs Elementary / Monte Carlo
+- [x] **Governance:** CI descriptions/tests vs grants / RLS / contracts
+- [x] **Feature lab:** finance-heavy vs `_showcase/` roll-out
 
 ---
 
-## 9. Wrap — Part E (~3 min)
+## 8. AI workflow — Part E (~10 min)  [x reviewed]
 
-- [ ] Recap: uv → CI → dbt surface → production path → AI config
-- [ ] Point to backlog: GitHub Pages, `_showcase/`
+- [x] `AGENTS.md` — stack, commands, autonomy, session start/end
+- [x] `.agents/skills/` — token-lean, session-handoff, dbt-models, python
+- [x] `CLAUDE.md` — one-line shim `@AGENTS.md` (Claude Code entry only)
+- [x] `docs/STATUS.md` — session handoff
+- [x] Demo prompt: *"Read `docs/STATUS.md` and continue."*
+- [x] Human commits/pushes only
+- [x] No `.cursor/rules/` (removed — AI-agnostic)
+
+---
+
+## 9. Wrap — Part F (~3 min)  [x reviewed]
+
+- [x] Recap: uv → CI → dbt surface → production path → AI config
+- [x] Point to backlog: GitHub Pages, Docker/observability, `mart_showcase/` (no checklist file in the room)
 
 ---
 
@@ -287,8 +286,8 @@ Show `README.md` / `AGENTS.md` + table in `docs/demo-agenda.md` Part F. Mention 
 - [ ] Part A show-files; Part B in GitHub Actions tab (or explain from yaml)
 - [ ] `./scripts/load_raw.sh` then `cd mart_finance` — C2–C8, then **C9 defer last**
 - [ ] Second terminal `./dbt_docs.sh mart_finance` for C7
-- [ ] Part F table (5 min)
-- [ ] Part D files (5–10 min)
+- [ ] Part D table (5 min)
+- [ ] Part E files (5–10 min)
 - [ ] Total time fits ~50–55 min
 
 ---

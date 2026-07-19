@@ -18,7 +18,7 @@ Show a realistic, opinionated dbt setup end to end:
 - CI that mirrors local work, plus **orchestration stubs**: GitHub Actions, Prefect, and Airflow
 
 It doubles as a live demo script (`docs/demo-agenda.md`, `DEMO_CHECKLIST.md`) and an
-AI-agent-friendly repo (`AGENTS.md`, `.cursor/rules/`).
+AI-agent-friendly repo (`AGENTS.md`, `.agents/skills/`).
 
 ## What's in here
 
@@ -151,10 +151,11 @@ patterns off a laptop.
 | Topic                      | Path                           |
 | -------------------------- | ------------------------------ |
 | Session handoff / status   | `docs/STATUS.md`               |
-| Demo walkthrough checklist | `DEMO_CHECKLIST.md`            |
+| Demo walkthrough checklist | `DEMO_CHECKLIST.md` *(temp)*   |
 | Live demo runbook          | `docs/demo-agenda.md`          |
 | dbt feature map / CLI      | `docs/dbt-feature-guide.md`    |
 | Defer / slim / clone       | `docs/defer.md`                |
 | Naming / SQL style         | `docs/conventions.md`          |
 | AI agent instructions      | `AGENTS.md`                    |
-| Token-lean skill           | `.agents/skills/token-lean/`   |
+| Agent skills               | `.agents/skills/`              |
+| Claude Code entry          | `CLAUDE.md` → `@AGENTS.md`     |

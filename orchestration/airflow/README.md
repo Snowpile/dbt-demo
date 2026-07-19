@@ -72,4 +72,4 @@ with DAG(
 - GitHub Actions: `.github/workflows/orchestrate.yml`
 - Prefect stub: `orchestration/prefect/README.md`
 - CI (PR gate): `.github/workflows/ci.yml`, `pre-commit.yml`
-- Demo Part F: `docs/demo-agenda.md`
+- Demo Part D (production path): `docs/demo-agenda.md`

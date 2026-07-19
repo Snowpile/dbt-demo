@@ -64,4 +64,4 @@ def dbt_demo_daily():
 - GitHub Actions: `.github/workflows/orchestrate.yml`
 - Airflow stub: `orchestration/airflow/README.md`
 - CI (PR gate): `.github/workflows/ci.yml`, `pre-commit.yml`
-- Demo Part F: `docs/demo-agenda.md`
+- Demo Part D (production path): `docs/demo-agenda.md`

@@ -1,11 +1,11 @@
 # dbt_demo — Current Status (AI handoff)
 
 *Living "where are we / pick up here" file. **Update at the end of every working session.***
-*Protocol: `.cursor/rules/session-handoff.mdc` · Tracker: `DEMO_CHECKLIST.md` · Demo script: `docs/demo-agenda.md`*
+*Protocol: `.agents/skills/session-handoff/SKILL.md` · Demo script: `docs/demo-agenda.md`*
 
-**Last updated:** 2026-07-18
+**Last updated:** 2026-07-19
 
-**Guardrail:** Only the human commits/pushes (see `.cursor/rules/core.mdc`).
+**Guardrail:** Only the human commits/pushes (see `AGENTS.md`).
 
 ---
 
@@ -13,20 +13,16 @@
 
 ### Demo prep (human)
 
-Pre-review cleanup is **complete** (including #6 token-lean skill). Slim CI is the **PR gate**.
-
-**Next:** presenter pass on `docs/demo-agenda.md` (esp. B4 / C9), then checklist **§5 → §10** + dry run.
-
-**After you push to `main`:** first successful `publish-state` job creates the `dbt-state` artifact; later PRs slim-build against it.
+§1–§9 done. **Next: §10 timed dry run** (~50–55 min) of `docs/demo-agenda.md`.
 
 ### Left for you (human)
 
 | # | Item | Where |
 |---|------|-------|
-| 1 | Presenter pass (B4 Slim CI + C9 defer) | `docs/demo-agenda.md` |
-| 2 | Walk checklist **§5** → §10 | `DEMO_CHECKLIST.md` |
-| 3 | Timed dry run (§10) | `DEMO_CHECKLIST.md` |
-| 4 | Commit + push/merge so `main` publishes `dbt-state` | human commit |
+| 1 | **§10** timed dry run | `docs/demo-agenda.md` + `DEMO_CHECKLIST.md` §10 |
+| 2 | Commit pending changes (AI-agnostic + Part letters + agenda wrap) | human |
+| 3 | Confirm `dbt-state` artifact on `main` | Actions tab |
+| 4 | After prep: delete `DEMO_CHECKLIST.md` + retarget refs | planned |
 
 **New chat prompt:** `Read docs/STATUS.md and continue.`
 
@@ -34,34 +30,29 @@ Pre-review cleanup is **complete** (including #6 token-lean skill). Slim CI is t
 
 ## Last session
 
-- Repo cleanup: deleted `docs/remaining-work.md`, `docs/ai-practices.md`, orphan `summary.md`, tracked `.user.yml`.
-- Folded token practices → `.agents/skills/token-lean/SKILL.md`; essentials in `AGENTS.md`; retargeted checklist / agenda / rules / README.
-- Fixed stale script/CI comments; dropped dead `data/.gitkeep` ignore exceptions; gitignore `.user.yml`.
+- §7–§9 marked done; Part F backlog no longer points at `DEMO_CHECKLIST.md`.
+- AI-agnostic: no `.cursor/rules/`; `CLAUDE.md` = `@AGENTS.md` only.
 
 ---
 
 ## Snapshot
 
-- Pre-review cleanup: all items `[x]`.
-- PR gate = Slim CI; main = full bootstrap + `dbt-state` artifact.
-- Defer local demo = C9 after marts; Part A = `. ./setup.sh` only (no bootstrap on screen).
-- Large uncommitted batch — human commits when ready.
+- Agenda Parts A–F sequential; demo prep checklist §1–§9 complete.
+- Uncommitted: AI-agnostic migration + renumber + wrap tweak.
 
 ---
 
 ## Next session
 
-1. Presenter re-read agenda B4/C9
-2. Checklist §5 → §10 + dry run
-3. Human commit + push so main artifact exists
+1. Timed dry run (§10)
+2. Human commit + push; Actions artifact check
+3. Delete `DEMO_CHECKLIST.md` when prep is truly finished
 
 ---
 
 ## Open items
 
-Uncommitted cleanup (this session + prior). First `main` CI after merge must succeed before PRs get a real slim baseline (fallback = full bootstrap until then).
-
-Phase 2+ (mention-only / later): `mart_showcase/`, more snapshots/analyses, package expansion — see `DEMO_CHECKLIST.md`.
+Uncommitted work. Phase 2+ backlog copy now only in agenda Part F / STATUS (not pointed at as a live file in the room).
 
 ---
 
@@ -70,7 +61,6 @@ Phase 2+ (mention-only / later): `mart_showcase/`, more snapshots/analyses, pack
 ```bash
 . ./setup.sh
 ./scripts/load_raw.sh && cd mart_finance
-dbt list --select selector:finance_showcase
 ```
 
 ---
@@ -79,10 +69,9 @@ dbt list --select selector:finance_showcase
 
 | Topic | Path |
 |-------|------|
-| **Demo + pre-review checklist** | **`DEMO_CHECKLIST.md`** |
 | Meeting / demo script | `docs/demo-agenda.md` |
-| dbt feature map / CLI | `docs/dbt-feature-guide.md` |
-| Defer / slim / clone | `docs/defer.md` |
-| Repo overview | `README.md` |
+| Demo checklist (temp) | `DEMO_CHECKLIST.md` |
 | AI instructions | `AGENTS.md` |
-| Token-lean skill | `.agents/skills/token-lean/SKILL.md` |
+| Skills | `.agents/skills/` |
+| Defer / slim | `docs/defer.md` |
+| Combined Docs DAG | `mart_combined/README.md` |
