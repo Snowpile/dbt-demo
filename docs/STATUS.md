@@ -11,7 +11,7 @@
 
 ## Resume here
 
-`main` CI is green; **`dbt-state`** artifact exists. Optional: timed dry run of `docs/demo-agenda.md`.
+Demo dry run **paused**. User wants another **repo pass** first, then the agenda dry run.
 
 **New chat prompt:** `Read docs/STATUS.md and continue.`
 
@@ -19,8 +19,9 @@
 
 ## Last session
 
-- CI #21 (`bce84a7`) **success** — bootstrap, checkpoint, publish_state, upload **`dbt-state`** (~27.8 MB).
-- Prior: deps fix + showcase KPI tests unblocked main.
+- `main` CI #21 green; **`dbt-state`** artifact live (~27.8 MB).
+- Started dress-rehearsal coach at Part A; user paused — prefer repo review before demo.
+- Prior: `dbt deps` in scripts; showcase KPI tests for checkpoint.
 
 ---
 
@@ -34,8 +35,9 @@
 
 ## Next session
 
-1. Optional: timed dry run of `docs/demo-agenda.md`.
-2. Phase 2+ only if needed (Pages / Docker / showcase).
+1. User-led (or assisted) repo pass.
+2. Then timed dry run of `docs/demo-agenda.md`.
+3. Phase 2+ only if needed.
 
 ---
 
@@ -43,7 +45,8 @@
 
 | Item | Notes |
 |------|--------|
-| Optional dry run | `docs/demo-agenda.md` |
+| Repo pass | Before demo dry run |
+| Optional dry run | `docs/demo-agenda.md` after pass |
 | Phase 2+ | Pages / Docker / broader showcase — agenda Part F |
 
 ---
