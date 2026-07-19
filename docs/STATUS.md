@@ -11,18 +11,14 @@
 
 ## Resume here
 
-### Demo prep (human)
+### Human
 
-§1–§9 done. **Next: §10 timed dry run** (~50–55 min) of `docs/demo-agenda.md`.
+Repo review / prep walkthrough **§1–§9 done**. Optional **§10** dry run, then ship.
 
-### Left for you (human)
-
-| # | Item | Where |
-|---|------|-------|
-| 1 | **§10** timed dry run | `docs/demo-agenda.md` + `DEMO_CHECKLIST.md` §10 |
-| 2 | Commit pending changes (AI-agnostic + Part letters + agenda wrap) | human |
-| 3 | Confirm `dbt-state` artifact on `main` | Actions tab |
-| 4 | After prep: delete `DEMO_CHECKLIST.md` + retarget refs | planned |
+1. Commit leftover: `docs/defer.md` (clone slim-down) + `.gitignore` / `.cursorignore` cleanup
+2. Confirm Actions: `main` has **`dbt-state`** artifact
+3. Optional: timed dry run (`docs/demo-agenda.md` ~50–55 min) — `DEMO_CHECKLIST.md` §10
+4. After you’re satisfied: **delete `DEMO_CHECKLIST.md`** and retarget any remaining refs (STATUS / README / AGENTS)
 
 **New chat prompt:** `Read docs/STATUS.md and continue.`
 
@@ -30,29 +26,28 @@
 
 ## Last session
 
-- §7–§9 marked done; Part F backlog no longer points at `DEMO_CHECKLIST.md`.
-- AI-agnostic: no `.cursor/rules/`; `CLAUDE.md` = `@AGENTS.md` only.
+- Final cleanup: commented `.gitignore`, aligned `.cursorignore`, slimmed `dbt clone` in `docs/defer.md`.
+- Demo agenda Parts A–F reviewed; AI-agnostic (`AGENTS.md` + `.agents/skills/`; `CLAUDE.md` = `@AGENTS.md`).
 
 ---
 
 ## Snapshot
 
-- Agenda Parts A–F sequential; demo prep checklist §1–§9 complete.
-- Uncommitted: AI-agnostic migration + renumber + wrap tweak.
-
----
-
-## Next session
-
-1. Timed dry run (§10)
-2. Human commit + push; Actions artifact check
-3. Delete `DEMO_CHECKLIST.md` when prep is truly finished
+- Pre-review + presenter walk §1–§9 complete.
+- Slim CI + `mart_combined` docs DAG + `sql.sh` in place.
+- Uncommitted: `docs/defer.md`, `.gitignore`, `.cursorignore` (± STATUS).
 
 ---
 
 ## Open items
 
-Uncommitted work. Phase 2+ backlog copy now only in agenda Part F / STATUS (not pointed at as a live file in the room).
+| Item | Notes |
+|------|--------|
+| Commit / push cleanup | human |
+| `dbt-state` on `main` | Actions tab |
+| §10 dry run | optional but recommended once |
+| Remove `DEMO_CHECKLIST.md` | after dry run / when prep closed |
+| Phase 2+ | Pages, Docker, broader showcase — mention-only in agenda Part F |
 
 ---
 
@@ -69,9 +64,9 @@ Uncommitted work. Phase 2+ backlog copy now only in agenda Part F / STATUS (not 
 
 | Topic | Path |
 |-------|------|
-| Meeting / demo script | `docs/demo-agenda.md` |
-| Demo checklist (temp) | `DEMO_CHECKLIST.md` |
+| Meeting script | `docs/demo-agenda.md` |
+| Defer / slim | `docs/defer.md` |
 | AI instructions | `AGENTS.md` |
 | Skills | `.agents/skills/` |
-| Defer / slim | `docs/defer.md` |
+| Checklist (temp) | `DEMO_CHECKLIST.md` |
 | Combined Docs DAG | `mart_combined/README.md` |

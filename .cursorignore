@@ -1,6 +1,10 @@
+# Keep agent context small: ignore heavy build / data trees (not a security file).
+# Repo policy for agents: AGENTS.md + .agents/skills/
+
 target/
 dbt_packages/
 logs/
+state/
 .venv/
 venv/
 data/*
@@ -9,4 +13,5 @@ data/*
 *.parquet
 *.csv
 *.duckdb
+*.duckdb.wal
 .git/

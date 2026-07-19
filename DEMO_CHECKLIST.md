@@ -11,29 +11,23 @@ Portable checklist for preparing and delivering the demo. Check items off as you
 
 ## Progress summary
 
-*Update this table when you finish a section. Last updated: 2026-07-18.*
+*Update this table when you finish a section. Last updated: 2026-07-19.*
 
 | # | Section | Status | Notes |
 |---|---------|--------|-------|
-| — | **Pre-review cleanup** | **Done** | #6 folded; #11 agenda rewritten; #16 reviewed |
+| — | **Pre-review cleanup** | **Done** | AI-agnostic; agenda A–F |
 | 1 | Bootstrap — `setup.sh` | **x Done** | Env only; no builds |
-| 2 | Setup subprocesses | **N/A** | Files are in git — show in Part A, not a separate review |
-| 3 | CI / GitHub (Part B) | **x Done** | Slim CI PR gate + main `dbt-state` artifact |
-| 4 | Repo layout & architecture | **x Done** | README/AGENTS/conventions + hooks/architectural_ddl |
-| 5 | Data & sources | **x Done** | Freshness on all three projects |
-| 6 | dbt live demo (Part C) | **x Done** | Walked; combined DAG + sql.sh available |
-| 7 | Production path (Part D) | **x Done** | Demo vs prod table |
-| 8 | AI workflow (Part E) | **x Done** | AGENTS.md + .agents/skills/; CLAUDE.md shim |
-| 9 | Wrap (Part F) | **x Done** | No DEMO_CHECKLIST pointer in agenda |
-| 10 | End-to-end dry run | **To do** | Do last |
+| 2 | Setup subprocesses | **N/A** | Show in Part A |
+| 3 | CI / GitHub (Part B) | **x Done** | Slim CI + `dbt-state` |
+| 4 | Repo layout & architecture | **x Done** | |
+| 5 | Data & sources | **x Done** | |
+| 6 | dbt live demo (Part C) | **x Done** | |
+| 7 | Production path (Part D) | **x Done** | |
+| 8 | AI workflow (Part E) | **x Done** | |
+| 9 | Wrap (Part F) | **x Done** | |
+| 10 | End-to-end dry run | **To do** | Optional timing pass — then delete this file |
 
-**Resume here (human):**
-
-1. **§10** timed dry run (~50–55 min)
-2. Commit pending changes; confirm `dbt-state` on `main`
-3. After prep: delete `DEMO_CHECKLIST.md` + retarget refs
-
-Also listed in `docs/STATUS.md` → **Left for you**.
+**Resume here (human):** §10 dry run (optional) → commit gitignore/defer cleanup → confirm Actions artifact → delete this checklist.
 
 ### Deferred (mention in demo, not built yet)
 

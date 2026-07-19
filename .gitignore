@@ -1,3 +1,9 @@
+# =============================================================================
+# dbt_demo — gitignore
+# Local env, warehouse files, and build artifacts stay out of git.
+# Examples/templates that *are* committed: .env.example, profiles.yml.example
+# =============================================================================
+
 # --- secrets & local config (never commit) ---
 .env
 .env.*
@@ -6,14 +12,16 @@
 *.key
 credentials.json
 secrets/
+# dbt profile with absolute paths (use profiles.yml.example instead)
 profiles.yml
 dbt_profiles.yml
 **/profiles.yml
 
-# --- dbt ---
+# --- dbt build / deps / state (regenerated locally or by CI) ---
 target/
 dbt_packages/
 logs/
+# Local slim/defer manifests: ./scripts/pull_state.sh → state/<mart_*>/
 state/
 manifest.json
 catalog.json
@@ -42,7 +50,8 @@ build/
 htmlcov/
 .ipynb_checkpoints/
 
-# --- data artifacts (local only) ---
+# --- warehouse / data artifacts (local only) ---
+# Keep seeds under data/seeds/; everything else under data/ is local DuckDB etc.
 data/*
 !data/seeds/
 !data/seeds/**
@@ -50,12 +59,14 @@ data/*
 *.avro
 *.orc
 *.duckdb
+*.duckdb.wal
+*.wal
 *.sqlite
 *.db
 !**/seeds/**/*.csv
 !**/seeds/**/*.parquet
 
-# --- Spark / notebooks ---
+# --- Spark / notebooks (unused in this demo; ignore if created locally) ---
 .spark/
 metastore_db/
 derby.log
@@ -70,9 +81,12 @@ Thumbs.db
 .vscode/
 !.vscode/extensions.json
 !.vscode/settings.json
+# Cursor UI / MCP local overrides (project AI instructions live in AGENTS.md)
+.cursor/
+.cursorignore.bak
 
-# --- AI / IDE local overrides (machine-specific; keep AGENTS.md in git) ---
+# --- AI local overrides (machine-specific; keep AGENTS.md + CLAUDE.md shim in git) ---
 AGENTS.override.md
 CLAUDE.local.md
-.cursor/mcp.json
+.claude/
 .user.yml

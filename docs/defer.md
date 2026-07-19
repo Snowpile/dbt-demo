@@ -19,7 +19,7 @@ Day-of demo: `docs/demo-agenda.md` §C9. Scripts below wrap the same flags.
 | `./scripts/publish_state.sh` | `pull_state` for all three domains |
 | `./scripts/slim_build.sh [mart_*] [selector]` | `dbt build --select … --defer --state state/<project>/` |
 | `./scripts/slim_build_all.sh [selector]` | Slim-build every domain that has a manifest |
-| `./scripts/clone_state.sh [mart_*] [selector]` | `dbt clone --state …` into the `dev_schema` sandbox |
+| `./scripts/clone_state.sh [mart_*] [selector]` | Optional wrapper around `dbt clone` (see below) |
 
 `state/` is gitignored (see `.gitignore`).
 
@@ -80,18 +80,13 @@ cd mart_finance
 dbt build --select state:modified+ --defer --vars '{"dev_schema":"dev"}' --target prod
 ```
 
-## `dbt clone`
+## `dbt clone` (optional)
 
-After `pull_state.sh`, clone materializes pointers (on DuckDB: views) into the sandbox schema
-so deferred parents exist without a full rebuild:
+Same `--state` family as defer, but **creates** objects (zero-copy clone where supported; on DuckDB, pointer views) instead of resolving `ref()`s at compile time. This demo and Slim CI rely on **`--defer`**, not clone.
 
-```bash
-./scripts/clone_state.sh mart_finance
-# or only staging:
-./scripts/clone_state.sh mart_finance 'path:models/staging'
-```
-
-Then slim-build only the models you edited.
+- Docs: [About dbt clone](https://docs.getdbt.com/reference/commands/clone)
+- Compare approaches: [To defer or to clone](https://docs.getdbt.com/blog/to-defer-or-to-clone)
+- Local wrapper (if needed): `./scripts/clone_state.sh mart_finance`
 
 ## CI (GitHub Actions)
 
