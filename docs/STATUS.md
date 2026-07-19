@@ -11,7 +11,7 @@
 
 ## Resume here
 
-**Commit + push** the `dbt deps` script fixes so `main` CI can succeed and publish the `dbt-state` artifact.
+**Commit + push** `unique`/`not_null` tests on `finance_showcase_kpi` v1/v2 (`_showcase.yml`), then confirm green `main` CI uploads **`dbt-state`**.
 
 **New chat prompt:** `Read docs/STATUS.md and continue.`
 
@@ -19,9 +19,8 @@
 
 ## Last session
 
-- Diagnosed `main` CI failure: `bootstrap` → `dbt_build_all` ran `dbt build` without `dbt deps`; `dbt_packages/` gitignored → exit 2 on clean Actions checkout.
-- Added `dbt deps` before dbt invokes in: `dbt_build_all.sh`, `slim_build.sh`, `pull_state.sh`, `clone_state.sh`, `dbt_docs.sh` (domain path). `mart_combined` path already had deps.
-- Dropped redundant deps loops from `ci.yml` / `slim-ci.yml` (scripts own deps now). Compile step in `ci.yml` still runs deps.
+- After re-enable, CI #20 (`a65c8ae`): **bootstrap succeeded** (deps fix worked); failed on **dbt-checkpoint** `check-model-has-tests` for `finance_showcase_kpi_v1` / `_v2` (0 tests).
+- Added `unique` + `not_null` on `store_id` per version in `_showcase.yml`; local checkpoint hooks pass.
 
 ---
 

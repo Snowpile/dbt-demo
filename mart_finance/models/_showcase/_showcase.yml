@@ -87,6 +87,7 @@ models:
           alias: finance_showcase_kpi_v1
         columns:
           - name: store_id
+            tests: [unique, not_null]
           - name: store_name
           - name: kpi_version
       - v: 2
@@ -94,6 +95,7 @@ models:
           alias: finance_showcase_kpi_v2
         columns:
           - name: store_id
+            tests: [unique, not_null]
           - name: store_name
           - name: tax_rate
           - name: kpi_version
