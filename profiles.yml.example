@@ -1,13 +1,11 @@
 dbt_demo:
-  target: dev
+  target: qa
   outputs:
-    dev:
+    # QA and prod share one DuckDB file. Layer schemas (source_data, mart, …) are
+    # identical; branch/PR work uses --defer + dev_schema sandbox (see docs/defer.md).
+    qa:
       type: duckdb
-      path: "{{ env_var('DUCKDB_DEV_PATH', 'data/dev.duckdb') }}"
-      threads: 4
-    staging:
-      type: duckdb
-      path: "{{ env_var('DUCKDB_STAGING_PATH', 'data/staging.duckdb') }}"
+      path: "{{ env_var('DUCKDB_PROD_PATH', 'data/prod.duckdb') }}"
       threads: 4
     prod:
       type: duckdb

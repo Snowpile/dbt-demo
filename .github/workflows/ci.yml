@@ -6,7 +6,7 @@ name: CI
 #   main  → full warehouse build, then persist a baseline for later PRs
 #   PR    → Slim CI: rebuild only what changed vs that baseline (--defer --state)
 #
-# Detail: docs/defer.md · Manual Slim re-run: slim-ci.yml
+# Detail: docs/defer.md
 # =============================================================================
 
 on:
@@ -29,7 +29,7 @@ jobs:
   # publish-state  (main only)
   #
   # 1. Install toolchain
-  # 2. Full bootstrap (scan seeds → load raw → dbt build all domains, dev+prod)
+  # 2. Full bootstrap (scan seeds → load raw → dbt build prod baseline)
   # 3. Structural dbt-checkpoint hooks (need manifests from the build)
   # 4. Capture per-domain manifest.json into state/
   # 5. Upload artifact "dbt-state" for PRs:
@@ -54,7 +54,7 @@ jobs:
         run: ./setup.sh
 
       # Same path CI always used for a full trust build (not Slim CI)
-      - name: Bootstrap warehouse (scan → load → dbt build dev + prod)
+      - name: Bootstrap warehouse (scan → load → dbt build prod)
         run: ./scripts/bootstrap.sh
 
       # Manifest-based checks — require the compile/build artifacts from bootstrap
@@ -133,9 +133,11 @@ jobs:
             echo "fallback=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          # Sanity-check the two pieces Slim CI needs
-          test -f state/mart_finance/manifest.json
+          # Sanity-check: prod DuckDB + a manifest per domain (matches publish_state.sh)
           test -f data/prod.duckdb
+          for project in mart_finance mart_marketing mart_operations; do
+            test -f "state/$project/manifest.json"
+          done
           echo "fallback=false" >> "$GITHUB_OUTPUT"
 
       # First-time / pre-artifact: behave like the old full PR gate

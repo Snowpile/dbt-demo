@@ -18,11 +18,9 @@ if [[ -f "$DBT_DEMO_ROOT/.env" ]]; then
 fi
 
 export DBT_PROFILES_DIR="${DBT_PROFILES_DIR:-$DBT_DEMO_ROOT}"
-export DUCKDB_DEV_PATH="${DUCKDB_DEV_PATH:-$DBT_DEMO_ROOT/data/dev.duckdb}"
-export DUCKDB_STAGING_PATH="${DUCKDB_STAGING_PATH:-$DBT_DEMO_ROOT/data/staging.duckdb}"
 export DUCKDB_PROD_PATH="${DUCKDB_PROD_PATH:-$DBT_DEMO_ROOT/data/prod.duckdb}"
 
-export DBT_TARGET="${DBT_TARGET:-dev}"
+export DBT_TARGET="${DBT_TARGET:-qa}"
 export DBT_PROJECT="${DBT_PROJECT:-mart_finance}"
 export DBT_DOCS_PORT_FINANCE="${DBT_DOCS_PORT_FINANCE:-8011}"
 export DBT_DOCS_PORT_MARKETING="${DBT_DOCS_PORT_MARKETING:-8012}"

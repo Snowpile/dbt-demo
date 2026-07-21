@@ -29,7 +29,6 @@ for pkg in mart_marketing mart_operations; do
 	rsync -a \
 		--exclude dbt_packages \
 		--exclude target \
-		--exclude logs \
 		--exclude .git \
 		"$src/" "$dst/"
 	echo "vendored copy: $pkg"

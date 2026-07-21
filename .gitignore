@@ -20,7 +20,6 @@ dbt_profiles.yml
 # --- dbt build / deps / state (regenerated locally or by CI) ---
 target/
 dbt_packages/
-logs/
 # Local slim/defer manifests: ./scripts/pull_state.sh → state/<mart_*>/
 state/
 manifest.json

@@ -12,6 +12,8 @@ config-version: 2
 
 profile: dbt_demo
 
+log-path: target/logs
+
 model-paths: ["models"]
 analysis-paths: ["analyses"]
 test-paths: ["tests"]

@@ -19,7 +19,7 @@ on:
         required: true
         default: prod
         type: choice
-        options: [dev, staging, prod]
+        options: [qa, prod]
   # Uncomment to run on a schedule (UTC):
   # schedule:
   #   - cron: "0 6 * * *"

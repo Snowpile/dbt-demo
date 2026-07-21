@@ -27,6 +27,7 @@ Works with Cursor, Claude Code, and other agents — durable context lives here 
 - Fresh chat when context is long; resume via `docs/STATUS.md`.
 - Token-lean detail: `.agents/skills/token-lean/SKILL.md`.
 - dbt model work: `.agents/skills/dbt-models/SKILL.md` · Python: `.agents/skills/python/SKILL.md`.
+- Open/update PRs: `.agents/skills/make-pr/SKILL.md` (after human push).
 - **No MCP** in this repo — terminal + repo files only (Claude Code and Cursor alike).
 
 ### Git: only the human commits/pushes
@@ -40,7 +41,7 @@ Works with Cursor, Claude Code, and other agents — durable context lives here 
 |------------------------|--------------------------------|
 | `./setup.sh`, `dbt deps`, local `dbt parse/compile/test/build` | **`git commit` / `push` / `merge` / `rebase` / `reset` — human only, never the AI** |
 | Read-only git (`status`/`diff`/`log`), `git add` to prepare | Force-push, branch delete |
-| Read-only SQL on **dev** DuckDB only | SQL on **staging** or **prod** |
+| Read-only SQL on **prod.duckdb** (qa/prod targets) | Destructive DDL/DML without `--write` |
 | Create feature branches | Destructive warehouse DDL/DML |
 | Edit CI / bash scripts | Changing secrets or prod credentials |
 | `scripts/scan_downloads.sh`, `scripts/load_raw.sh`, `scripts/sql.sh` | Anything ambiguous on business logic |
@@ -55,7 +56,7 @@ Works with Cursor, Claude Code, and other agents — durable context lives here 
 | Orchestration (demo) | **GitHub Actions** (`ci.yml` + `orchestrate.yml` stub); **Prefect** / **Airflow** stubs under `orchestration/` — extras in `requirements.json`, not default install |
 | Sample data | jaffle-shop seeds → `data/seeds/` → `raw.*` |
 | Python | **uv** (`requirements.json`, `./setup.sh`); lint/format **Ruff** only |
-| Environments | **dev** / **staging** / **prod** → `data/{dev,staging,prod}.duckdb` |
+| Environments | **qa** + **prod** → shared `data/prod.duckdb`; branch work = `--defer` + `dev_schema` |
 | Remote | GitHub [`Snowpile/dbt-demo`](https://github.com/Snowpile/dbt-demo) |
 
 ## Architecture (short)
@@ -93,7 +94,7 @@ Detail: `docs/defer.md`.
 
 ```bash
 . ./setup.sh                         # venv + config (~1 min)
-./scripts/bootstrap.sh               # scan + load raw + dbt build dev + prod
+./scripts/bootstrap.sh               # scan + load raw + prod dbt build (baseline)
 ./scripts/dbt_build_all.sh           # re-build only
 ./scripts/sql.sh "select 1"          # ad-hoc SQL (dev DuckDB; REPL if no args)
 ./dbt_docs.sh mart_finance           # docs :8011
@@ -122,5 +123,6 @@ Detail: `docs/defer.md`.
 | dbt feature map / CLI / mechanics | `docs/dbt-feature-guide.md` |
 | Defer / slim / clone | `docs/defer.md` |
 | Naming | `docs/conventions.md` |
+| Open PR (after human push) | `.agents/skills/make-pr/SKILL.md` |
 | Token-lean skill | `.agents/skills/token-lean/SKILL.md` |
 | Seed provenance | `data/seeds/PROVENANCE.md` |

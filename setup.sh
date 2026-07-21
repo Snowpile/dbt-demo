@@ -64,8 +64,6 @@ else
 	# Repo may have moved or been renamed since first setup; path keys must match ROOT.
 	sed -i \
 		-e "s|^DBT_PROFILES_DIR=.*|DBT_PROFILES_DIR=${ROOT}|" \
-		-e "s|^DUCKDB_DEV_PATH=.*|DUCKDB_DEV_PATH=${ROOT}/data/dev.duckdb|" \
-		-e "s|^DUCKDB_STAGING_PATH=.*|DUCKDB_STAGING_PATH=${ROOT}/data/staging.duckdb|" \
 		-e "s|^DUCKDB_PROD_PATH=.*|DUCKDB_PROD_PATH=${ROOT}/data/prod.duckdb|" \
 		.env
 fi
@@ -87,5 +85,5 @@ echo "==> Verifying dbt"
 
 echo ""
 echo "Environment ready."
-echo "Next: ./scripts/bootstrap.sh   # seed scan + load raw + dbt build (dev + prod)"
+echo "Next: ./scripts/bootstrap.sh   # seed scan + load raw + prod dbt build (baseline)"
 echo "Docs (second terminal, after bootstrap): ./dbt_docs.sh mart_finance"

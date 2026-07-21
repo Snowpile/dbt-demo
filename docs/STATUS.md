@@ -3,7 +3,7 @@
 *Living "where are we / pick up here" file. **Update at the end of every working session.***
 *Protocol: `.agents/skills/session-handoff/SKILL.md` · Demo script: `docs/demo-agenda.md`*
 
-**Last updated:** 2026-07-19
+**Last updated:** 2026-07-21
 
 **Guardrail:** Only the human commits/pushes (see `AGENTS.md`).
 
@@ -11,7 +11,7 @@
 
 ## Resume here
 
-Demo dry run **paused**. User wants another **repo pass** first, then the agenda dry run.
+User solo repo pass → then demo dry run. Uncommitted: **prod + QA env model** (drop dev/staging), PR template, make-pr skill, CI sanity check, slim-ci removed.
 
 **New chat prompt:** `Read docs/STATUS.md and continue.`
 
@@ -19,25 +19,24 @@ Demo dry run **paused**. User wants another **repo pass** first, then the agenda
 
 ## Last session
 
-- `main` CI #21 green; **`dbt-state`** artifact live (~27.8 MB).
-- Started dress-rehearsal coach at Part A; user paused — prefer repo review before demo.
-- Prior: `dbt deps` in scripts; showcase KPI tests for checkpoint.
+- Aligned repo to **prod + QA only**: shared `prod.duckdb`, `dev_schema` + defer for branch/PR work; removed dev/staging targets and bootstrap dev pass.
+- Updated profiles, scripts, macros, defer.md, agenda, README, AGENTS.
+- Prior: make-pr skill, PR template, CI green + `dbt-state`.
 
 ---
 
 ## Snapshot
 
-- `main` CI green (#21); artifact **`dbt-state`** (~27.8 MB) available for Slim CI / PRs.
-- Scripts run `dbt deps` before build/compile/clone/docs domain path.
-- Checklist removed earlier; agenda A–F still the demo script.
+- Environments: `docs/defer.md` § Environments (prod + QA; no dev.duckdb).
+- `main` CI green; **`dbt-state`** artifact available.
+- PR workflow: `.agents/skills/make-pr/SKILL.md` after human push.
 
 ---
 
 ## Next session
 
-1. User-led (or assisted) repo pass.
-2. Then timed dry run of `docs/demo-agenda.md`.
-3. Phase 2+ only if needed.
+1. Human: commit env alignment + other staged work.
+2. Optional: timed dry run of `docs/demo-agenda.md` (Part C now uses `--target prod`).
 
 ---
 
@@ -45,9 +44,9 @@ Demo dry run **paused**. User wants another **repo pass** first, then the agenda
 
 | Item | Notes |
 |------|--------|
-| Repo pass | Before demo dry run |
-| Optional dry run | `docs/demo-agenda.md` after pass |
-| Phase 2+ | Pages / Docker / broader showcase — agenda Part F |
+| Commit env + PR tooling | profiles, bootstrap, docs, make-pr |
+| Optional dry run | `docs/demo-agenda.md` |
+| Phase 2+ | Pages / Docker — agenda Part F |
 
 ---
 
@@ -55,7 +54,7 @@ Demo dry run **paused**. User wants another **repo pass** first, then the agenda
 
 ```bash
 . ./setup.sh
-./scripts/load_raw.sh && cd mart_finance
+./scripts/bootstrap.sh   # prod baseline only
 ```
 
 ---
@@ -64,8 +63,7 @@ Demo dry run **paused**. User wants another **repo pass** first, then the agenda
 
 | Topic | Path |
 |-------|------|
+| Environments + defer | `docs/defer.md` |
 | Meeting script | `docs/demo-agenda.md` |
-| Defer / slim | `docs/defer.md` |
 | AI instructions | `AGENTS.md` |
-| Skills | `.agents/skills/` |
-| Combined Docs DAG | `mart_combined/README.md` |
+| Open PR | `.agents/skills/make-pr/SKILL.md` |

@@ -29,13 +29,13 @@ No Docker in this demo — `uv` + one script installs the runtime. CI runs the s
 . ./setup.sh    # venv → deps → .env / profiles.yml → pre-commit → dbt --version (~1 min)
 ```
 
-**View:** `requirements.json`, `setup.sh`, `profiles.yml.example` (dev / staging / prod).
+**View:** `requirements.json`, `setup.sh`, `profiles.yml.example` (qa / prod — same `prod.duckdb`).
 
 
 | Piece          | Role                                                   |
 | -------------- | ------------------------------------------------------ |
 | `setup.sh`     | Env only — no warehouse builds                         |
-| `bootstrap.sh` | What **CI** runs: scan → load → `dbt build` dev + prod |
+| `bootstrap.sh` | What **CI** runs: scan → load → prod `dbt build` (baseline for defer) |
 | `load_raw.sh`  | CSV → DuckDB `raw.`* (Part C, before first build)      |
 
 
@@ -69,7 +69,7 @@ On every PR: lint **changed files only** — same hooks as local commit.
 On `main`: install, full bootstrap, structural checks, then **persist** Slim CI baseline.
 
 1. `setup-uv` → `./setup.sh`
-2. `./scripts/bootstrap.sh` — scan + load + build **dev + prod**
+2. `./scripts/bootstrap.sh` — scan + load + **prod** build (baseline)
 3. **dbt-checkpoint** — descriptions, tests, no raw table names
 4. `publish_state.sh` → upload artifact `**dbt-state`** (`state/*/manifest.json` + `data/prod.duckdb`)
 
@@ -81,7 +81,7 @@ Branch, push, open PR — lint + Slim CI run on the PR.
 
 ### B4. Slim CI on PRs (~1 min)
 
-PRs download main's `**dbt-state**`, then build only `state:modified+` with `--defer`. Unchanged models resolve from the baseline. That's the point of CI at scale. Same flags live in C9. Manual re-run: `slim-ci.yml`.
+PRs download main's `**dbt-state**`, then build only `state:modified+` with `--defer`. Unchanged models resolve from the baseline. That's the point of CI at scale. Same flags live in C9.
 
 **View:** `ci.yml` jobs `publish-state` vs `slim-pr` — full build on main vs deferred PR build.
 
@@ -92,8 +92,9 @@ PRs download main's `**dbt-state**`, then build only `state:modified+` with `--d
 One command at a time · never `bootstrap.sh` on screen · second terminal for docs (C7).
 
 ```bash
-./scripts/load_raw.sh
+./scripts/load_raw.sh prod
 cd mart_finance
+dbt deps
 ```
 
 ### C1. Framing (1 min)
@@ -107,9 +108,9 @@ Layered models. Build and test up to marts, then marts.
 ```bash
 dbt ls --select staging
 dbt ls --select marts
-dbt build --select staging intermediate    # includes attached tests
-dbt build --select marts
-# or: dbt build --select +finance_fct_order_revenue
+dbt build --select staging intermediate --target prod
+dbt build --select marts --target prod
+# or: dbt build --select +finance_fct_order_revenue --target prod
 ```
 
 **View:** `models/` tree · `dbt_project.yml` (tags, `docs.node_color`, persist_docs, vars, on-run) · config layers (project vs `schema.yml` vs model `config()`).
@@ -118,7 +119,7 @@ dbt build --select marts
 
 Standalone `dbt test` waits for C4 — no re-test of the same select after `dbt build`.
 
-**On marts build:** `WARN` from `warn_high_margin_orders` (~33k rows, `gross_margin_pct > 0.8`). Intentional — `severity: warn`, build still succeeds (`ERROR=0`); `store_failures` → `dev_dbt_test__audit.warn_high_margin_orders`. Dig into it in C4.
+**On marts build:** `WARN` from `warn_high_margin_orders` (~33k rows, `gross_margin_pct > 0.8`). Intentional — `severity: warn`, build still succeeds (`ERROR=0`); `store_failures` → `prod_dbt_test__audit.warn_high_margin_orders`. Dig into it in C4.
 
 ### C3. Incrementals (4 min)
 
@@ -146,14 +147,14 @@ dbt test --select test_type:singular
 dbt test --select test_type:unit
 dbt test --select warn_high_margin_orders
 # Peek at stored failures (repo root — second terminal is fine):
-./scripts/sql.sh "select * from dev_dbt_test__audit.warn_high_margin_orders limit 10"
+./scripts/sql.sh "select * from prod_dbt_test__audit.warn_high_margin_orders limit 10"
 ```
 
 **View:** custom generics `not_empty_string`, `accepted_range` · `warn_high_margin_orders` (`severity: warn`, `store_failures`) — same WARN as on the C2 marts build.
 
 Hard tests fail the build. This one only warns and stores the bad rows for review — soft fail without blocking the pipeline. At scale: Elementary / Monte Carlo. This repo stops at native tests + `store_failures`.
 
-**Ad-hoc SQL:** `./scripts/sql.sh "…"` from repo root (or `./scripts/sql.sh` for a REPL) — don't `source` it. `data/dev.duckdb` read-only; `-t prod` for prod.
+**Ad-hoc SQL:** `./scripts/sql.sh "…"` from repo root (or `./scripts/sql.sh` for a REPL) — don't `source` it. Read-only against `data/prod.duckdb` by default (`-t qa` is the same file).
 
 ### C5. Macros (2 min)
 
@@ -191,7 +192,7 @@ Second terminal, repo root:
 `dbt_utils` via `packages.yml`. Same patterns in marketing and operations.
 
 ```bash
-cd ../mart_marketing && dbt build
+cd ../mart_marketing && dbt build --target prod
 cd ../mart_finance     # back for defer
 ```
 
@@ -204,13 +205,13 @@ Marts already built (C2+) → baseline `manifest.json` is meaningful. Detail: `d
 We've built the project. Capture that as the baseline (like `main` / prod). Change one model — rebuild only that change; everything else resolves via `--defer`.
 
 ```bash
-# Still in mart_finance — marts already on **dev** from C2+
-dbt compile --target-path /tmp/dbt
+# Still in mart_finance — marts already on **prod** from C2+
+dbt compile --target-path /tmp/dbt --target prod
 
 printf '\n-- demo change\n' >> models/marts/finance_fct_daily_revenue.sql
 
 dbt build --select state:modified+ --defer --state /tmp/dbt \
-  --vars '{"dev_schema":"dev"}'
+  --vars '{"dev_schema":"dev"}' --target prod
 
 git checkout -- models/marts/finance_fct_daily_revenue.sql
 ```
@@ -229,7 +230,7 @@ Local and small on purpose. Same repo shape; swap the runtime.
 | Runtime       | `uv` + `setup.sh`                                    | Docker / same `requirements.json`                               |
 | Infra         | Local files                                          | Terraform / cloud IAM                                           |
 | Warehouse     | DuckDB per env                                       | Snowflake, BigQuery, Postgres                                   |
-| Envs          | Profile has staging; CI builds dev + prod            | Promote path + secrets per target                               |
+| Envs          | **qa** + **prod** (one DuckDB); branch work = defer + `dev_schema` | Prod warehouse + CI sandbox; no separate dev DB                |
 | Ingestion     | Vendored CSV + `load_raw`                            | Fivetran / Airbyte / APIs                                       |
 | PR CI         | Slim CI vs main `dbt-state` artifact                 | Same pattern (manifest from `main`; warehouse already has prod) |
 | Schedule      | GHA / Prefect / Airflow stubs                        | Same tools, real schedules                                      |
@@ -287,11 +288,11 @@ Durable context lives in files, not chat history — **tool-agnostic**.
 . ./setup.sh
 
 # Part C
-./scripts/load_raw.sh
-cd mart_finance
+./scripts/load_raw.sh prod
+cd mart_finance && dbt deps
 dbt ls --select staging
-dbt build --select staging intermediate
-dbt build --select marts
+dbt build --select staging intermediate --target prod
+dbt build --select marts --target prod
 dbt run --select finance_fct_order_revenue --full-refresh
 dbt test --select test_type:generic
 dbt test --select test_type:singular
@@ -300,9 +301,9 @@ dbt run-operation audit_relations
 dbt source freshness
 dbt snapshot
 ./dbt_docs.sh mart_finance   # C7 — second terminal
-# C9 defer (after marts built)
-dbt compile --target-path /tmp/dbt
+# C9 defer (after marts built on prod)
+dbt compile --target-path /tmp/dbt --target prod
 printf '\n-- demo change\n' >> models/marts/finance_fct_daily_revenue.sql
-dbt build --select state:modified+ --defer --state /tmp/dbt --vars '{"dev_schema":"dev"}'
+dbt build --select state:modified+ --defer --state /tmp/dbt --vars '{"dev_schema":"dev"}' --target prod
 git checkout -- models/marts/finance_fct_daily_revenue.sql
 ```

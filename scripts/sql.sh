@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Ad-hoc SQL against the demo DuckDB warehouse (dev by default).
+# Ad-hoc SQL against the demo DuckDB warehouse (qa/prod share prod.duckdb).
 #
 # Usage (repo root — run; do not source):
 #   ./scripts/sql.sh "select * from raw.raw_orders limit 5"
@@ -37,7 +37,7 @@ while [[ $# -gt 0 ]]; do
 		;;
 	-h | --help)
 		cat <<'EOF' >&2
-Ad-hoc SQL against the demo DuckDB warehouse (dev by default).
+Ad-hoc SQL against prod.duckdb (qa and prod targets use the same file).
 
 Usage (repo root — run as ./scripts/sql.sh, do not source):
   ./scripts/sql.sh "select * from raw.raw_orders limit 5"
@@ -62,11 +62,9 @@ EOF
 done
 
 case "$TARGET" in
-dev) DB="$DUCKDB_DEV_PATH" ;;
-staging) DB="$DUCKDB_STAGING_PATH" ;;
-prod) DB="$DUCKDB_PROD_PATH" ;;
+qa | prod) DB="$DUCKDB_PROD_PATH" ;;
 *)
-	echo "usage: sql.sh [-t dev|staging|prod] [--write] [sql]" >&2
+	echo "usage: sql.sh [-t qa|prod] [--write] [sql]" >&2
 	exit 1
 	;;
 esac

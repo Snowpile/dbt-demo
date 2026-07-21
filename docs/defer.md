@@ -5,6 +5,27 @@ prod); resolve other `ref()`s with `--defer --state`.
 
 Day-of demo: `docs/demo-agenda.md` §C9. Scripts below wrap the same flags.
 
+## Environments (prod + QA only)
+
+This repo uses **one warehouse file** (`data/prod.duckdb`) and two dbt targets:
+
+| Target | Role | Typical use |
+|--------|------|-------------|
+| **prod** | Canonical marts + CI baseline on `main` | `bootstrap.sh`, `publish_state.sh`, full builds |
+| **qa** | Same file as prod; semantic “validation” target | Default in `.env`; alias for ad-hoc work |
+
+There is **no separate dev or staging DuckDB**. Local branch and PR work use **`--target prod`** (catalog must match the state manifest) plus:
+
+- `--defer --state …` — unselected refs resolve to prod relations
+- `--vars '{"dev_schema":"dev"}'` — changed nodes land in a flat sandbox schema
+
+`dev_schema` is the dbt var name (community convention); it is the **sandbox**, not a third environment.
+
+```
+main bootstrap → prod marts in prod.duckdb → publish dbt-state
+PR / branch    → slim build on prod.duckdb + defer + dev_schema sandbox
+```
+
 ## Prerequisites
 
 1. Baseline warehouse already built for the domain (prod locally, or CI artifact).
@@ -94,7 +115,6 @@ Same `--state` family as defer, but **creates** objects (zero-copy clone where s
 |-------|-----|----------|
 | Push to `main` | `publish-state` | Full `bootstrap.sh` → dbt-checkpoint → `publish_state.sh` → upload artifact **`dbt-state`** (`state/*/manifest.json` + `data/prod.duckdb`) |
 | Pull request | `slim-pr` | Download latest successful main **`dbt-state`** → `load_raw.sh prod` → `slim_build_all.sh state:modified+` → compile + checkpoint |
-| Manual | `slim-ci.yml` | Same download + slim (optional selector) |
 
 If no main artifact exists yet (first clone / cold start), the PR job **falls back** to a full bootstrap.
 

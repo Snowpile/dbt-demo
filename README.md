@@ -34,7 +34,7 @@ dbt-demo/
 ├── mart_combined/           # docs-only: all three domains in one DAG
 ├── orchestration/           # Prefect + Airflow stubs (docs only)
 ├── profiles.yml.example
-├── .github/workflows/       # pre-commit, ci, slim-ci (dispatch), orchestrate (stub)
+├── .github/workflows/       # pre-commit, ci, orchestrate (stub)
 └── docs/                    # STATUS, demo-agenda, conventions, feature-guide, defer
 ```
 
@@ -55,18 +55,20 @@ All three read the same `raw.`* tables. **Every project** includes `dev_schema` 
 ./scripts/bootstrap.sh       # optional full build (same as CI)
 ./dbt_docs.sh mart_finance   # optional docs → http://127.0.0.1:8011
 ./dbt_docs.sh mart_combined  # optional: all domains in one DAG → :8010
-./scripts/sql.sh "select 1"  # optional ad-hoc SQL vs data/dev.duckdb
+./scripts/sql.sh "select 1"  # optional ad-hoc SQL vs data/prod.duckdb
 ```
 
 ### Single project
 
 ```bash
 cd mart_finance
-dbt build --target dev
+dbt build --target prod    # or qa (same warehouse file)
 dbt list --select tag:showcase
 dbt show --select finance_stg_stores --limit 5
 dbt source freshness
 ```
+
+Branch work on prod data: `./scripts/slim_build.sh mart_finance` (defer + `dev_schema`). See `docs/defer.md`.
 
 `dbt build` already **runs + tests** every selected node (models, seeds, snapshots, and the
 generic/singular/unit tests attached to them in the DAG).
@@ -92,11 +94,12 @@ data/seeds/*.csv  →  scripts/load_raw.py  →  raw.* (DuckDB)
 ```
 
 
-| Target  | DuckDB file           | Notes              |
-| ------- | --------------------- | ------------------ |
-| dev     | `data/dev.duckdb`     | Local iteration    |
-| staging | `data/staging.duckdb` | Ask before writing |
-| prod    | `data/prod.duckdb`    | Ask before writing |
+| Target | DuckDB file | Role |
+| ------ | ----------- | ---- |
+| **qa** | `data/prod.duckdb` | Default profile target; same warehouse as prod |
+| **prod** | `data/prod.duckdb` | Canonical marts + CI baseline on `main` |
+
+Branch / PR work uses **`--target prod`** + `--defer` + `dev_schema` sandbox (not a separate dev file). Detail: `docs/defer.md`.
 
 
 DuckDB is **single-writer** per file — run domains/targets sequentially. Real platforms
@@ -109,7 +112,6 @@ swap the profile to Snowflake/BigQuery/etc.; project layout stays the same.
 | ----------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `pre-commit.yml`  | Lint changed files (Ruff, SQLFluff, …)                 | [GitHub Actions](https://docs.github.com/en/actions)                                                                                                            |
 | `ci.yml`          | **main:** full bootstrap + upload `dbt-state` · **PR:** Slim CI (`state:modified+ --defer`) | `docs/defer.md` |
-| `slim-ci.yml`     | Manual re-run of Slim CI against main artifact | `docs/defer.md` |
 | `orchestrate.yml` | **Stub** scheduled/manual pipeline                     | [GitHub Actions](https://docs.github.com/en/actions) · [workflow syntax](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions) |
 | `orchestration/prefect/` | **Stub** Python flows (Cloud or self-host) | [Prefect](https://docs.prefect.io/) · [self-host](https://docs.prefect.io/v3/manage/self-host) |
 | `orchestration/airflow/` | **Stub** DAG scheduler (industry default) | [Airflow](https://airflow.apache.org/docs/) · [quick start](https://airflow.apache.org/docs/apache-airflow/stable/start.html) |

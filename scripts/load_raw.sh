@@ -9,11 +9,9 @@ TARGET="${1:-$DBT_TARGET}"
 "$DBT_DEMO_ROOT/scripts/scan_downloads.sh"
 
 case "$TARGET" in
-dev) DB="$DUCKDB_DEV_PATH" ;;
-staging) DB="$DUCKDB_STAGING_PATH" ;;
-prod) DB="$DUCKDB_PROD_PATH" ;;
+qa | prod) DB="$DUCKDB_PROD_PATH" ;;
 *)
-	echo "usage: load_raw.sh [dev|staging|prod]" >&2
+	echo "usage: load_raw.sh [qa|prod]" >&2
 	exit 1
 	;;
 esac

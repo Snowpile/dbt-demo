@@ -166,19 +166,18 @@ not how the SELECT is built.
 ## Env-aware layered schemas (`generate_schema_name`)
 
 **All three projects** override `macros/generate_schema_name.sql` with per-layer `+schema`
-in `dbt_project.yml` and declare `vars.dev_schema` (required pattern):
+in `dbt_project.yml` and declare `vars.dev_schema` (required pattern).
 
-| Layer | `+schema` | dev target | prod / staging |
+| Layer | `+schema` | prod / qa (no `dev_schema`) | defer / Slim CI (`dev_schema` set) |
 |---|---|---|---|
-| staging | `source_data` | `dev_source_data` | `source_data` |
-| intermediate | `transform` | `dev_transform` | `transform` |
-| marts | `mart` | `dev_mart` | `mart` |
-| showcase (finance) | `showcase` | `dev_showcase` | `showcase` |
+| staging | `source_data` | `source_data` | flat sandbox schema |
+| intermediate | `transform` | `transform` | (same) |
+| marts | `mart` | `mart` | (same) |
+| showcase (finance) | `showcase` | `showcase` | (same) |
 
-- **prod / staging** → bare layer names.
-- **dev** → env-prefixed so local builds can't clobber prod.
-- **`dev_schema` var** — when set (`--vars '{"dev_schema":"dev"}'`), flattens into one sandbox
-  schema for `--defer` builds.
+- **prod / qa** share `data/prod.duckdb` and use bare layer schema names.
+- **`dev_schema` var** — when set (`--vars '{"dev_schema":"dev"}'`), flattens built nodes into
+  one sandbox schema for `--defer` branch/PR work on prod data.
 
 Project vars example: `revenue_start_date` on `finance_stg_orders` (override with `--vars`).
 
@@ -188,7 +187,7 @@ Project vars example: `revenue_start_date` on `finance_stg_orders` (override wit
 
 **Full runbook:** `docs/defer.md`.
 
-Optional Actions: `.github/workflows/slim-ci.yml` (`workflow_dispatch`). PR gate: Slim CI in `ci.yml` (`docs/defer.md`).
+PR gate: Slim CI in `ci.yml` (`docs/defer.md`). Local: `./scripts/slim_build.sh` / `slim_build_all.sh`.
 
 ---
 
@@ -235,7 +234,7 @@ File DuckDB is **single-writer** — run domains/targets sequentially; microbatc
 dbt run --select finance_stg_orders --vars '{revenue_start_date: "2025-01-01"}'
 
 # Query stored test failures
-# select * from dev_dbt_test__audit.warn_high_margin_orders;
+# select * from prod_dbt_test__audit.warn_high_margin_orders;
 
 # Compile an analysis (not in the DAG)
 dbt compile --select revenue_by_store_analysis

@@ -7,7 +7,7 @@
 # Env:
 #   DBT_STATE_ROOT    override parent of per-project state dirs (default: <repo>/state)
 #   DBT_STATE_TARGET  warehouse target for the baseline manifest (default: prod)
-#                     (not DBT_TARGET — that is often left as "dev" in .env)
+#                     Slim/defer must use the same target as the captured state.
 set -euo pipefail
 
 source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/env.sh"
