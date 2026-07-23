@@ -123,6 +123,7 @@ Detail: `docs/defer.md`.
 | dbt feature map / CLI / mechanics | `docs/dbt-feature-guide.md` |
 | Defer / slim / clone | `docs/defer.md` |
 | Naming | `docs/conventions.md` |
+| Scripts & root files | `docs/scripts-and-root.md` |
 | Open PR (after human push) | `.agents/skills/make-pr/SKILL.md` |
 | Token-lean skill | `.agents/skills/token-lean/SKILL.md` |
 | Seed provenance | `data/seeds/PROVENANCE.md` |

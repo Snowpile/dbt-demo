@@ -3,7 +3,7 @@
 *Living "where are we / pick up here" file. **Update at the end of every working session.***
 *Protocol: `.agents/skills/session-handoff/SKILL.md` · Demo script: `docs/demo-agenda.md`*
 
-**Last updated:** 2026-07-21
+**Last updated:** 2026-07-22
 
 **Guardrail:** Only the human commits/pushes (see `AGENTS.md`).
 
@@ -11,7 +11,7 @@
 
 ## Resume here
 
-User solo repo pass → then demo dry run. Uncommitted: **prod + QA env model** (drop dev/staging), PR template, make-pr skill, CI sanity check, slim-ci removed.
+Human reviewing **scripts/** + **root** via `docs/scripts-and-root.md`. Uncommitted: env alignment, docs (versions/unit tests/YAML), `warehouse/ddl/` move, README planned backlog.
 
 **New chat prompt:** `Read docs/STATUS.md and continue.`
 
@@ -19,9 +19,9 @@ User solo repo pass → then demo dry run. Uncommitted: **prod + QA env model** 
 
 ## Last session
 
-- Aligned repo to **prod + QA only**: shared `prod.duckdb`, `dev_schema` + defer for branch/PR work; removed dev/staging targets and bootstrap dev pass.
-- Updated profiles, scripts, macros, defer.md, agenda, README, AGENTS.
-- Prior: make-pr skill, PR template, CI green + `dbt-state`.
+- Moved `architectural_ddl.sql` → **`warehouse/ddl/`**; updated all refs.
+- Added **`docs/scripts-and-root.md`** (catalog of every `scripts/` + root file).
+- Prior: unit tests vs macros; YAML placement; model versions; env alignment.
 
 ---
 
@@ -65,5 +65,6 @@ User solo repo pass → then demo dry run. Uncommitted: **prod + QA env model** 
 |-------|------|
 | Environments + defer | `docs/defer.md` |
 | Meeting script | `docs/demo-agenda.md` |
+| Scripts & root files | `docs/scripts-and-root.md` |
 | AI instructions | `AGENTS.md` |
 | Open PR | `.agents/skills/make-pr/SKILL.md` |

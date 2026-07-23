@@ -25,7 +25,8 @@ AI-agent-friendly repo (`AGENTS.md`, `.agents/skills/`).
 ```
 dbt-demo/
 ├── setup.sh                 # venv + deps + local config (fast, no builds)
-├── scripts/                 # env, scan, load_raw, bootstrap, slim/defer helpers, sql/architectural_ddl.sql
+├── scripts/                 # env, scan, load_raw, bootstrap, slim/defer helpers
+├── warehouse/ddl/           # one-off warehouse DDL (not the dbt DAG)
 ├── dbt_docs.sh              # docs server for one project
 ├── data/seeds/              # vendored jaffle-shop CSVs
 ├── mart_finance/            # revenue, margin, tax (+ headline dbt patterns)
@@ -139,10 +140,20 @@ This repo stays DuckDB + scripts on purpose. A durable production shape would ad
 | **Dockerfile / compose** | Same `uv` + `requirements.json` runtime CI and laptops use; no “works on my machine” drift |
 | **deployment.yml (or Helm/Terraform)** | Env-specific warehouse profiles, secrets, schedules — not committed credentials |
 | **Orchestration** | Stubs in-repo: `orchestrate.yml` (GHA), `orchestration/prefect/`, `orchestration/airflow/` — pick one for prod schedules |
-| **Warehouse one-offs** | DDL/grants in `scripts/sql/architectural_ddl.sql` (run once per env; not `on-run-start`) |
+| **Warehouse one-offs** | DDL/grants in `warehouse/ddl/architectural_ddl.sql` (run once per env; not `on-run-start`) |
 | **Warehouse profile** | Swap DuckDB for Snowflake/BigQuery/Postgres; keep `mart_*` projects unchanged |
 | **Artifacts** | CI uploads `manifest.json` (+ `prod.duckdb` for DuckDB defer) from `main`; PRs Slim CI — `docs/defer.md` |
 | **Docs hosting** | Local: `./dbt_docs.sh`. Prod may host `main` on Pages/S3 — not built here |
+
+### Planned (not in this demo yet)
+
+Wire these when graduating beyond laptop stubs — complementary to the table above:
+
+- **Observability** — run health, freshness SLAs, failure alerting (e.g. Elementary / warehouse monitors)
+- **Orchestration (beyond stubs)** — real schedules, retries, and dependency DAGs (GHA / Prefect / Airflow)
+- **Event / orchestration logging** — durable `event_log` (or similar) tables for pipeline runs, not just console `log()` / demo `audit.dbt_model_hooks`
+- **Metrics** — semantic / MetricFlow layer or warehouse metrics tables for KPI definitions
+- **Ops DDL** — extend `warehouse/ddl/` for those logging/metrics objects (once per env)
 
 None of those are required to run the demo locally; they are the path when you graduate the
 patterns off a laptop.
@@ -157,6 +168,7 @@ patterns off a laptop.
 | dbt feature map / CLI      | `docs/dbt-feature-guide.md`    |
 | Defer / slim / clone       | `docs/defer.md`                |
 | Naming / SQL style         | `docs/conventions.md`          |
+| Scripts & root file catalog | `docs/scripts-and-root.md`    |
 | AI agent instructions      | `AGENTS.md`                    |
 | Agent skills               | `.agents/skills/`              |
 | Claude Code entry          | `CLAUDE.md` → `@AGENTS.md`     |

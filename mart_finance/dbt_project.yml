@@ -36,7 +36,7 @@ dispatch:
 
 # Project-level run hooks (demo cold-start). After the warehouse is initialized,
 # remove on-run-start / on-run-end — durable DDL/grants live in
-# scripts/sql/architectural_ddl.sql (run once per env, not every dbt invocation).
+# warehouse/ddl/architectural_ddl.sql (run once per env, not every dbt invocation).
 # Model-level: pre_hook on finance_fct_order_revenue, post_hook on
 # finance_fct_daily_revenue (separate models for the demo).
 on-run-start:

@@ -5,7 +5,7 @@
 -- those hooks are fine for cold-start demos, but after init they can be removed.
 --
 -- Apply manually against the target DuckDB file (or your warehouse console), e.g.:
---   duckdb "$DBT_DEMO_DUCKDB_PATH" < scripts/sql/architectural_ddl.sql
+--   duckdb "$DUCKDB_PROD_PATH" < warehouse/ddl/architectural_ddl.sql
 --
 -- Add here: schemas, audit/log tables, grants, role setup, warehouse-native
 -- objects that models assume already exist.

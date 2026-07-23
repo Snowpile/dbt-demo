@@ -21,7 +21,7 @@ clean-targets:
 vars:
   dev_schema: ""
 
-# Demo-only logs. After init, remove — see scripts/sql/architectural_ddl.sql.
+# Demo-only logs. After init, remove — see warehouse/ddl/architectural_ddl.sql.
 on-run-start:
   - "{{ log('mart_marketing on-run-start target=' ~ target.name, info=True) }}"
 on-run-end:

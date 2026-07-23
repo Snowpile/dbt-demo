@@ -15,7 +15,10 @@ Run dbt from inside a domain project (`cd mart_finance`) after `. ./setup.sh`.
 | Config catalog (enabled, merge, append, delete+insert, microbatch, contract, versions, quote, custom strategy, indexes) | `mart_finance/models/_showcase/` |
 | Incr-of-incr + pre_hook | `finance_fct_order_revenue` + `finance_int_*_delta` |
 | post_hook | `finance_fct_daily_revenue` |
-| Shared `{% docs %}` | `mart_*/models/docs.md` → `{{ doc() }}` in `schema.yml` |
+| Shared `{% docs %}` | `mart_*/models/docs.md` → `{{ doc() }}` in model YAML |
+| Model YAML (central) | `mart_*/models/schema.yml` — domain descriptions, columns, tests |
+| Model YAML (colocated) | `mart_finance/models/_showcase/_showcase.yml` — same properties next to SQL |
+| Sources YAML | `mart_*/models/sources.yml` (always at `models/` root in this repo) |
 | Macros | `cents_to_dollars`, `generate_schema_name`, `audit_relations`, `get_incremental_custom_sql` |
 | Package | `packages.yml` → `dbt_utils` (tests + `generate_surrogate_key`) |
 | Tests | generic / singular / custom generic / unit (`unit_tests.yml`) / freshness |
@@ -157,9 +160,41 @@ not how the SELECT is built.
 
 - **Project:** `on-run-start` creates `audit.dbt_model_hooks`; `on-run-end` logs.
   Demo cold-start only — **after init, remove** `on-run-start` / `on-run-end`.
-  One-off DDL/grants: `scripts/sql/architectural_ddl.sql` (not every invocation).
+  One-off DDL/grants: `warehouse/ddl/architectural_ddl.sql` (not every invocation).
 - **pre_hook** on `finance_fct_order_revenue` — retention `DELETE` + audit insert.
 - **post_hook** on `finance_fct_daily_revenue` — `UPDATE loaded_at` + audit insert.
+
+---
+
+## Model versions (`finance_showcase_kpi`)
+
+dbt can keep **multiple implementations of one logical model** so a breaking column
+change does not force every consumer to cut over on the same day. Official docs:
+[Model versions](https://docs.getdbt.com/docs/mesh/govern/model-versions)
+([`versions`](https://docs.getdbt.com/reference/resource-properties/versions) /
+[`latest_version`](https://docs.getdbt.com/reference/resource-properties/latest_version)).
+
+**In this repo:** one model name `finance_showcase_kpi`, two SQL files, wired in
+`models/_showcase/_showcase.yml` with `latest_version: 2`.
+
+| File | Version | Difference |
+|------|---------|------------|
+| `finance_showcase_kpi_v1.sql` | v1 | `store_id`, `store_name`, `kpi_version` |
+| `finance_showcase_kpi_v2.sql` | v2 | adds **`tax_rate`** (breaking vs v1) |
+
+**How refs resolve:**
+
+- `ref('finance_showcase_kpi')` → **v2** (unpinned = `latest_version`)
+- `ref('finance_showcase_kpi', v=1)` → stay on the old contract
+
+Both versions materialize (aliases `finance_showcase_kpi_v1` / `_v2`). **Talk track:**
+contract evolution without a hard cutover — old reports pin `v=1`; new default is v2.
+
+```bash
+dbt list --select finance_showcase_kpi
+dbt run --select finance_showcase_kpi
+# or pin: dbt run --select finance_showcase_kpi.v1
+```
 
 ---
 
@@ -188,6 +223,64 @@ Project vars example: `revenue_start_date` on `finance_stg_orders` (override wit
 **Full runbook:** `docs/defer.md`.
 
 PR gate: Slim CI in `ci.yml` (`docs/defer.md`). Local: `./scripts/slim_build.sh` / `slim_build_all.sh`.
+
+---
+
+## Model YAML placement
+
+dbt loads **every** `*.yml` under `models/` — root vs subfolder is a team preference, not a
+platform limit.
+
+| Style | Path | What it documents |
+|-------|------|-------------------|
+| Central | `models/schema.yml` | Domain stg / int / fct / dim |
+| Colocated | `models/_showcase/_showcase.yml` | Showcase configs next to those SQL files |
+| Sources | `models/sources.yml` | Always at `models/` root here |
+
+Same properties either way: `description`, `columns`, tests, `contract`, `versions`, etc.
+
+---
+
+## Unit tests (`models/unit_tests.yml`)
+
+Native dbt unit tests (not warehouse data): mock **inputs**, assert **outputs**. Official docs:
+[Unit tests](https://docs.getdbt.com/docs/build/unit-tests)
+([overrides](https://docs.getdbt.com/reference/resource-properties/unit-test-overrides)).
+
+**Why a macro *and* a unit test?** Different jobs:
+
+| Piece | Role |
+|-------|------|
+| **`cents_to_dollars` macro** | Reusable **implementation** — one place for “cents → USD” math |
+| **Unit test** | **Regression lock on the model** — proves `finance_stg_orders` still *calls* that macro on the right columns and emits the expected aliases |
+
+Having the macro only proves the function works *if* you call it. It does **not** prove the staging model still applies it to `subtotal` / `tax_paid` / `order_total`, or that a later edit didn’t drop the conversion. The unit test is: *given these raw cent rows, does this model still emit these USD rows?* — fast, deterministic, no DuckDB / seeds required.
+
+**In finance** — both cases target `finance_stg_orders`:
+
+| Test | What it proves |
+|------|----------------|
+| `test_stg_orders_cents_to_dollars` | End-to-end with the **real** macro: cent ints → USD (700 → 7.00) |
+| `test_stg_orders_cents_to_dollars_override` | `overrides.macros` stubs the macro **return value** to `"1.23"` (static, not the body) — teaching mock/isolation; optional for the “why we need tests” story |
+
+```yaml
+unit_tests:
+  - name: …
+    model: finance_stg_orders
+    given:
+      - input: source('raw', 'raw_orders')
+        rows: […]          # fake upstream
+    expect:
+      rows: […]            # expected model output
+    # optional:
+    overrides:
+      macros:
+        cents_to_dollars: "1.23"
+```
+
+Run: `dbt test --select test_type:unit` (from `mart_finance`).
+
+**Talk track:** macros = reusable logic; unit tests = lock *this* model’s contract so a future edit can’t silently skip the conversion.
 
 ---
 

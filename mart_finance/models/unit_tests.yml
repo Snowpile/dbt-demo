@@ -1,3 +1,6 @@
+# Unit tests lock the *model* contract; the cents_to_dollars macro is the reusable math.
+# Having the macro does not prove finance_stg_orders still applies it — these tests do.
+# See docs/dbt-feature-guide.md § Unit tests.
 unit_tests:
   - name: test_stg_orders_cents_to_dollars
     description: >

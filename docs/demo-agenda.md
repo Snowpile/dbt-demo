@@ -113,7 +113,9 @@ dbt build --select marts --target prod
 # or: dbt build --select +finance_fct_order_revenue --target prod
 ```
 
-**View:** `models/` tree · `dbt_project.yml` (tags, `docs.node_color`, persist_docs, vars, on-run) · config layers (project vs `schema.yml` vs model `config()`).
+**View:** `models/` tree · `dbt_project.yml` (tags, `docs.node_color`, persist_docs, vars, on-run) · config layers (project vs YAML vs model `config()`).
+
+**YAML placement (show both):** domain descriptions/columns/tests live in root `models/schema.yml`; showcase models colocate theirs in `models/_showcase/_showcase.yml` (dbt discovers any `*.yml` under `models/`). **Sources stay at** `models/sources.yml` (always).
 
 **Hooks:** **pre** on `finance_fct_order_revenue` · **post** on `finance_fct_daily_revenue`.
 
@@ -135,7 +137,7 @@ dbt run --select finance_fct_daily_revenue    # post_hook
 1. Parents: `finance_int_orders_delta`, `finance_int_order_items_delta`
 2. Key union: `finance_int_changed_order_ids`
 3. Child: `finance_fct_order_revenue` — `is_incremental()`, `unique_key`, `**merge`**, `on_schema_change`
-4. `_showcase/`: **append** (`finance_showcase_order_log`) · **merge** + predicates (`finance_showcase_store_scd`) · optional microbatch / custom → `docs/dbt-feature-guide.md`
+4. `_showcase/`: **append** (`finance_showcase_order_log`) · **merge** + predicates (`finance_showcase_store_scd`) · **versions** (`finance_showcase_kpi` v1/v2 — pin with `ref(..., v=1)`; unpinned → `latest_version`) · optional microbatch / custom → `docs/dbt-feature-guide.md` § Model versions ([dbt docs](https://docs.getdbt.com/docs/mesh/govern/model-versions))
 
 Two incremental parents can each surface different keys. A union of changed IDs gives the child one cheap key list — rebuild only those rows.
 
@@ -150,7 +152,7 @@ dbt test --select warn_high_margin_orders
 ./scripts/sql.sh "select * from prod_dbt_test__audit.warn_high_margin_orders limit 10"
 ```
 
-**View:** custom generics `not_empty_string`, `accepted_range` · `warn_high_margin_orders` (`severity: warn`, `store_failures`) — same WARN as on the C2 marts build.
+**View:** custom generics `not_empty_string`, `accepted_range` · `warn_high_margin_orders` (`severity: warn`, `store_failures`) — same WARN as on the C2 marts build · **unit tests** in `models/unit_tests.yml`: macro = reusable math; unit test = proves *this model* still calls it (fixture in → expect out). Override case is optional mock demo — detail: `docs/dbt-feature-guide.md` § Unit tests.
 
 Hard tests fail the build. This one only warns and stores the bad rows for review — soft fail without blocking the pipeline. At scale: Elementary / Monte Carlo. This repo stops at native tests + `store_failures`.
 
@@ -173,7 +175,7 @@ dbt snapshot
 
 SCD2 on products; freshness on `raw_orders` in all three projects.
 
-**Governance (~30 sec):** Prod adds **grants**, **RLS**, and **contracts**. Contracts in `_showcase/` (`finance_showcase_store_scd`). Grants/RLS need a real warehouse role model — DuckDB skips them; same project shape ports to Snowflake/BQ. One-off DDL: `scripts/sql/architectural_ddl.sql`.
+**Governance (~30 sec):** Prod adds **grants**, **RLS**, and **contracts**. Contracts in `_showcase/` (`finance_showcase_store_scd`). Grants/RLS need a real warehouse role model — DuckDB skips them; same project shape ports to Snowflake/BQ. One-off DDL: `warehouse/ddl/architectural_ddl.sql`.
 
 ### C7. Docs + exposure (2 min)
 

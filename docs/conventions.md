@@ -24,20 +24,28 @@ Examples for domain `finance`:
 - Timestamps: `{event}_at` in UTC unless documented otherwise.
 - Booleans: `is_{condition}` (e.g. `is_active`).
 
-## Documentation (`{% docs %}` vs `schema.yml`)
+## Documentation (`{% docs %}` vs YAML)
 
-Prefer **shared** field docs in `models/docs.md` + `{{ doc('field') }}` in `schema.yml` when the
+Prefer **shared** field docs in `models/docs.md` + `{{ doc('field') }}` in model YAML when the
 column means the **same thing** across models (e.g. `order_id` everywhere is the order key).
 
 **When the same column name means different things in different models**, do **not** force a
-shared `{% docs %}` block — put a model-specific `description:` on that column in `schema.yml`
+shared `{% docs %}` block — put a model-specific `description:` on that column in YAML
 (or a uniquely named doc block like `status__orders` vs `status__shipments`). Shared docs are
 for identical semantics only; divergent meanings stay inline in YAML.
+
+**Where the YAML file lives** (both valid — dbt picks up any `*.yml` under `models/`):
+
+| Pattern | Example in this repo |
+|---------|----------------------|
+| Central catalog at `models/` root | `models/schema.yml` (domain stg/int/fct/dim) |
+| Colocated next to a subfolder | `models/_showcase/_showcase.yml` |
+| Sources (always at root here) | `models/sources.yml` |
 
 | Situation | Where the description lives |
 |-----------|----------------------------|
 | Same name, same meaning across tables | `models/docs.md` → `{{ doc('col') }}` |
-| Same name, **different** meaning | Inline `description:` under that model in `schema.yml` |
+| Same name, **different** meaning | Inline `description:` under that model in YAML |
 | One-off model narrative | `{% docs model_name %}` in `docs.md` or inline model `description:` |
 
 ## Tests (required)
@@ -47,7 +55,8 @@ On every PK: `unique`, `not_null`.
 Add `relationships` when FKs are stable (see finance/ops/marketing `schema.yml`).
 
 Custom generics live in `tests/generic/` (e.g. `not_negative`). Singular SQL tests in `tests/`.
-Unit tests: `models/unit_tests.yml` (finance).
+Unit tests: `models/unit_tests.yml` (finance) — lock that a model still *uses* macros correctly;
+the macro itself is reusable logic only (see `docs/dbt-feature-guide.md` § Unit tests).
 
 ## Tags & selection
 
@@ -68,6 +77,6 @@ dbt list --select selector:finance_showcase   # mart_finance/selectors.yml
 ## Warehouse one-offs (DDL / grants)
 
 Durable architectural SQL (create audit schemas/tables, grants, role setup) lives in
-`scripts/sql/architectural_ddl.sql` — run once per environment, not on every dbt
+`warehouse/ddl/architectural_ddl.sql` — run once per environment, not on every dbt
 invocation. `on-run-start` / `on-run-end` in `dbt_project.yml` are demo cold-start
 only; remove them after the warehouse is initialized.
