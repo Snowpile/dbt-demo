@@ -3,7 +3,7 @@
 *Living "where are we / pick up here" file. **Update at the end of every working session.***
 *Protocol: `.agents/skills/session-handoff/SKILL.md` · Demo script: `docs/demo-agenda.md`*
 
-**Last updated:** 2026-07-22
+**Last updated:** 2026-07-28
 
 **Guardrail:** Only the human commits/pushes (see `AGENTS.md`).
 
@@ -11,7 +11,7 @@
 
 ## Resume here
 
-Human reviewing **scripts/** + **root** via `docs/scripts-and-root.md`. Uncommitted: env alignment, docs (versions/unit tests/YAML), `warehouse/ddl/` move, README planned backlog.
+**Demo ready.** Human: timed dry run of `docs/demo-agenda.md` (Part A: `. ./setup.sh`; Part B/C as scripted).
 
 **New chat prompt:** `Read docs/STATUS.md and continue.`
 
@@ -19,24 +19,25 @@ Human reviewing **scripts/** + **root** via `docs/scripts-and-root.md`. Uncommit
 
 ## Last session
 
-- Moved `architectural_ddl.sql` → **`warehouse/ddl/`**; updated all refs.
-- Added **`docs/scripts-and-root.md`** (catalog of every `scripts/` + root file).
-- Prior: unit tests vs macros; YAML placement; model versions; env alignment.
+- Human finished scripts/root review; removed temporary `docs/scripts-and-root.md`; refs cleaned.
+- `setup.sh` now migrates stale `.env` / `profiles.yml` (dev/staging → qa + prod).
+- Repo aligned for demo: prod + QA, `warehouse/ddl/`, feature docs, showcase patterns documented.
 
 ---
 
 ## Snapshot
 
-- Environments: `docs/defer.md` § Environments (prod + QA; no dev.duckdb).
+- Environments: prod + QA shared `prod.duckdb` (`docs/defer.md`).
+- Warehouse one-offs: `warehouse/ddl/architectural_ddl.sql`.
+- Demo runbook: `docs/demo-agenda.md` · feature map: `docs/dbt-feature-guide.md`.
 - `main` CI green; **`dbt-state`** artifact available.
-- PR workflow: `.agents/skills/make-pr/SKILL.md` after human push.
 
 ---
 
 ## Next session
 
-1. Human: commit env alignment + other staged work.
-2. Optional: timed dry run of `docs/demo-agenda.md` (Part C now uses `--target prod`).
+1. Timed demo dry run (`docs/demo-agenda.md`).
+2. Human: commit any remaining local changes before/after dry run.
 
 ---
 
@@ -44,17 +45,17 @@ Human reviewing **scripts/** + **root** via `docs/scripts-and-root.md`. Uncommit
 
 | Item | Notes |
 |------|--------|
-| Commit env + PR tooling | profiles, bootstrap, docs, make-pr |
-| Optional dry run | `docs/demo-agenda.md` |
-| Phase 2+ | Pages / Docker — agenda Part F |
+| Demo dry run | Primary next step |
+| Phase 2+ backlog | Pages / Docker / observability — README § Planned |
 
 ---
 
 ## Resume quickly
 
 ```bash
-. ./setup.sh
-./scripts/bootstrap.sh   # prod baseline only
+. ./setup.sh                 # fresh terminal recommended
+./scripts/bootstrap.sh       # prod baseline (skip if warehouse already warm)
+# Demo: follow docs/demo-agenda.md from Part A
 ```
 
 ---
@@ -65,6 +66,6 @@ Human reviewing **scripts/** + **root** via `docs/scripts-and-root.md`. Uncommit
 |-------|------|
 | Environments + defer | `docs/defer.md` |
 | Meeting script | `docs/demo-agenda.md` |
-| Scripts & root files | `docs/scripts-and-root.md` |
+| dbt feature map | `docs/dbt-feature-guide.md` |
 | AI instructions | `AGENTS.md` |
 | Open PR | `.agents/skills/make-pr/SKILL.md` |

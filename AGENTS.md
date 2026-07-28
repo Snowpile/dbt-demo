@@ -96,7 +96,7 @@ Detail: `docs/defer.md`.
 . ./setup.sh                         # venv + config (~1 min)
 ./scripts/bootstrap.sh               # scan + load raw + prod dbt build (baseline)
 ./scripts/dbt_build_all.sh           # re-build only
-./scripts/sql.sh "select 1"          # ad-hoc SQL (dev DuckDB; REPL if no args)
+./scripts/sql.sh "select 1"          # ad-hoc SQL (prod.duckdb; REPL if no args)
 ./dbt_docs.sh mart_finance           # docs :8011
 ./dbt_docs.sh mart_combined          # all-domain DAG :8010 (docs only)
 ```
@@ -123,7 +123,6 @@ Detail: `docs/defer.md`.
 | dbt feature map / CLI / mechanics | `docs/dbt-feature-guide.md` |
 | Defer / slim / clone | `docs/defer.md` |
 | Naming | `docs/conventions.md` |
-| Scripts & root files | `docs/scripts-and-root.md` |
 | Open PR (after human push) | `.agents/skills/make-pr/SKILL.md` |
 | Token-lean skill | `.agents/skills/token-lean/SKILL.md` |
 | Seed provenance | `data/seeds/PROVENANCE.md` |

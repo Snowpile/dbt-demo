@@ -66,10 +66,24 @@ else
 		-e "s|^DBT_PROFILES_DIR=.*|DBT_PROFILES_DIR=${ROOT}|" \
 		-e "s|^DUCKDB_PROD_PATH=.*|DUCKDB_PROD_PATH=${ROOT}/data/prod.duckdb|" \
 		.env
+	# Drop legacy dev/staging keys from older env files.
+	sed -i \
+		-e '/^DUCKDB_DEV_PATH=/d' \
+		-e '/^DUCKDB_STAGING_PATH=/d' \
+		.env
+	if grep -qE '^DBT_TARGET=(dev|staging)$' .env 2>/dev/null; then
+		sed -i 's|^DBT_TARGET=.*|DBT_TARGET=qa|' .env
+	fi
+	if ! grep -q '^DBT_DOCS_PORT_COMBINED=' .env 2>/dev/null; then
+		echo 'DBT_DOCS_PORT_COMBINED=8010' >>.env
+	fi
 fi
 
 if [[ ! -f profiles.yml ]]; then
 	echo "==> Creating profiles.yml from profiles.yml.example"
+	cp profiles.yml.example profiles.yml
+elif ! grep -qE '^\s+qa:' profiles.yml 2>/dev/null || grep -qE '^\s+target:\s*dev\s*$' profiles.yml 2>/dev/null; then
+	echo "==> Refreshing profiles.yml from profiles.yml.example (qa + prod only)"
 	cp profiles.yml.example profiles.yml
 fi
 

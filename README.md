@@ -168,7 +168,6 @@ patterns off a laptop.
 | dbt feature map / CLI      | `docs/dbt-feature-guide.md`    |
 | Defer / slim / clone       | `docs/defer.md`                |
 | Naming / SQL style         | `docs/conventions.md`          |
-| Scripts & root file catalog | `docs/scripts-and-root.md`    |
 | AI agent instructions      | `AGENTS.md`                    |
 | Agent skills               | `.agents/skills/`              |
 | Claude Code entry          | `CLAUDE.md` → `@AGENTS.md`     |
