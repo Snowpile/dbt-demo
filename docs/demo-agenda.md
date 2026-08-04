@@ -108,6 +108,9 @@ Layered models. Build and test up to marts, then marts.
 ```bash
 dbt ls --select staging
 dbt ls --select marts
+# Seeds first — finance_stg_margin_targets refs seed finance_margin_targets
+# (load_raw does NOT load this; it's under mart_finance/seeds/)
+dbt seed --target prod
 dbt build --select staging intermediate --target prod
 dbt build --select marts --target prod
 # or: dbt build --select +finance_fct_order_revenue --target prod
@@ -293,6 +296,7 @@ Durable context lives in files, not chat history — **tool-agnostic**.
 ./scripts/load_raw.sh prod
 cd mart_finance && dbt deps
 dbt ls --select staging
+dbt seed --target prod
 dbt build --select staging intermediate --target prod
 dbt build --select marts --target prod
 dbt run --select finance_fct_order_revenue --full-refresh
