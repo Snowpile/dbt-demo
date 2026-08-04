@@ -24,16 +24,37 @@ echo "==> SHA-256 checksum verification"
 CHECKSUMS="$(mktemp)"
 tr -d '\r' <checksums.sha256 >"$CHECKSUMS"
 # macOS ships `shasum`, not `sha256sum`; Linux/Git Bash ship `sha256sum`.
+set +e
 if command -v sha256sum >/dev/null 2>&1; then
 	sha256sum -c "$CHECKSUMS"
+	checksum_rc=$?
 elif command -v shasum >/dev/null 2>&1; then
 	shasum -a 256 -c "$CHECKSUMS"
+	checksum_rc=$?
 else
 	rm -f "$CHECKSUMS"
 	echo "error: need sha256sum or shasum on PATH" >&2
 	exit 1
 fi
+set -e
 rm -f "$CHECKSUMS"
+
+if [[ "$checksum_rc" -ne 0 ]]; then
+	echo "" >&2
+	echo "Checksum failed. On Windows this is usually CRLF in a seed CSV" >&2
+	echo "(especially raw_orders.csv). Fix:" >&2
+	echo "  git rm --cached -r data/seeds && git checkout HEAD -- data/seeds" >&2
+	echo "  # or: delete data/seeds/raw_orders.csv && git checkout HEAD -- data/seeds/raw_orders.csv" >&2
+	echo "Confirm .gitattributes marks seeds as binary, then re-pull/renormalize." >&2
+	"$PY" -c "
+from pathlib import Path
+for p in sorted(Path('.').glob('raw_*.csv')):
+    n = p.read_bytes().count(b'\r')
+    if n:
+        print(f'  HINT: {p.name} contains {n} CR bytes (CRLF checkout)', flush=True)
+" >&2 || true
+	exit "$checksum_rc"
+fi
 
 echo "==> File type checks"
 for f in raw_customers.csv raw_orders.csv raw_items.csv raw_products.csv raw_stores.csv raw_supplies.csv; do
