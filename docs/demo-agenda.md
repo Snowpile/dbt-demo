@@ -123,27 +123,22 @@ dbt ls --select marts
 # Seeds first — finance_stg_margin_targets refs seed finance_margin_targets
 # (load_raw does NOT load this; it's under mart_finance/seeds/)
 dbt seed --target prod
+
+# Indirect selection (30–45 sec): FK test mart → staging dim is intentional.
+# Default dbt eager still selects that test when you only select staging; this repo = cautious.
+# Prefer grep over `| head` (head → BrokenPipeError noise from dbt).
+dbt ls --select staging --resource-type test --indirect-selection=eager \
+  | grep relationships_finance_fct || true
+dbt ls --select staging --resource-type test --indirect-selection=cautious \
+  | grep relationships_finance_fct || true
+# eager prints relationships_finance_fct_order_revenue_… ; cautious prints nothing
+
 dbt build --select staging intermediate --target prod
 dbt build --select marts --target prod
 # or one-shot: dbt build --target prod
 ```
 
-**Indirect selection (30–45 sec demo):** FK test on the mart → staging dim is intentional.
-Default dbt **eager** still runs that test when you only select staging. This repo sets
-**cautious**. Show the difference, then build layers:
-
-```bash
-# Prefer grep over `| head` — head closes the pipe early and dbt prints scary BrokenPipeError noise.
-dbt ls --select staging --resource-type test --indirect-selection=eager \
-  | grep relationships_finance_fct || true
-dbt ls --select staging --resource-type test --indirect-selection=cautious \
-  | grep relationships_finance_fct || true
-# eager prints the mart FK test name; cautious prints nothing
-dbt build --select staging intermediate --target prod
-dbt build --select marts --target prod
-```
-
-Full mode table + when to use each: `docs/dbt-feature-guide.md` § Indirect selection
+Full mode table: `docs/dbt-feature-guide.md` § Indirect selection
 ([dbt docs](https://docs.getdbt.com/reference/global-configs/indirect-selection)).
 
 **View:** `models/` tree · `dbt_project.yml` (tags, `docs.node_color`, persist_docs, vars, on-run) · config layers (project vs YAML vs model `config()`).
