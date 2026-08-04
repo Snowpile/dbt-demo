@@ -21,9 +21,13 @@ clean-targets:
 vars:
   dev_schema: ""
 
-# Demo-only logs. After init, remove — see warehouse/ddl/architectural_ddl.sql.
+# Demo-only logs + layer schemas. After init, remove — see warehouse/ddl/architectural_ddl.sql.
 on-run-start:
   - "{{ log('mart_marketing on-run-start target=' ~ target.name, info=True) }}"
+  - |
+    create schema if not exists source_data;
+    create schema if not exists transform;
+    create schema if not exists mart;
 on-run-end:
   - "{{ log('mart_marketing on-run-end target=' ~ target.name, info=True) }}"
 

@@ -10,6 +10,12 @@
 -- Add here: schemas, audit/log tables, grants, role setup, warehouse-native
 -- objects that models assume already exist.
 
+-- --- layer schemas (finance / shared DuckDB file) ---
+create schema if not exists source_data;
+create schema if not exists transform;
+create schema if not exists mart;
+create schema if not exists showcase;
+
 -- --- finance model-hook audit (used by pre_hook / post_hook demos) ---
 create schema if not exists audit;
 

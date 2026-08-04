@@ -97,6 +97,17 @@ cd mart_finance
 dbt deps
 ```
 
+**Fresh warehouse checklist** (laptop / empty `prod.duckdb` — not git drift):
+
+| Need | How you get it |
+|------|----------------|
+| `raw.*` tables | `./scripts/load_raw.sh prod` |
+| Seed `finance_margin_targets` | `dbt seed --target prod` (not part of load_raw) |
+| Schemas `source_data`, `transform`, `mart`, `showcase`, `audit` | Created on first `dbt` run via `on-run-start` (or `warehouse/ddl/architectural_ddl.sql`) |
+| Staging / intermediate / marts | Selective `dbt build --select …` below, **in order** |
+
+`--select staging intermediate` does **not** build marts or seeds. Build marts only after stg+int succeed.
+
 ### C1. Framing (1 min)
 
 Three dbt projects at repo root, shared DuckDB / jaffle-shop (~62k orders). Goal: full dbt surface — not just `dbt run`. Naming: `docs/conventions.md`.

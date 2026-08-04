@@ -42,7 +42,14 @@ dispatch:
 on-run-start:
   - "{{ log('mart_finance on-run-start target=' ~ target.name, info=True) }}"
   - |
+    -- Layer + audit schemas must exist before models/hooks touch them.
+    -- (Fresh DuckDB: missing `mart` breaks finance_fct_order_revenue pre_hook /
+    -- is_incremental() relation lookup with "schema does not exist".)
     create schema if not exists audit;
+    create schema if not exists source_data;
+    create schema if not exists transform;
+    create schema if not exists mart;
+    create schema if not exists showcase;
     create table if not exists audit.dbt_model_hooks (
       event_at timestamp,
       invocation_id varchar,
