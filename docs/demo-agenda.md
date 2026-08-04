@@ -133,9 +133,12 @@ Default dbt **eager** still runs that test when you only select staging. This re
 **cautious**. Show the difference, then build layers:
 
 ```bash
-dbt ls --select staging --resource-type test --indirect-selection=eager | head
-dbt ls --select staging --resource-type test --indirect-selection=cautious | head
-# eager list includes relationships_finance_fct_order_revenue_… ; cautious does not
+# Prefer grep over `| head` — head closes the pipe early and dbt prints scary BrokenPipeError noise.
+dbt ls --select staging --resource-type test --indirect-selection=eager \
+  | grep relationships_finance_fct || true
+dbt ls --select staging --resource-type test --indirect-selection=cautious \
+  | grep relationships_finance_fct || true
+# eager prints the mart FK test name; cautious prints nothing
 dbt build --select staging intermediate --target prod
 dbt build --select marts --target prod
 ```

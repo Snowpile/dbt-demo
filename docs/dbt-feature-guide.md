@@ -103,10 +103,15 @@ From `mart_finance` after seed + at least staging exists (or on a cold DB for th
 
 ```bash
 # What tests does "staging" pull under each mode?
-dbt ls --select staging --resource-type test --indirect-selection=eager
-dbt ls --select staging --resource-type test --indirect-selection=cautious
-dbt ls --select staging --resource-type test --indirect-selection=buildable
-dbt ls --select staging --resource-type test --indirect-selection=empty
+# (Use grep, not `| head` — head closes stdout early → dbt BrokenPipeError traceback noise.)
+dbt ls --select staging --resource-type test --indirect-selection=eager \
+  | grep relationships_finance_fct || true
+dbt ls --select staging --resource-type test --indirect-selection=cautious \
+  | grep relationships_finance_fct || true
+dbt ls --select staging --resource-type test --indirect-selection=buildable \
+  | grep relationships_finance_fct || true
+dbt ls --select staging --resource-type test --indirect-selection=empty \
+  | grep relationships_finance_fct || true
 
 # Eager on stg-only (fails if marts never built — teach the footgun)
 # dbt build --select staging --indirect-selection=eager --target prod
@@ -116,8 +121,8 @@ dbt build --select staging intermediate --target prod
 dbt build --select marts --target prod
 ```
 
-Look for `relationships_finance_fct_order_revenue_…` in the **eager** `ls` output; it should
-**not** appear under **cautious** when only `staging` is selected.
+Eager should print `relationships_finance_fct_order_revenue_…`; **cautious** / **empty** print
+nothing for that name when only `staging` is selected.
 
 **Talk track:** selection is not just models — tests have parents too. Eager maximizes
 coverage; cautious/buildable make subset `build`s honest without deleting FK tests.
