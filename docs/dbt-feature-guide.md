@@ -12,6 +12,7 @@ Run dbt from inside a domain project (`cd mart_finance`) after `. ./setup.sh`.
 | Area | Where |
 |------|--------|
 | Layer defaults (materialized, schema, tags, meta, node_color, persist_docs) | `mart_*/dbt_project.yml` |
+| Indirect selection (`eager` / `buildable` / `cautious` / `empty`) | `flags.indirect_selection` in each `mart_*/dbt_project.yml` — § below |
 | Config catalog (enabled, merge, append, delete+insert, microbatch, contract, versions, quote, custom strategy, indexes) | `mart_finance/models/_showcase/` |
 | Incr-of-incr + pre_hook | `finance_fct_order_revenue` + `finance_int_*_delta` |
 | post_hook | `finance_fct_daily_revenue` |
@@ -59,12 +60,67 @@ dbt clean                          # wipe target/ + dbt_packages/
 Selection examples: `--select model_name`, `tag:finance`, `path:models/_showcase`,
 `+finance_fct_daily_revenue+`, `source:raw.raw_orders`, `state:modified+` (needs `--state`).
 
-**Indirect selection:** all three domains set `flags.indirect_selection: cautious` in
-`dbt_project.yml`. Default dbt **eager** mode runs any test that *touches* a selected
-model — so `build --select staging` would also run mart `relationships` tests that FK
-into staging dims (and fail if marts aren’t built yet). **Cautious** only runs a test
-when every parent is selected. Override per command: `--indirect-selection=eager`.
-Docs: [indirect selection](https://docs.getdbt.com/reference/global-configs/indirect-selection).
+---
+
+## Indirect selection (which tests run with `--select`)
+
+When you `dbt build` / `dbt test --select …`, dbt also pulls in **tests connected to
+those nodes through the DAG** (not only tests defined *on* the selected models). That
+behavior is **indirect selection**. Official docs:
+[Indirect selection](https://docs.getdbt.com/reference/global-configs/indirect-selection) ·
+[Test selection examples](https://docs.getdbt.com/reference/node-selection/test-selection-examples).
+
+### Modes
+
+| Mode | Inclusiveness | Rule of thumb | When to use |
+|------|---------------|---------------|-------------|
+| **`eager`** | Default in stock dbt | Run a test if **any** parent is selected | Full-DAG CI / “test everything that touches this change”; needs upstream+downstream built or **defer** |
+| **`buildable`** | Middle | Run if every ref is selected **or an ancestor** of the selection | Subset builds where a test spans a model and its parent (e.g. agg vs detail) |
+| **`cautious`** | Strict | Run only if **all** parents are selected | **Layered builds** (`staging` then `marts`) without defer — this repo’s default |
+| **`empty`** | None | Do not indirectly select tests | Interactive compile; “build models only, I’ll test later” |
+
+Exclusion is always greedy: if any parent is explicitly `--exclude`d, the test is out.
+
+### This repo
+
+All three domains set in `dbt_project.yml`:
+
+```yaml
+flags:
+  indirect_selection: cautious
+```
+
+**Why:** `finance_fct_order_revenue.store_id` has a `relationships` test → `finance_stg_stores`.
+That FK is good architecture. Under **eager**, `dbt build --select staging` still *runs*
+that mart test (it touches `stg_stores`) → `fct_order_revenue does not exist` on a fresh
+warehouse. **Cautious** waits until the mart is selected too.
+
+Precedence if you override: CLI → env var → `dbt_project.yml` flags.
+
+### Demo commands (show the difference)
+
+From `mart_finance` after seed + at least staging exists (or on a cold DB for the eager fail):
+
+```bash
+# What tests does "staging" pull under each mode?
+dbt ls --select staging --resource-type test --indirect-selection=eager
+dbt ls --select staging --resource-type test --indirect-selection=cautious
+dbt ls --select staging --resource-type test --indirect-selection=buildable
+dbt ls --select staging --resource-type test --indirect-selection=empty
+
+# Eager on stg-only (fails if marts never built — teach the footgun)
+# dbt build --select staging --indirect-selection=eager --target prod
+
+# Project default (cautious) — safe layered build
+dbt build --select staging intermediate --target prod
+dbt build --select marts --target prod
+```
+
+Look for `relationships_finance_fct_order_revenue_…` in the **eager** `ls` output; it should
+**not** appear under **cautious** when only `staging` is selected.
+
+**Talk track:** selection is not just models — tests have parents too. Eager maximizes
+coverage; cautious/buildable make subset `build`s honest without deleting FK tests.
 
 ---
 

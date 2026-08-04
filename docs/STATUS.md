@@ -3,7 +3,7 @@
 *Living "where are we / pick up here" file. **Update at the end of every working session.***
 *Protocol: `.agents/skills/session-handoff/SKILL.md` · Demo script: `docs/demo-agenda.md`*
 
-**Last updated:** 2026-07-28
+**Last updated:** 2026-08-04
 
 **Guardrail:** Only the human commits/pushes (see `AGENTS.md`).
 
@@ -11,7 +11,7 @@
 
 ## Resume here
 
-**Demo ready.** Human: timed dry run of `docs/demo-agenda.md` (Part A: `. ./setup.sh`; Part B/C as scripted).
+**Demo ready** after push of cold-start + `indirect_selection: cautious` docs. Dry run `docs/demo-agenda.md` (C2 includes mode compare).
 
 **New chat prompt:** `Read docs/STATUS.md and continue.`
 
@@ -19,9 +19,9 @@
 
 ## Last session
 
-- Human finished scripts/root review; removed temporary `docs/scripts-and-root.md`; refs cleaned.
-- `setup.sh` now migrates stale `.env` / `profiles.yml` (dev/staging → qa + prod).
-- Repo aligned for demo: prod + QA, `warehouse/ddl/`, feature docs, showcase patterns documented.
+- Documented **indirect selection** (eager / buildable / cautious / empty) in `docs/dbt-feature-guide.md` + live `dbt ls` compare in agenda C2.
+- Project default: `flags.indirect_selection: cautious` (all `mart_*`) so layered `build --select staging` stays valid.
+- Prior: seed + schema cold-start checklist; Windows uv/CRLF fixes.
 
 ---
 

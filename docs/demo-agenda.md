@@ -106,7 +106,8 @@ dbt deps
 | Schemas `source_data`, `transform`, `mart`, `showcase`, `audit` | Created on first `dbt` run via `on-run-start` (or `warehouse/ddl/architectural_ddl.sql`) |
 | Staging / intermediate / marts | `dbt build --select staging intermediate` then `dbt build --select marts` (order matters) |
 
-Project flag **`indirect_selection: cautious`** — default dbt `eager` would also run mart→staging relationship tests when building staging alone (mart table missing). Cautious only runs a test when *all* its parents are selected. Keep using **`build`**.
+Project flag **`indirect_selection: cautious`** (all `mart_*/dbt_project.yml`). Detail + live
+compare of modes: `docs/dbt-feature-guide.md` § Indirect selection.
 
 ### C1. Framing (1 min)
 
@@ -127,7 +128,20 @@ dbt build --select marts --target prod
 # or one-shot: dbt build --target prod
 ```
 
-**Why not eager tests on stg-only builds:** a `relationships` test on `finance_fct_order_revenue` → `finance_stg_stores` is correct architecture. Default **eager** indirect selection still *runs* that test whenever staging is selected (it touches `stg_stores`). With **`flags.indirect_selection: cautious`** in `dbt_project.yml`, the test waits until the mart is selected too. Talk track / docs: [indirect selection](https://docs.getdbt.com/reference/global-configs/indirect-selection).
+**Indirect selection (30–45 sec demo):** FK test on the mart → staging dim is intentional.
+Default dbt **eager** still runs that test when you only select staging. This repo sets
+**cautious**. Show the difference, then build layers:
+
+```bash
+dbt ls --select staging --resource-type test --indirect-selection=eager | head
+dbt ls --select staging --resource-type test --indirect-selection=cautious | head
+# eager list includes relationships_finance_fct_order_revenue_… ; cautious does not
+dbt build --select staging intermediate --target prod
+dbt build --select marts --target prod
+```
+
+Full mode table + when to use each: `docs/dbt-feature-guide.md` § Indirect selection
+([dbt docs](https://docs.getdbt.com/reference/global-configs/indirect-selection)).
 
 **View:** `models/` tree · `dbt_project.yml` (tags, `docs.node_color`, persist_docs, vars, on-run) · config layers (project vs YAML vs model `config()`).
 
