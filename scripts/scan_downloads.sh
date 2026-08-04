@@ -3,16 +3,35 @@
 # Verifies: SHA-256 pins, MIME type, no null bytes, valid UTF-8 CSV parse.
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-SEEDS="$ROOT/data/seeds"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/env.sh"
+SEEDS="$DBT_DEMO_ROOT/data/seeds"
 
-# Portable interpreter pick: Linux/macOS have python3; Windows Git Bash often python.
-if command -v python3 >/dev/null 2>&1; then
-	PY=python3
-elif command -v python >/dev/null 2>&1; then
-	PY=python
-else
-	echo "error: need python3 or python on PATH" >&2
+# Prefer repo .venv (from setup.sh / uv). Avoid Windows Store "python" stubs on PATH.
+PY=""
+for candidate in "$DBT_DEMO_PYTHON" "${DBT_DEMO_PYTHON}.exe" "$DBT_DEMO_VENV_BIN/python.exe" "$DBT_DEMO_VENV_BIN/python"; do
+	if [[ -x "$candidate" ]] || [[ -f "$candidate" ]]; then
+		PY="$candidate"
+		break
+	fi
+done
+if [[ -z "$PY" ]]; then
+	if command -v python3 >/dev/null 2>&1; then
+		PY=$(command -v python3)
+	elif command -v python >/dev/null 2>&1; then
+		PY=$(command -v python)
+	fi
+fi
+if [[ -z "$PY" ]]; then
+	echo "error: no Python found. Run: . ./setup.sh" >&2
+	echo "(That creates .venv via uv — do not use the Microsoft Store python shortcut.)" >&2
+	exit 1
+fi
+# Reject Windows App Execution Alias stub (prints Store message, exit 9009).
+if ! "$PY" -c "import sys; assert sys.version_info >= (3, 11)" >/dev/null 2>&1; then
+	echo "error: '$PY' is not a working Python 3.11+." >&2
+	echo "Run: . ./setup.sh   # installs .venv with uv" >&2
+	echo "On Windows: Settings → Apps → Advanced app settings → App execution aliases" >&2
+	echo "  → turn OFF 'python.exe' / 'python3.exe' aliases if they point at the Store." >&2
 	exit 1
 fi
 

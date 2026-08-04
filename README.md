@@ -45,9 +45,10 @@ All three read the same `raw.`* tables. **Every project** includes `dev_schema` 
 
 ## Requirements
 
-- `[uv](https://docs.astral.sh/uv/getting-started/installation/)`
-- Python 3.11
+- Python 3.11 (usually installed **by** `uv` during `. ./setup.sh` — no system Python required)
 - macOS / Linux / Windows (Git Bash or WSL for `*.sh`)
+- `uv` — installed automatically by `setup.sh` if missing; or install yourself:
+  [uv install docs](https://docs.astral.sh/uv/getting-started/installation/)
 
 ## Quick start
 

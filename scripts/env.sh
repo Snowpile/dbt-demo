@@ -34,6 +34,14 @@ else
 	DBT_DEMO_VENV_BIN="$DBT_DEMO_ROOT/.venv/bin"
 fi
 export DBT_DEMO_VENV_BIN
-# Bare names; on Windows (Git Bash/MSYS) the exec layer resolves the .exe.
-export DBT_DEMO_DBT="${DBT_DEMO_VENV_BIN}/dbt"
-export DBT_DEMO_PYTHON="${DBT_DEMO_VENV_BIN}/python"
+# Prefer python.exe on Windows; bare `python` also works under Git Bash/MSYS.
+if [[ -f "$DBT_DEMO_VENV_BIN/python.exe" ]]; then
+	export DBT_DEMO_PYTHON="$DBT_DEMO_VENV_BIN/python.exe"
+else
+	export DBT_DEMO_PYTHON="$DBT_DEMO_VENV_BIN/python"
+fi
+if [[ -f "$DBT_DEMO_VENV_BIN/dbt.exe" ]]; then
+	export DBT_DEMO_DBT="$DBT_DEMO_VENV_BIN/dbt.exe"
+else
+	export DBT_DEMO_DBT="$DBT_DEMO_VENV_BIN/dbt"
+fi

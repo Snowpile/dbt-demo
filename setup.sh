@@ -24,10 +24,26 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT"
 
-# If uv is not installed, print an error message, how to install, and stop
+# Install uv if missing (official standalone installer). Needed before .venv / Python.
 if ! command -v uv >/dev/null 2>&1; then
-	echo "error: uv is required." >&2
-	echo "Install: https://docs.astral.sh/uv/getting-started/installation/" >&2
+	echo "==> uv not found — installing (https://astral.sh/uv)"
+	if command -v curl >/dev/null 2>&1; then
+		curl -LsSf https://astral.sh/uv/install.sh | sh
+	elif command -v wget >/dev/null 2>&1; then
+		wget -qO- https://astral.sh/uv/install.sh | sh
+	else
+		echo "error: need curl or wget to install uv." >&2
+		echo "Or install manually: https://docs.astral.sh/uv/getting-started/installation/" >&2
+		false
+	fi
+	# Installer drops binaries here; ensure this shell can see them (esp. when sourced).
+	export PATH="${HOME}/.local/bin:${HOME}/.cargo/bin:${PATH}"
+	hash -r 2>/dev/null || true
+fi
+if ! command -v uv >/dev/null 2>&1; then
+	echo "error: uv still not on PATH after install." >&2
+	echo "Open a new terminal (or: export PATH=\"\$HOME/.local/bin:\$PATH\") and re-run: . ./setup.sh" >&2
+	echo "Windows (PowerShell alternative): irm https://astral.sh/uv/install.ps1 | iex" >&2
 	false
 fi
 
