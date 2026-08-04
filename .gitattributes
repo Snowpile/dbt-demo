@@ -1,0 +1,19 @@
+# Keep checkout bytes stable across Windows/macOS/Linux (checksums + bash).
+# Without this, core.autocrlf rewrites seeds to CRLF and sha256sum fails
+# (filenames become 'raw_orders.csv'$'\r', and file digests change).
+
+* text=auto eol=lf
+
+*.sh text eol=lf
+*.bash text eol=lf
+*.py text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+*.toml text eol=lf
+*.json text eol=lf
+*.sql text eol=lf
+
+# Seed integrity pins — must match committed SHA-256 digests exactly.
+data/seeds/*.csv binary
+data/seeds/checksums.sha256 text eol=lf

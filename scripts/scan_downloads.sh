@@ -19,15 +19,21 @@ fi
 cd "$SEEDS"
 
 echo "==> SHA-256 checksum verification"
+# Strip CR so a CRLF checkout of checksums.sha256 still works (Windows autocrlf).
+# Seed CSVs themselves must stay LF/binary — see .gitattributes.
+CHECKSUMS="$(mktemp)"
+tr -d '\r' <checksums.sha256 >"$CHECKSUMS"
 # macOS ships `shasum`, not `sha256sum`; Linux/Git Bash ship `sha256sum`.
 if command -v sha256sum >/dev/null 2>&1; then
-	sha256sum -c checksums.sha256
+	sha256sum -c "$CHECKSUMS"
 elif command -v shasum >/dev/null 2>&1; then
-	shasum -a 256 -c checksums.sha256
+	shasum -a 256 -c "$CHECKSUMS"
 else
+	rm -f "$CHECKSUMS"
 	echo "error: need sha256sum or shasum on PATH" >&2
 	exit 1
 fi
+rm -f "$CHECKSUMS"
 
 echo "==> File type checks"
 for f in raw_customers.csv raw_orders.csv raw_items.csv raw_products.csv raw_stores.csv raw_supplies.csv; do
@@ -35,10 +41,13 @@ for f in raw_customers.csv raw_orders.csv raw_items.csv raw_products.csv raw_sto
 		echo "missing $f"
 		exit 1
 	}
-	file "$f" | grep -qi 'csv\|text' || {
-		echo "bad type: $f"
-		exit 1
-	}
+	# `file` is often missing on minimal Git Bash — skip MIME check if unavailable.
+	if command -v file >/dev/null 2>&1; then
+		file "$f" | grep -qi 'csv\|text' || {
+			echo "bad type: $f"
+			exit 1
+		}
+	fi
 done
 
 "$PY" -c "
