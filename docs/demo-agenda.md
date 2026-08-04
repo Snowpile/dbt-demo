@@ -104,9 +104,9 @@ dbt deps
 | `raw.*` tables | `./scripts/load_raw.sh prod` |
 | Seed `finance_margin_targets` | `dbt seed --target prod` (not part of load_raw) |
 | Schemas `source_data`, `transform`, `mart`, `showcase`, `audit` | Created on first `dbt` run via `on-run-start` (or `warehouse/ddl/architectural_ddl.sql`) |
-| Staging / intermediate / marts | Selective `dbt build --select …` below, **in order** |
+| Staging / intermediate / marts | `dbt build --select staging intermediate` then `dbt build --select marts` (order matters) |
 
-`--select staging intermediate` does **not** build marts or seeds. Build marts only after stg+int succeed.
+Project flag **`indirect_selection: cautious`** — default dbt `eager` would also run mart→staging relationship tests when building staging alone (mart table missing). Cautious only runs a test when *all* its parents are selected. Keep using **`build`**.
 
 ### C1. Framing (1 min)
 
@@ -124,8 +124,10 @@ dbt ls --select marts
 dbt seed --target prod
 dbt build --select staging intermediate --target prod
 dbt build --select marts --target prod
-# or: dbt build --select +finance_fct_order_revenue --target prod
+# or one-shot: dbt build --target prod
 ```
+
+**Why not eager tests on stg-only builds:** a `relationships` test on `finance_fct_order_revenue` → `finance_stg_stores` is correct architecture. Default **eager** indirect selection still *runs* that test whenever staging is selected (it touches `stg_stores`). With **`flags.indirect_selection: cautious`** in `dbt_project.yml`, the test waits until the mart is selected too. Talk track / docs: [indirect selection](https://docs.getdbt.com/reference/global-configs/indirect-selection).
 
 **View:** `models/` tree · `dbt_project.yml` (tags, `docs.node_color`, persist_docs, vars, on-run) · config layers (project vs YAML vs model `config()`).
 

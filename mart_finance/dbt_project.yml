@@ -34,6 +34,13 @@ dispatch:
   - macro_namespace: dbt
     search_order: ["mart_finance", "dbt"]
 
+# Layered builds: default eager indirect selection pulls mart relationship tests
+# when you `build --select staging` (those tests also ref staging dims) → missing
+# mart tables. Cautious = only run a test when *all* its parents are selected.
+# https://docs.getdbt.com/reference/global-configs/indirect-selection
+flags:
+  indirect_selection: cautious
+
 # Project-level run hooks (demo cold-start). After the warehouse is initialized,
 # remove on-run-start / on-run-end — durable DDL/grants live in
 # warehouse/ddl/architectural_ddl.sql (run once per env, not every dbt invocation).

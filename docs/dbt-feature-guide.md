@@ -59,6 +59,13 @@ dbt clean                          # wipe target/ + dbt_packages/
 Selection examples: `--select model_name`, `tag:finance`, `path:models/_showcase`,
 `+finance_fct_daily_revenue+`, `source:raw.raw_orders`, `state:modified+` (needs `--state`).
 
+**Indirect selection:** all three domains set `flags.indirect_selection: cautious` in
+`dbt_project.yml`. Default dbt **eager** mode runs any test that *touches* a selected
+model — so `build --select staging` would also run mart `relationships` tests that FK
+into staging dims (and fail if marts aren’t built yet). **Cautious** only runs a test
+when every parent is selected. Override per command: `--indirect-selection=eager`.
+Docs: [indirect selection](https://docs.getdbt.com/reference/global-configs/indirect-selection).
+
 ---
 
 ## Incremental models
