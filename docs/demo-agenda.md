@@ -200,8 +200,8 @@ dbt run-operation audit_relations
 ### C6. Sources, freshness, snapshots (2 min)
 
 ```bash
-dbt source freshness
-dbt snapshot
+dbt source freshness   # may WARN as sample data ages (thresholds in sources.yml)
+dbt snapshot           # creates snapshot schema/table on first run
 ```
 
 SCD2 on products; freshness on `raw_orders` in all three projects.
@@ -214,6 +214,8 @@ Second terminal, repo root:
 
 ```bash
 ./dbt_docs.sh mart_finance    # http://127.0.0.1:8011
+# Re-runs load_raw + full `dbt build` for the domain (includes _showcase) — a few minutes;
+# expected WARN from warn_high_margin_orders. Leave it running in this terminal.
 ```
 
 **View:** DAG · shared `{% docs %}` in `models/docs.md` · `revenue_dashboard` exposure.
@@ -225,9 +227,11 @@ Second terminal, repo root:
 `dbt_utils` via `packages.yml`. Same patterns in marketing and operations.
 
 ```bash
-cd ../mart_marketing && dbt deps && dbt build --target prod
+cd ../mart_marketing && dbt deps && dbt seed --target prod && dbt build --target prod
 cd ../mart_finance     # back for defer
 ```
+
+Marketing has its own seed (`marketing_channels`) — same pattern as finance’s `finance_margin_targets`; `load_raw` does not load it.
 
 **Orchestration (~30 sec):** Stubs — `orchestrate.yml`, Prefect, Airflow (still the industry default). CI gates PRs; orchestration schedules the same scripts.
 
@@ -334,7 +338,9 @@ dbt test --select test_type:unit
 dbt run-operation audit_relations
 dbt source freshness
 dbt snapshot
-./dbt_docs.sh mart_finance   # C7 — second terminal
+./dbt_docs.sh mart_finance   # C7 — second terminal (full rebuild; slow; expected WARN)
+# C8 (optional multi-project)
+# cd ../mart_marketing && dbt deps && dbt seed --target prod && dbt build --target prod
 # C9 defer (after marts built on prod)
 dbt compile --target-path /tmp/dbt --target prod
 printf '\n-- demo change\n' >> models/marts/finance_fct_daily_revenue.sql
