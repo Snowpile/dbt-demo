@@ -10,9 +10,7 @@
         incremental_strategy='delete+insert',
         on_schema_change='append_new_columns',
         tags=['finance', 'showcase', 'delete_insert_demo'],
-        meta={'demo_features': ['delete+insert']},
-        group='finance_core',
-        access='private'
+        meta={'demo_features': ['delete+insert']}
     )
 }}
 

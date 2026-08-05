@@ -1,6 +1,6 @@
 {#
   Showcase: incremental_strategy=merge, unique_key, incremental_predicates,
-  full_refresh=false, contract (YAML), group/access, indexes via post_hook.
+  full_refresh=false, contract (YAML), indexes via post_hook.
 #}
 {{
     config(
@@ -14,8 +14,6 @@
         ],
         tags=['finance', 'showcase', 'merge_demo'],
         meta={'demo_features': ['merge', 'incremental_predicates', 'contract', 'indexes']},
-        group='finance_core',
-        access='protected',
         post_hook=[
             "create index if not exists idx_finance_showcase_store_scd_store_id on {{ this }} (store_id)"
         ]

@@ -22,9 +22,7 @@
         lookback=0,
         concurrent_batches=false,
         tags=['finance', 'showcase', 'microbatch_demo'],
-        meta={'demo_features': ['microbatch', 'event_time', 'batch_size', 'lookback']},
-        group='finance_core',
-        access='private'
+        meta={'demo_features': ['microbatch', 'event_time', 'batch_size', 'lookback']}
     )
 }}
 

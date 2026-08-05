@@ -7,9 +7,7 @@
         incremental_strategy='append',
         full_refresh=true,
         tags=['finance', 'showcase', 'append_demo'],
-        meta={'demo_features': ['append', 'full_refresh']},
-        group='finance_core',
-        access='private'
+        meta={'demo_features': ['append', 'full_refresh']}
     )
 }}
 

@@ -2,9 +2,7 @@
 {{
     config(
         materialized='view',
-        tags=['finance', 'showcase', 'versions_demo'],
-        group='finance_core',
-        access='public'
+        tags=['finance', 'showcase', 'versions_demo']
     )
 }}
 

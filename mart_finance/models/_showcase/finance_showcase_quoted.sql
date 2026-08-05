@@ -1,13 +1,11 @@
 {#
-  Showcase: quoted identifier column (YAML quote: true) + public access.
+  Showcase: quoted identifier column (YAML quote: true).
   RF05 noqa: spaces in the alias are intentional for the quote demo.
 #}
 {{
     config(
         materialized='view',
-        tags=['finance', 'showcase', 'quote_demo'],
-        group='finance_core',
-        access='public'
+        tags=['finance', 'showcase', 'quote_demo']
     )
 }}
 

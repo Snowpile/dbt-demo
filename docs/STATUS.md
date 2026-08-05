@@ -19,9 +19,9 @@
 
 ## Last session
 
-- Documented **indirect selection** (eager / buildable / cautious / empty) in `docs/dbt-feature-guide.md` + live `dbt ls` compare in agenda C2.
-- Project default: `flags.indirect_selection: cautious` (all `mart_*`) so layered `build --select staging` stays valid.
-- Prior: seed + schema cold-start checklist; Windows uv/CRLF fixes.
+- Removed **groups.yml** + showcase `group`/`access` (Core-only demo; Mesh not in scope).
+- Documented **indirect selection** (eager / buildable / cautious / empty); project default `cautious`.
+- Prior: seed + schema cold-start; Windows uv/CRLF fixes.
 
 ---
 

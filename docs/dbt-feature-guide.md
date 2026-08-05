@@ -26,7 +26,6 @@ Run dbt from inside a domain project (`cd mart_finance`) after `. ./setup.sh`.
 | Snapshot | `mart_finance/snapshots/finance_snapshot_products.yml` |
 | Exposure | `mart_finance/models/exposures.yml` |
 | Analysis | `mart_finance/analyses/revenue_by_store_analysis.sql` |
-| Groups / access | `mart_finance/models/groups.yml` + showcase models |
 | Named selectors | `mart_finance/selectors.yml` |
 | Docs site (local only) | `./dbt_docs.sh mart_finance` — branch vs `main`; no Pages deploy |
 | Defer / state / clone | `scripts/pull_state.sh`, `slim_build.sh`, `clone_state.sh` |

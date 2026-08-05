@@ -11,12 +11,10 @@ models:
   - name: finance_showcase_store_scd
     description: >
       Config demo — merge incremental, incremental_predicates, full_refresh=false,
-      model contract, group/access, and a DuckDB index via post_hook.
+      model contract, and a DuckDB index via post_hook.
     config:
       contract:
         enforced: true
-      group: finance_core
-      access: protected
     columns:
       - name: store_id
         data_type: varchar

@@ -15,9 +15,7 @@
         incremental_strategy='custom',
         unique_key='store_id',
         tags=['finance', 'showcase', 'custom_strategy_demo'],
-        meta={'demo_features': ['custom_incremental_strategy']},
-        group='finance_core',
-        access='private'
+        meta={'demo_features': ['custom_incremental_strategy']}
     )
 }}
 
