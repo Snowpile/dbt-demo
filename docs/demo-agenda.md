@@ -172,7 +172,10 @@ Two incremental parents can each surface different keys. A union of changed IDs 
 ### C4. Tests (4 min)
 
 ```bash
-dbt test --select test_type:generic
+# Exclude _showcase: those models are a config catalog (C3 view-only) and are not
+# built in C2 — generic tests on them fail with "table does not exist".
+# Optional later: dbt build --select selector:finance_showcase --target prod
+dbt test --select test_type:generic --exclude path:models/_showcase
 dbt test --select test_type:singular
 dbt test --select test_type:unit
 dbt test --select warn_high_margin_orders
@@ -222,7 +225,7 @@ Second terminal, repo root:
 `dbt_utils` via `packages.yml`. Same patterns in marketing and operations.
 
 ```bash
-cd ../mart_marketing && dbt build --target prod
+cd ../mart_marketing && dbt deps && dbt build --target prod
 cd ../mart_finance     # back for defer
 ```
 
@@ -325,7 +328,7 @@ dbt seed --target prod
 dbt build --select staging intermediate --target prod
 dbt build --select marts --target prod
 dbt run --select finance_fct_order_revenue --full-refresh
-dbt test --select test_type:generic
+dbt test --select test_type:generic --exclude path:models/_showcase
 dbt test --select test_type:singular
 dbt test --select test_type:unit
 dbt run-operation audit_relations
