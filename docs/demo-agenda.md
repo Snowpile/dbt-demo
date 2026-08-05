@@ -149,7 +149,7 @@ Full mode table: `docs/dbt-feature-guide.md` § Indirect selection
 
 Standalone `dbt test` waits for C4 — no re-test of the same select after `dbt build`.
 
-**On marts build:** `WARN` from `warn_high_margin_orders` (~33k rows, `gross_margin_pct > 0.8`). Intentional — `severity: warn`, build still succeeds (`ERROR=0`); `store_failures` → `prod_dbt_test__audit.warn_high_margin_orders`. Dig into it in C4.
+**On marts build:** `WARN` from `warn_high_margin_orders` (~33k rows, `gross_margin_pct > 0.8`). Intentional — `severity: warn`, build still succeeds (`ERROR=0`); `store_failures` → `dbt_test__audit.warn_high_margin_orders`. Dig into it in C4.
 
 ### C3. Incrementals (4 min)
 
@@ -180,7 +180,7 @@ dbt test --select test_type:singular
 dbt test --select test_type:unit
 dbt test --select warn_high_margin_orders
 # Peek at stored failures (repo root — second terminal is fine):
-./scripts/sql.sh "select * from prod_dbt_test__audit.warn_high_margin_orders limit 10"
+./scripts/sql.sh "select * from dbt_test__audit.warn_high_margin_orders limit 10"
 ```
 
 **View:** custom generics `not_empty_string`, `accepted_range` · `warn_high_margin_orders` (`severity: warn`, `store_failures`) — same WARN as on the C2 marts build · **unit tests** in `models/unit_tests.yml`: macro = reusable math; unit test = proves *this model* still calls it (fixture in → expect out). Override case is optional mock demo — detail: `docs/dbt-feature-guide.md` § Unit tests.

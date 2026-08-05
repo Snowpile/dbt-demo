@@ -394,7 +394,7 @@ File DuckDB is **single-writer** — run domains/targets sequentially; microbatc
 dbt run --select finance_stg_orders --vars '{revenue_start_date: "2025-01-01"}'
 
 # Query stored test failures
-# select * from prod_dbt_test__audit.warn_high_margin_orders;
+# select * from dbt_test__audit.warn_high_margin_orders;
 
 # Compile an analysis (not in the DAG)
 dbt compile --select revenue_by_store_analysis
